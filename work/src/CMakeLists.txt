@@ -10,12 +10,17 @@ SET(headers
 	"opengl.hpp"
 	"simple_shader.hpp"
 	"simple_image.hpp"
+	"shady_geometry.hpp"
+	"school.hpp"
+	"boid.hpp"
 )
 
 
 # TODO list your source files (.cpp) here
 SET(sources
 	"main.cpp"
+	"school.cpp"
+	"boid.cpp"
 )
 
 # Add executable target and link libraries

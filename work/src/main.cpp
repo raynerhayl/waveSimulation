@@ -22,7 +22,10 @@
 #include "cgra_math.hpp"
 #include "simple_image.hpp"
 #include "simple_shader.hpp"
+
+#include "shady_geometry.hpp"
 #include "opengl.hpp"
+#include "school.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -184,6 +187,31 @@ void setupCamera(int width, int height) {
 }
 
 
+
+void drawOrigin(){
+	//x
+	glColor3f(1,0,0);
+	glPushMatrix();{
+		glRotatef(90,0,1,0);
+		glTranslatef(0,0,50);
+		cgraLine(100);
+	}glPopMatrix();
+	//y
+	glColor3f(0,1,0);
+	glPushMatrix();{
+		glRotatef(90,1,0,0);
+		glTranslatef(0,0,50);
+		cgraLine(100);
+	}glPopMatrix();
+	//z
+	glColor3f(0,0,1);
+	glPushMatrix();{
+		glTranslatef(0,0,50);
+		cgraLine(100);
+	}glPopMatrix();
+}
+
+
 // Draw function
 //
 void render(int width, int height) {
@@ -200,6 +228,13 @@ void render(int width, int height) {
 
 	setupCamera(width, height);
 
+	glDisable(GL_LIGHTING);
+	//draw unlit stuff here
+	drawOrigin();
+	glColor3f(1,1,1);
+	cgraCube(vec3(0,0,0),vec3(20,0.5,20));
+
+	glEnable(GL_LIGHTING);
 
 	// Without shaders
 	// Uses the default OpenGL pipeline
@@ -241,7 +276,7 @@ void render(int width, int height) {
 	else {
 
 		// Texture setup
-		//
+		
 		// Enable Drawing texures
 		glEnable(GL_TEXTURE_2D);
 		// Set the location for binding the texture
