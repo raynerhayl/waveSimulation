@@ -50,6 +50,11 @@ float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
 
+vec3 scene_bounds = vec3(100,50,80);
+
+//school related
+School * g_school;
+bool draw_school = true;
 // Values and fields to showcase the use of shaders
 // Remove when modifying main.cpp for Assignment 3
 //
@@ -108,6 +113,11 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 	// 	<< "action=" << action << "mods=" << mods << endl;
 	// YOUR CODE GOES HERE
 	// ...
+	switch(key){
+		case 'F':
+			if(action == 1)draw_school = !draw_school;
+		break;
+	}
 }
 
 
@@ -119,6 +129,9 @@ void charCallback(GLFWwindow *win, unsigned int c) {
 	// Not needed for this assignment, but useful to have later on
 }
 
+void initSchool(){
+	g_school = new School(20,scene_bounds);
+}
 
 // Sets up where and what the light is
 // Called once on start up
@@ -232,8 +245,8 @@ void render(int width, int height) {
 	//draw unlit stuff here
 	drawOrigin();
 	glColor3f(1,1,1);
-	cgraCube(vec3(0,0,0),vec3(20,0.5,20));
-
+	cgraCube(vec3(0,0,0),scene_bounds);
+	if(draw_school) g_school->renderSchool();
 	glEnable(GL_LIGHTING);
 
 	// Without shaders
@@ -241,32 +254,32 @@ void render(int width, int height) {
 	//
 	if (!g_useShader) {
 
-		// Texture setup
-		//
+		// // Texture setup
+		// //
 
-		// Enable Drawing texures
-		glEnable(GL_TEXTURE_2D);
-		// Use Texture as the color
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		// Set the location for binding the texture
-		glActiveTexture(GL_TEXTURE0);
-		// Bind the texture
-		glBindTexture(GL_TEXTURE_2D, g_texture);
+		// // Enable Drawing texures
+		// glEnable(GL_TEXTURE_2D);
+		// // Use Texture as the color
+		// glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		// // Set the location for binding the texture
+		// glActiveTexture(GL_TEXTURE0);
+		// // Bind the texture
+		// glBindTexture(GL_TEXTURE_2D, g_texture);
 
-		// Render a single square as our geometry
-		// You would normally render your geometry here
-		glBegin(GL_QUADS);
-		glNormal3f(0.0, 0.0, 1.0);
-		glTexCoord2f(0.0, 0.0);
-		glVertex3f(-5.0, -5.0, 0.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3f(-5.0, 5.0, 0.0);
-		glTexCoord2f(1.0, 1.0);
-		glVertex3f(5.0, 5.0, 0.0);
-		glTexCoord2f(1.0, 0.0);
-		glVertex3f(5.0, -5.0, 0.0);
-		glEnd();
-		glFlush();
+		// // Render a single square as our geometry
+		// // You would normally render your geometry here
+		// glBegin(GL_QUADS);
+		// glNormal3f(0.0, 0.0, 1.0);
+		// glTexCoord2f(0.0, 0.0);
+		// glVertex3f(-5.0, -5.0, 0.0);
+		// glTexCoord2f(0.0, 1.0);
+		// glVertex3f(-5.0, 5.0, 0.0);
+		// glTexCoord2f(1.0, 1.0);
+		// glVertex3f(5.0, 5.0, 0.0);
+		// glTexCoord2f(1.0, 0.0);
+		// glVertex3f(5.0, -5.0, 0.0);
+		// glEnd();
+		// glFlush();
 	}
 
 
@@ -397,7 +410,7 @@ int main(int argc, char **argv) {
 	initLight();
 	initTexture();
 	initShader();
-
+	initSchool();
 
 
 	// Loop until the user closes the window

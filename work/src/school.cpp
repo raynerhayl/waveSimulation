@@ -20,43 +20,46 @@
 using namespace std;
 using namespace cgra;
 
-School::School(int numFish, vec3 bounds) {
+School::School(int numBoids, vec3 bounds) {
 	bounding_box = bounds;
+	for(int i = 0; i < numBoids; i++){
+		boids.push_back(Boid(bounds));
+		cout << "creating boid "<< i << endl;
+	}
 }
 
 void School::renderSchool() {
+	
+	tick();
+	
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
 	if(draw_bounds)drawBounds();
 	//Actually draw the School
-	for(int i = 0; i < m_boids.size(); i++){
-		
+	for(int i = 0; i < boids.size(); i++){
+		boids[i].draw();
 	}
 
 	// Clean up
 	glPopMatrix();
 }
 
+void School::tick(){
+	for (int i = 0; i < boids.size(); ++i){
+		boids[i].tick();
+	}
+}
 
 void School::drawBounds(){
 	glPushMatrix();
-
+		
 	glPopMatrix();
 }
 
 void School::addCollider(primitives){
 
 }
-
-
-// void School::cube(vec3 pos, vec3 size){
-// 	glPushMatrix();{
-// 		glTranslatef();
-
-
-// 	}glPopMatrix();
-// }
 
 // YOUR CODE GOES HERE
 // ...

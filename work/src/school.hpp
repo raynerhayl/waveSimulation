@@ -24,19 +24,22 @@ enum primitives {
 
 
 class School {
+
 public:
 	//methods
 	School(int,cgra::vec3);
 	void renderSchool();
 	void addCollider(primitives);
-
+	
 private:
 	//fields
 	cgra::vec3 bounding_box;
 	bool draw_bounds = true;
 
-	std::vector<Boid> m_boids;
+	std::vector<Boid> boids;
 
 	// Methods
 	void drawBounds();
+	void tick();
+
 };

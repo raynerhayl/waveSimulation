@@ -17,11 +17,15 @@
 
 
 class Boid {
+public:
+	Boid(cgra::vec3);
+	void draw();
+	void tick();
 
 private:
-	
-	
-public:
-	Boid(int,cgra::vec3);
-	void draw();
+	cgra::vec3 position;
+	cgra::vec3 direction;
+	float getRandom();
+	cgra::vec3 bounds;
+
 };
