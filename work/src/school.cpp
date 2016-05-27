@@ -47,13 +47,13 @@ void School::renderSchool() {
 
 void School::tick(){
 	for (int i = 0; i < boids.size(); ++i){
-		boids[i].tick();
+		boids[i].tick(boids);
 	}
 }
 
 void School::drawBounds(){
 	glPushMatrix();
-		
+
 	glPopMatrix();
 }
 
