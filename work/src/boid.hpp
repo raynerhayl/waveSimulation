@@ -28,10 +28,10 @@ public:
 private:
 	cgra::vec3 position;
 	cgra::vec3 velocity;
-	float awareness_range = 2;
+	float awareness_range = 10;
 	float avoidance_range = 2;
 	float mass;
-	float getRandom();
+	//float getRandom();
 	BoundingBox bounds;
 
 	cgra::vec3 limitVelocity(cgra::vec3);

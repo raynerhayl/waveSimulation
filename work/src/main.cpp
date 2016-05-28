@@ -131,7 +131,7 @@ void charCallback(GLFWwindow *win, unsigned int c) {
 }
 
 void initSchool(){
-	g_school = new School(50,scene_bounds);
+	g_school = new School(10,scene_bounds);
 }
 
 // Sets up where and what the light is

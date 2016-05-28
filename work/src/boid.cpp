@@ -23,18 +23,15 @@ using namespace cgra;
 
 Boid::Boid(BoundingBox bbox) {
 	bounds = bbox;
-	float x = (getRandom()-0.5)*2;
-	float y = (getRandom()-0.5)*2;
-	float z = (getRandom()-0.5)*2;
+	float x = math::random(-1.0,1.0);
+	float y = math::random(-1.0,1.0);
+	float z = math::random(-1.0,1.0);
 	//cout << x << " " << y << " " << z << endl;
 	velocity = vec3(x,y,z);
-	position = vec3((getRandom()-0.5)*bounds.max.x,(getRandom()-0.5)*bounds.max.y,(getRandom()-0.5)*bounds.max.z);
+	position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
 	//cout << velocity << endl;
 }
 
-float Boid::getRandom(){
-	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-}
 
 /**/
 void Boid::draw() {
@@ -58,32 +55,40 @@ void Boid::draw() {
 
 void Boid::tick(vector<Boid> boids, int myIndex){
 	//calculate centre of mass (TODO not including this one)
-	vec3 centreOfMass;
-	vec3 avoidancePos;
-	vec3 velocityMatch;
+	vec3 centreOfMass = vec3(0,0,0);
+	vec3 avoidancePos = vec3(0,0,0);
+	vec3 velocityMatch = vec3(0,0,0);
+	bool hasNeighbours = false;
 	for(int i = 0; i < boids.size(); i++){
 		if(myIndex != i){
-			centreOfMass += boids[i].getPosition();
-			//keep away from other boids
-			if(length(boids[i].getPosition() - position) < avoidance_range){
-				cout << "within range" << length(boids[i].getPosition() - position) << endl;
-				avoidancePos += (position - boids[i].getPosition())/50;
-
+			Boid otherB = boids[i];
+			if(length(otherB.position - position) < awareness_range){
+				hasNeighbours = true;
+				cout << "within range" << endl;
+				centreOfMass += otherB.getPosition();
+				//keep away from other boids
+				if(length(boids[i].getPosition() - position) < avoidance_range){
+					cout << "within range" << length(otherB.getPosition() - position) << endl;
+					avoidancePos += (position - otherB.getPosition())/50;
+				}
+				velocityMatch += otherB.getVelocity();
 			}
-			velocityMatch += boids[i].getVelocity();
 		}
 	}
-	centreOfMass = centreOfMass/(boids.size()-1);
-	centreOfMass = (centreOfMass - position) / 100;
+	if(hasNeighbours){
+		centreOfMass = centreOfMass/(boids.size()-1);
+		centreOfMass = (centreOfMass - position) / 100;
 
-	velocityMatch = velocityMatch / (boids.size()-1);
-	velocityMatch = (velocityMatch - velocity)/8;
+		velocityMatch = velocityMatch / (boids.size()-1);
+		velocityMatch = (velocityMatch - velocity)/8;
+	}	
 	cout << centreOfMass << avoidancePos << velocityMatch << limitToBounds(position) << endl;
 	
 	//update direction
 	vec3 calculatedVelocity = centreOfMass + (avoidancePos) + velocityMatch + limitToBounds(position);
 
 	velocity = limitVelocity(velocity + calculatedVelocity);
+	//cout << "velocity " << velocity << endl;
 	position += velocity;
 }
 
