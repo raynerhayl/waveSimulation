@@ -27,13 +27,13 @@ class School {
 
 public:
 	//methods
-	School(int,cgra::vec3);
+	School(int,BoundingBox);
 	void renderSchool();
 	void addCollider(primitives);
 	
 private:
 	//fields
-	cgra::vec3 bounding_box;
+	BoundingBox bounding_box;
 	bool draw_bounds = true;
 
 	std::vector<Boid> boids;

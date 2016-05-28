@@ -16,13 +16,16 @@
 #include "cgra_math.hpp"
 #include "opengl.hpp"
 #include "school.hpp"
+#include "helpers.hpp"
 
 using namespace std;
 using namespace cgra;
 
-School::School(int numBoids, vec3 bounds) {
-	bounding_box = bounds;
+School::School(int numBoids, BoundingBox bounds) {
+	//bounding_box = bounds;
 	for(int i = 0; i < numBoids; i++){
+		//struct BoundingBox b(vec3(2,0,0),vec3(0,0,0));
+
 		boids.push_back(Boid(bounds));
 		cout << "creating boid "<< i << endl;
 	}
@@ -47,7 +50,7 @@ void School::renderSchool() {
 
 void School::tick(){
 	for (int i = 0; i < boids.size(); ++i){
-		boids[i].tick(boids);
+		boids[i].tick(boids,i);
 	}
 }
 

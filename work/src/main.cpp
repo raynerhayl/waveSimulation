@@ -26,6 +26,7 @@
 #include "shady_geometry.hpp"
 #include "opengl.hpp"
 #include "school.hpp"
+#include "helpers.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -50,7 +51,7 @@ float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
 
-vec3 scene_bounds = vec3(100,50,80);
+BoundingBox scene_bounds = BoundingBox(vec3(-25,-25,-40),vec3(25,25,40));
 
 //school related
 School * g_school;
@@ -130,7 +131,7 @@ void charCallback(GLFWwindow *win, unsigned int c) {
 }
 
 void initSchool(){
-	g_school = new School(20,scene_bounds);
+	g_school = new School(50,scene_bounds);
 }
 
 // Sets up where and what the light is
@@ -228,7 +229,7 @@ void drawOrigin(){
 // Draw function
 //
 void render(int width, int height) {
-
+	glViewport(0,0,width,height);
 	// Grey/Blueish background
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -245,7 +246,14 @@ void render(int width, int height) {
 	//draw unlit stuff here
 	drawOrigin();
 	glColor3f(1,1,1);
-	cgraCube(vec3(0,0,0),scene_bounds);
+	cgraCube(
+		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
+		(scene_bounds.max.y+scene_bounds.min.y)/2,
+		(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
+		abs(scene_bounds.max.x-scene_bounds.min.x),
+		abs(scene_bounds.max.y-scene_bounds.min.y),
+		abs(scene_bounds.max.z-scene_bounds.min.z)
+	));
 	if(draw_school) g_school->renderSchool();
 	glEnable(GL_LIGHTING);
 
