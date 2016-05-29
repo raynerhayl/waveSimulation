@@ -3,7 +3,7 @@
 // Copyright (c) 2016 Taehyun Rhee, Joshua Scott, Ben Allen
 //
 // This software is provided 'as-is' for assignment of COMP308 in ECS,
-// Victoria University of Wellington, without any express or implied warranty. 
+// Victoria University of Wellington, without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from
 // the use of this software.
 //
@@ -22,11 +22,9 @@
 #include "cgra_math.hpp"
 #include "simple_image.hpp"
 #include "simple_shader.hpp"
-<<<<<<< HEAD
+
 #include "wave.hpp"
-=======
 #include "simple_gui.hpp"
->>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 
 #include "shady_geometry.hpp"
 #include "opengl.hpp"
@@ -42,7 +40,7 @@ GLFWwindow* g_window;
 
 
 // Projection values
-// 
+//
 float g_fovy = 20.0;
 float g_znear = 0.1;
 float g_zfar = 10000.0;
@@ -161,7 +159,7 @@ void renderGUI() {
 		ImGui::EndPopup();
 	}
 
-	
+
 
 	ImGui::SetNextWindowPos(ImVec2(10,10));
 	ImGui::Begin("Fixed Overlay", nullptr, ImVec2(0,0), 0.3f,
@@ -183,7 +181,7 @@ void initSchool(){
 
 // Sets up where and what the light is
 // Called once on start up
-// 
+//
 void initLight() {
 	float direction[] = { 0.0f, 0.0f, 1.0f, 0.0f };
 	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
@@ -231,7 +229,7 @@ void initShader() {
 
 
 // Sets up where the camera is in the scene
-// 
+//
 void setupCamera(int width, int height) {
 	// Set up the projection matrix
 	glMatrixMode(GL_PROJECTION);
@@ -309,37 +307,6 @@ void render(int width, int height) {
 	//
 	if (!g_useShader) {
 
-<<<<<<< HEAD
-		// Texture setup
-		//
-
-		// Enable Drawing texures
-		glEnable(GL_TEXTURE_2D);
-		// Use Texture as the color
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		// Set the location for binding the texture
-		glActiveTexture(GL_TEXTURE0);
-		// Bind the texture
-		glBindTexture(GL_TEXTURE_2D, g_texture);
-
-		// Render a single square as our geometry
-		// You would normally render your geometry here
-		//glBegin(GL_TRIANGLES);
-		//glEnd();
-
-		//glBegin(GL_QUADS);
-		//glNormal3f(0.0, 0.0, 1.0);
-		//glTexCoord2f(0.0, 0.0);
-		//glVertex3f(-5.0, -5.0, 0.0);
-		//glTexCoord2f(0.0, 1.0);
-		//glVertex3f(-5.0, 5.0, 0.0);
-		//glTexCoord2f(1.0, 1.0);
-		//glVertex3f(5.0, 5.0, 0.0);
-		//glTexCoord2f(1.0, 0.0);
-		//glVertex3f(5.0, -5.0, 0.0);
-		//glEnd();
-		glFlush();
-=======
 		// // Texture setup
 		// //
 
@@ -366,7 +333,6 @@ void render(int width, int height) {
 		// glVertex3f(5.0, -5.0, 0.0);
 		// glEnd();
 		// glFlush();
->>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 	}
 
 
@@ -376,7 +342,7 @@ void render(int width, int height) {
 	else {
 
 		// Texture setup
-		
+
 		// Enable Drawing texures
 		glEnable(GL_TEXTURE_2D);
 		// Set the location for binding the texture
@@ -424,7 +390,7 @@ void APIENTRY debugCallbackARB(GLenum, GLenum, GLuint, GLenum, GLsizei, const GL
 
 
 //Main program
-// 
+//
 int main(int argc, char **argv) {
 
 	// Initialize the GLFW library
@@ -508,21 +474,16 @@ int main(int argc, char **argv) {
 	initShader();
 	initSchool();
 
-<<<<<<< HEAD
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-=======
 	//for fps calculation
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
->>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
 
 		double currentTime = glfwGetTime();
 		nbFrames++;
-		if ( currentTime - lastTime >= 1.0 ){ 
+		if ( currentTime - lastTime >= 1.0 ){
 
 		    frameSpeed = 1000.0/double(nbFrames);
 		    fps = nbFrames;
@@ -537,13 +498,9 @@ int main(int argc, char **argv) {
 		// Main Render
 		render(width, height);
 
-<<<<<<< HEAD
 
-		//w.render();
-=======
 		//Render GUI on top
 		renderGUI();
->>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 
 		// Swap front and back buffers
 		glfwSwapBuffers(g_window);
