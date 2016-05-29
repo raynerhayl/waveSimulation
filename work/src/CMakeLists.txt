@@ -13,6 +13,7 @@ SET(headers
 	"shady_geometry.hpp"
 	"school.hpp"
 	"boid.hpp"
+	"simple_gui.hpp"
 )
 
 
@@ -21,6 +22,7 @@ SET(sources
 	"main.cpp"
 	"school.cpp"
 	"boid.cpp"
+	"simple_gui.cpp"
 )
 
 # Add executable target and link libraries
@@ -28,3 +30,4 @@ SET(sources
 add_executable(${CGRA_PROJECT} ${headers} ${sources})
 target_link_libraries(${CGRA_PROJECT} PRIVATE glew glfw ${GLFW_LIBRARIES})
 target_link_libraries(${CGRA_PROJECT} PRIVATE stb)
+target_link_libraries(${CGRA_PROJECT} PRIVATE imgui)

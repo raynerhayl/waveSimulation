@@ -29,3 +29,8 @@ inline BoundingBox operator* (const BoundingBox& lhs, float rhs)
     b.max *= rhs;
     return b;
 }
+
+/*Return the non-sqrt length of a vector*/
+inline float lengthSquared(const vec3 &vec){
+    return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
+}

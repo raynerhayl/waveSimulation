@@ -22,6 +22,7 @@
 #include "cgra_math.hpp"
 #include "simple_image.hpp"
 #include "simple_shader.hpp"
+#include "simple_gui.hpp"
 
 #include "shady_geometry.hpp"
 #include "opengl.hpp"
@@ -40,7 +41,7 @@ GLFWwindow* g_window;
 // 
 float g_fovy = 20.0;
 float g_znear = 0.1;
-float g_zfar = 1000.0;
+float g_zfar = 10000.0;
 
 
 // Mouse controlled Camera values
@@ -51,11 +52,16 @@ float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
 
-BoundingBox scene_bounds = BoundingBox(vec3(-25,-25,-40),vec3(25,25,40));
+BoundingBox scene_bounds = BoundingBox(vec3(-100,-100,-100),vec3(100,100,100));
 
 //school related
 School * g_school;
 bool draw_school = true;
+
+//performance
+float frameSpeed = 0;
+int fps = 0;
+
 // Values and fields to showcase the use of shaders
 // Remove when modifying main.cpp for Assignment 3
 //
@@ -130,8 +136,43 @@ void charCallback(GLFWwindow *win, unsigned int c) {
 	// Not needed for this assignment, but useful to have later on
 }
 
+void renderGUI() {
+	// Start registering GUI components
+	SimpleGUI::newFrame();
+
+	if (ImGui::IsMouseClicked(1))
+		ImGui::OpenPopup("Controls");
+
+	if (ImGui::BeginPopup("Controls")) {
+		if (ImGui::Selectable("Play")) {
+
+		}
+
+		if (ImGui::Selectable("Pause")) {
+
+		}
+
+		ImGui::EndPopup();
+	}
+
+	
+
+	ImGui::SetNextWindowPos(ImVec2(10,10));
+	ImGui::Begin("Fixed Overlay", nullptr, ImVec2(0,0), 0.3f,
+	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_AlwaysAutoResize|
+	ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings);
+	ostringstream ss;
+	// Replace this with your code
+	ss << frameSpeed << " ms/frame  " << fps << " fps";
+	ImGui::Text(ss.str().c_str());
+	ImGui::End();
+
+	// Flush components and render
+	SimpleGUI::render();
+}
+
 void initSchool(){
-	g_school = new School(10,scene_bounds);
+	g_school = new School(200,scene_bounds);
 }
 
 // Sets up where and what the light is
@@ -411,6 +452,15 @@ int main(int argc, char **argv) {
 		cout << "GL_ARB_debug_output not available. No worries." << endl;
 	}
 
+	// Initialize IMGUI
+	// Second argument is true if we dont need to use GLFW bindings for input
+	// if set to false we must manually call the SimpleGUI callbacks when we
+	// process the input.
+	if (!SimpleGUI::init(g_window, false)) {
+		cerr << "Error: Could not initialize IMGUI" << endl;
+		abort();
+	}
+
 
 	// Initialize Geometry/Material/Lights
 	// YOUR CODE GOES HERE
@@ -420,9 +470,22 @@ int main(int argc, char **argv) {
 	initShader();
 	initSchool();
 
+	//for fps calculation
+	double lastTime = glfwGetTime();
+	int nbFrames = 0;
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
+
+		double currentTime = glfwGetTime();
+		nbFrames++;
+		if ( currentTime - lastTime >= 1.0 ){ 
+
+		    frameSpeed = 1000.0/double(nbFrames);
+		    fps = nbFrames;
+		    nbFrames = 0;
+		    lastTime += 1.0;
+		}
 
 		// Make sure we draw to the WHOLE window
 		int width, height;
@@ -430,6 +493,9 @@ int main(int argc, char **argv) {
 
 		// Main Render
 		render(width, height);
+
+		//Render GUI on top
+		renderGUI();
 
 		// Swap front and back buffers
 		glfwSwapBuffers(g_window);
