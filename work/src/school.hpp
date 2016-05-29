@@ -40,6 +40,7 @@ private:
 
 	// Methods
 	void drawBounds();
-	void tick();
-
+	void update();
+	void applyForce(float,float);
+	float lengthSquared(const vec3 &);
 };

@@ -19,22 +19,17 @@
 
 class Boid {
 public:
-	Boid(BoundingBox);
+	Boid(vec3);
 	void draw();
-	void tick(std::vector<Boid>,int);
-	cgra::vec3 getPosition();
-	cgra::vec3 getVelocity();
+	void update();
+	vec3 mPosition;
+	vec3 mVelocity;
+	vec3 mAccel;
+
+	float mRadius = 5.0f;
+
+	void pullToCentre(const vec3 &);
 	
 private:
-	cgra::vec3 position;
-	cgra::vec3 velocity;
-	float awareness_range = 10;
-	float avoidance_range = 2;
-	float mass;
-	//float getRandom();
 	BoundingBox bounds;
-
-	cgra::vec3 limitVelocity(cgra::vec3);
-	cgra::vec3 limitToBounds(cgra::vec3);
-
 };
