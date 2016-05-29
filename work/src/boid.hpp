@@ -20,8 +20,9 @@
 class Boid {
 public:
 	Boid(vec3);
-	void draw();
+
 	void update();
+	void draw();
 	vec3 mPosition;
 	vec3 mVelocity;
 	vec3 mAccel;
@@ -30,7 +31,8 @@ public:
 	
 private:
 	BoundingBox bounds;
-
+	virtual void drawSelf() = 0;
+protected:
 	float mMaxSpeed = 1;
 	float mMaxSpeedSqrd;
 	float mMinSpeed = 0.01;
@@ -42,18 +44,21 @@ class Predator : public Boid {
 public:
 	//methods
 	Predator(vec3 pos);
-
 	//fields
 	bool mIsHungry = true;
 	float mHunger = 10;
+private:
+	void drawSelf();
 };
 
 class Prey : public Boid {
 public:
 	//methods
 	Prey(vec3 pos);
-
 	//fields
 	bool mIsDead = false;
-	float mFear = 10;
+	float mFear = 0;
+	float mMass = 1;
+private:
+	void drawSelf();
 };

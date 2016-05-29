@@ -172,7 +172,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(500,scene_bounds);
+	g_school = new School(800,2,scene_bounds);
 }
 
 // Sets up where and what the light is

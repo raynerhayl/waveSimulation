@@ -27,7 +27,7 @@ class School {
 
 public:
 	//methods
-	School(int,BoundingBox);
+	School(int, int, BoundingBox);
 	void renderSchool();
 	void addCollider(primitives);
 	
@@ -36,7 +36,8 @@ private:
 	BoundingBox bounding_box;
 	bool draw_bounds = true;
 
-	std::vector<Boid> boids;
+	std::vector<Prey> prey;
+	std::vector<Predator> predators;
 
 	// Methods
 	void drawBounds();

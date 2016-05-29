@@ -22,16 +22,23 @@
 using namespace std;
 using namespace cgra;
 
-School::School(int numBoids, BoundingBox bounds) {
+School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	
 
 
-	for(int i = 0; i < numBoids; i++){
+	for(int i = 0; i < numPrey; i++){
 
 		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
-		boids.push_back(Boid(position));
+		prey.push_back(Prey(position));
 	}
-	cout << "created "<< numBoids <<" boids " << endl;
+
+	for(int i = 0; i < numPredators; i++){
+		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
+		predators.push_back(Predator(position));
+	}
+
+
+	cout << "created "<< numPrey <<" prey " << endl;
 }
 
 void School::renderSchool() {
@@ -44,8 +51,11 @@ void School::renderSchool() {
 	
 	if(draw_bounds)drawBounds();
 	//Actually draw the School
-	for(int i = 0; i < boids.size(); i++){
-		boids[i].draw();
+	for(int i = 0; i < prey.size(); i++){
+		prey[i].draw();
+	}
+	for(int i = 0; i < predators.size(); i++){
+		predators[i].draw();
 	}
 	glRotatef(45,1,1,1);
 	glColor3f(1,1,0);
@@ -57,10 +67,10 @@ void School::renderSchool() {
 
 void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh){
 	float jFactor = 0.1;
-	for( vector<Boid>::iterator p1 = boids.begin(); p1 != boids.end(); ++p1 ) {
+	for( vector<Prey>::iterator p1 = prey.begin(); p1 != prey.end(); ++p1 ) {
 
-	    vector<Boid>::iterator p2 = p1;
-	    for( ++p2; p2 != boids.end(); ++p2 ) {
+	    vector<Prey>::iterator p2 = p1;
+	    for( ++p2; p2 != prey.end(); ++p2 ) {
 			vec3 dir = p1->mPosition - p2->mPosition;
 			float distSqrd = lengthSquared(dir);
 
@@ -92,34 +102,45 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 				}
 			}
 		}
-		// float eatDistSqrd = 10.0f;
-		// float predatorZoneRadiusSqrd = zoneRadiusSqrd * 3.0f;
-		// for( vector<Boid>::iterator predator = mPredators.begin(); predator != mPredators.end(); ++predator ) {
-		// 	Vec3f dir = p1->mPos[0] - predator->mPos[0];
-		// 	float distSqrd = dir.lengthSquared();
-		// 	if( distSqrd < predatorZoneRadiusSqrd ){
-		// 		if( distSqrd > eatDistSqrd ){
-		// 			float F = ( predatorZoneRadiusSqrd/distSqrd - 1.0f ) * 0.1f;
-		// 			p1->mFear += F * 0.1f;
-		// 			dir = normalize(dir) * F;
-		// 			p1->mAccel+= dir;
-		// 			predator->mAccel += dir;
-		// 		} else {
-		// 			p1->mIsDead = true;
-		// 			predator->mIsHungry = false;
-		// 			// predator->mHunger -= p1->mMass;
-		// 		}
-		// 	}
-		// }
+		float eatDistSqrd = 10.0f;
+		float predatorZoneRadiusSqrd = zoneRadiusSqrd * 3.0f;
+		for( vector<Predator>::iterator predator = predators.begin(); predator != predators.end(); ++predator ) {
+			vec3 dir = p1->mPosition - predator->mPosition;
+			float distSqrd = lengthSquared(dir);
+			if( distSqrd < predatorZoneRadiusSqrd ){
+				if( distSqrd > eatDistSqrd ){
+					float F = ( predatorZoneRadiusSqrd/distSqrd - 1.0f ) * 0.1f;
+					p1->mFear += F * 0.1f;
+					dir = normalize(dir) * F;
+					p1->mAccel+= dir;
+					predator->mAccel += dir;
+				} else {
+					p1->mIsDead = true;
+					predator->mIsHungry = false;
+					predator->mHunger -= p1->mMass;
+				}
+			}
+		}
 	}
 }
 
+/*Update the positions of the boids and remove dead prey*/
 void School::update(){
+	vector<Prey>::iterator pr = prey.begin();
+	while(pr != prey.end()) {
+		if (pr->mIsDead) {
+			prey.erase(pr++);
+		} else {
+			pr->pullToCentre(vec3(0,0,0));
+			pr->update();
+			++pr;
+		}
+	}
 
-	for(vector<Boid>::iterator b = boids.begin(); b != boids.end(); ++b) {
+	for(vector<Predator>::iterator pred = predators.begin(); pred != predators.end(); ++pred) {
 		
-		b->pullToCentre(vec3(0,0,0));
-		b->update();
+		pred->pullToCentre(vec3(0,0,0));
+		pred->update();
 	}
 }
 

@@ -31,24 +31,6 @@ Boid::Boid(vec3 pos) {
 	mVelocity = vec3(math::random(-0.01,0.01), math::random(-0.01,0.01), math::random(-0.01,0.01));
 }
 
-
-/**/
-void Boid::draw() {
-	glPushMatrix();{
-		glTranslatef(mPosition.x,mPosition.y,mPosition.z);
-		float rotation = degrees(acos(dot(normalize(mVelocity), vec3(0,0,1))));
-		vec3 orthog = cross(mVelocity, vec3(0,0,1));
-		glRotatef(-rotation,orthog.x,orthog.y,orthog.z);
-		glColor3f(1,1,1);
-		float len = 2;
-		cgraCone(0.5, len, 4, 4, false);
-		glTranslatef(0,0,4);
-		glColor3f(1,0,0);
-		cgraLine(3);
-	// Clean up
-	}glPopMatrix();
-}
-
 //TODO use dist^2
 void Boid::pullToCentre(const vec3 &centre){
 	vec3 dirToCenter = mPosition - centre;
@@ -69,7 +51,7 @@ void Boid::update(){
 	mVelocity += mAccel;
 
 	float velLengthSqrd = lengthSquared(mVelocity);
-	if( velLengthSqrd > mMaxSpeedSqrd ) {
+	if( velLengthSqrd > mMaxSpeed*mMaxSpeed ) {
 		mVelocity = normalize(mVelocity);
 		mVelocity *= mMaxSpeed;
 	} else if( velLengthSqrd < mMinSpeedSqrd ) {
@@ -84,9 +66,55 @@ void Boid::update(){
 }
 
 Predator::Predator(vec3 loc) : Boid(loc){
-	
+	mMaxSpeed = 2;
+
 }
 
+void Boid::draw() {
+	glPushMatrix();{
+		glTranslatef(mPosition.x,mPosition.y,mPosition.z);
+		float rotation = degrees(acos(dot(normalize(mVelocity), vec3(0,0,1))));
+		vec3 orthog = cross(mVelocity, vec3(0,0,1));
+		glRotatef(-rotation,orthog.x,orthog.y,orthog.z);
+		drawSelf();
+	// Clean up
+	}glPopMatrix();
+}
+// Boid::~Boid(){
+
+// }
+
+void Predator::drawSelf() {
+	glPushMatrix();{
+		glColor3f(1,0.6,0);
+		float len = 8;
+		cgraCone(len/4, len, 4, 4, false);
+		glTranslatef(0,0,4);
+		glColor3f(1,0,0);
+		cgraLine(3);
+	// Clean up
+	}glPopMatrix();
+}
+// Predator::~Predator(){
+
+// }
+
 Prey::Prey(vec3 loc) : Boid(loc){
-	
+
+}
+// Prey::~Prey(){
+
+// }
+
+/**/
+void Prey::drawSelf() {
+	glPushMatrix();{
+		glColor3f(1,1,1);
+		float len = 2;
+		cgraCone(0.5, len, 4, 4, false);
+		glTranslatef(0,0,4);
+		glColor3f(1,0,0);
+		cgraLine(3);
+	// Clean up
+	}glPopMatrix();
 }
