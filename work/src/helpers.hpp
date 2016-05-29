@@ -34,3 +34,12 @@ inline BoundingBox operator* (const BoundingBox& lhs, float rhs)
 inline float lengthSquared(const vec3 &vec){
     return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
 }
+
+
+inline float min(float a, float b){
+    return (a > b)? b : a;
+}
+
+inline float max(float a, float b){
+    return (a < b)? b : a;
+}

@@ -32,11 +32,10 @@ public:
 private:
 	BoundingBox bounds;
 	virtual void drawSelf() = 0;
+	virtual float getMaxSpeedSqrd() = 0;
 protected:
 	float mMaxSpeed = 1;
-	float mMaxSpeedSqrd;
 	float mMinSpeed = 0.01;
-	float mMinSpeedSqrd;
 };
 
 
@@ -49,6 +48,7 @@ public:
 	float mHunger = 10;
 private:
 	void drawSelf();
+	float getMaxSpeedSqrd();
 };
 
 class Prey : public Boid {
@@ -61,4 +61,5 @@ public:
 	float mMass = 1;
 private:
 	void drawSelf();
+	float getMaxSpeedSqrd();
 };

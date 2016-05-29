@@ -111,6 +111,7 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 				if( distSqrd > eatDistSqrd ){
 					float F = ( predatorZoneRadiusSqrd/distSqrd - 1.0f ) * 0.1f;
 					p1->mFear += F * 0.1f;
+					//cout << "fear add" <<F * 0.1f << endl;
 					dir = normalize(dir) * F;
 					p1->mAccel+= dir;
 					predator->mAccel += dir;
@@ -119,6 +120,8 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 					predator->mIsHungry = false;
 					predator->mHunger -= p1->mMass;
 				}
+			} else { //TODO make more elegand, decrement
+				p1->mFear = 0;
 			}
 		}
 	}
@@ -130,6 +133,7 @@ void School::update(){
 	while(pr != prey.end()) {
 		if (pr->mIsDead) {
 			prey.erase(pr++);
+			cout << "eaten!" << endl;
 		} else {
 			pr->pullToCentre(vec3(0,0,0));
 			pr->update();
