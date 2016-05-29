@@ -28,14 +28,10 @@ School::School(int numBoids, BoundingBox bounds) {
 
 	for(int i = 0; i < numBoids; i++){
 
-		float x = math::random(-1.0,1.0);
-		float y = math::random(-1.0,1.0);
-		float z = math::random(-1.0,1.0);
-		//velocity = vec3(x,y,z);
 		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
 		boids.push_back(Boid(position));
-		cout << "creating boid "<< i << endl;
 	}
+	cout << "created "<< numBoids <<" boids " << endl;
 }
 
 void School::renderSchool() {
