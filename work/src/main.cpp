@@ -22,6 +22,7 @@
 #include "cgra_math.hpp"
 #include "simple_image.hpp"
 #include "simple_shader.hpp"
+#include "wave.hpp"
 
 #include "shady_geometry.hpp"
 #include "opengl.hpp"
@@ -56,6 +57,8 @@ float g_zoom = 1.0;
 bool g_useShader = false;
 GLuint g_texture = 0;
 GLuint g_shader = 0;
+
+Wave w = Wave();
 
 
 // Mouse Button callback
@@ -255,17 +258,20 @@ void render(int width, int height) {
 
 		// Render a single square as our geometry
 		// You would normally render your geometry here
-		glBegin(GL_QUADS);
-		glNormal3f(0.0, 0.0, 1.0);
-		glTexCoord2f(0.0, 0.0);
-		glVertex3f(-5.0, -5.0, 0.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3f(-5.0, 5.0, 0.0);
-		glTexCoord2f(1.0, 1.0);
-		glVertex3f(5.0, 5.0, 0.0);
-		glTexCoord2f(1.0, 0.0);
-		glVertex3f(5.0, -5.0, 0.0);
-		glEnd();
+		//glBegin(GL_TRIANGLES);
+		//glEnd();
+
+		//glBegin(GL_QUADS);
+		//glNormal3f(0.0, 0.0, 1.0);
+		//glTexCoord2f(0.0, 0.0);
+		//glVertex3f(-5.0, -5.0, 0.0);
+		//glTexCoord2f(0.0, 1.0);
+		//glVertex3f(-5.0, 5.0, 0.0);
+		//glTexCoord2f(1.0, 1.0);
+		//glVertex3f(5.0, 5.0, 0.0);
+		//glTexCoord2f(1.0, 0.0);
+		//glVertex3f(5.0, -5.0, 0.0);
+		//glEnd();
 		glFlush();
 	}
 
@@ -398,6 +404,7 @@ int main(int argc, char **argv) {
 	initTexture();
 	initShader();
 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
 	// Loop until the user closes the window
@@ -409,6 +416,9 @@ int main(int argc, char **argv) {
 
 		// Main Render
 		render(width, height);
+
+
+		//w.render();
 
 		// Swap front and back buffers
 		glfwSwapBuffers(g_window);

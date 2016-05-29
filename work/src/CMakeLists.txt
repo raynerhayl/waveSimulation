@@ -13,6 +13,7 @@ SET(headers
 	"shady_geometry.hpp"
 	"school.hpp"
 	"boid.hpp"
+	"wave.hpp"
 )
 
 
@@ -21,6 +22,7 @@ SET(sources
 	"main.cpp"
 	"school.cpp"
 	"boid.cpp"
+	"wave.cpp"
 )
 
 # Add executable target and link libraries
