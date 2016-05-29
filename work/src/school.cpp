@@ -90,10 +90,27 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 					p2->mAccel += dir;
 					//cout << "mod accel2" << endl;
 				}
-			}else{
-					//cout << "no change" << endl;
-				}
+			}
 		}
+		// float eatDistSqrd = 10.0f;
+		// float predatorZoneRadiusSqrd = zoneRadiusSqrd * 3.0f;
+		// for( vector<Boid>::iterator predator = mPredators.begin(); predator != mPredators.end(); ++predator ) {
+		// 	Vec3f dir = p1->mPos[0] - predator->mPos[0];
+		// 	float distSqrd = dir.lengthSquared();
+		// 	if( distSqrd < predatorZoneRadiusSqrd ){
+		// 		if( distSqrd > eatDistSqrd ){
+		// 			float F = ( predatorZoneRadiusSqrd/distSqrd - 1.0f ) * 0.1f;
+		// 			p1->mFear += F * 0.1f;
+		// 			dir = normalize(dir) * F;
+		// 			p1->mAccel+= dir;
+		// 			predator->mAccel += dir;
+		// 		} else {
+		// 			p1->mIsDead = true;
+		// 			predator->mIsHungry = false;
+		// 			// predator->mHunger -= p1->mMass;
+		// 		}
+		// 	}
+		// }
 	}
 }
 

@@ -82,3 +82,11 @@ void Boid::update(){
 	mPosition += mVelocity;
 	mAccel = vec3(0,0,0);
 }
+
+Predator::Predator(vec3 loc) : Boid(loc){
+	
+}
+
+Prey::Prey(vec3 loc) : Boid(loc){
+	
+}

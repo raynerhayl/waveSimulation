@@ -36,3 +36,24 @@ private:
 	float mMinSpeed = 0.01;
 	float mMinSpeedSqrd;
 };
+
+
+class Predator : public Boid {
+public:
+	//methods
+	Predator(vec3 pos);
+
+	//fields
+	bool mIsHungry = true;
+	float mHunger = 10;
+};
+
+class Prey : public Boid {
+public:
+	//methods
+	Prey(vec3 pos);
+
+	//fields
+	bool mIsDead = false;
+	float mFear = 10;
+};
