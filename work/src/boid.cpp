@@ -23,8 +23,12 @@ using namespace cgra;
 
 
 Boid::Boid(vec3 pos) {
+	//calculate once 
+	mMaxSpeedSqrd = mMaxSpeed * mMaxSpeed;
+	mMinSpeedSqrd = mMinSpeed * mMinSpeed;
+
 	mPosition = pos;
-	mVelocity = vec3(math::random(-0.1,0.1), math::random(-0.1,0.1), math::random(-0.1,0.1));
+	mVelocity = vec3(math::random(-0.01,0.01), math::random(-0.01,0.01), math::random(-0.01,0.01));
 }
 
 
@@ -49,17 +53,32 @@ void Boid::draw() {
 void Boid::pullToCentre(const vec3 &centre){
 	vec3 dirToCenter = mPosition - centre;
 	float distToCenter = length(dirToCenter);
-	float maxDistance = 300.0f;
+	float maxDistance = 100.0f;
 	if(distToCenter > maxDistance){
-		//float pullStrength = 0.0001f;
-		float pullStrength = 0.01f;
+		float pullStrength = 0.0001f;
+		//float pullStrength = 0.01f;
 		mVelocity -= normalize(dirToCenter) * ( ( distToCenter - maxDistance ) * pullStrength );
+		//mAccel -= normalize(dirToCenter) * ( ( distToCenter - maxDistance ) * pullStrength );
 	}
 }
 
 void Boid::update(){
 	//cout << "accel: " << mAccel << " vel: " << mVelocity << " pos: " << mPosition << endl;
+	//limit velocity
+
 	mVelocity += mAccel;
+
+	float velLengthSqrd = lengthSquared(mVelocity);
+	if( velLengthSqrd > mMaxSpeedSqrd ) {
+		mVelocity = normalize(mVelocity);
+		mVelocity *= mMaxSpeed;
+	} else if( velLengthSqrd < mMinSpeedSqrd ) {
+		mVelocity = normalize(mVelocity);
+		mVelocity *= mMinSpeed;
+	}
+
+
+	
 	mPosition += mVelocity;
 	mAccel = vec3(0,0,0);
 }

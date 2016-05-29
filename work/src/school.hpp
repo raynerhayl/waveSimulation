@@ -41,6 +41,7 @@ private:
 	// Methods
 	void drawBounds();
 	void update();
-	void applyForce(float,float);
-	float lengthSquared(const vec3 &);
+	void applyForce(float,float,float);
+
+
 };

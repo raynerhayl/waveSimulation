@@ -26,10 +26,13 @@ public:
 	vec3 mVelocity;
 	vec3 mAccel;
 
-	float mRadius = 5.0f;
-
 	void pullToCentre(const vec3 &);
 	
 private:
 	BoundingBox bounds;
+
+	float mMaxSpeed = 1;
+	float mMaxSpeedSqrd;
+	float mMinSpeed = 0.01;
+	float mMinSpeedSqrd;
 };

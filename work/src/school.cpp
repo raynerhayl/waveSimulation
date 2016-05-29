@@ -17,12 +17,15 @@
 #include "opengl.hpp"
 #include "school.hpp"
 #include "helpers.hpp"
+#include "shady_geometry.hpp"
 
 using namespace std;
 using namespace cgra;
 
 School::School(int numBoids, BoundingBox bounds) {
-	//bounding_box = bounds;
+	
+
+
 	for(int i = 0; i < numBoids; i++){
 
 		float x = math::random(-1.0,1.0);
@@ -36,26 +39,29 @@ School::School(int numBoids, BoundingBox bounds) {
 }
 
 void School::renderSchool() {
-	float zRad = 15;
-	applyForce(zRad*zRad, 0.5);
+	float zRad = 50;
+	applyForce(zRad*zRad, 0.4, 0.65);
 	update(); //update all
 	
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-
+	
 	if(draw_bounds)drawBounds();
 	//Actually draw the School
 	for(int i = 0; i < boids.size(); i++){
 		boids[i].draw();
 	}
+	glRotatef(45,1,1,1);
+	glColor3f(1,1,0);
+	cgraLine(zRad);
 
 	// Clean up
 	glPopMatrix();
 }
 
-void School::applyForce(float zoneRadiusSqrd, float thresh){
+void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh){
+	float jFactor = 0.1;
 	for( vector<Boid>::iterator p1 = boids.begin(); p1 != boids.end(); ++p1 ) {
-		p1->pullToCentre(vec3(0,0,0));
 
 	    vector<Boid>::iterator p2 = p1;
 	    for( ++p2; p2 != boids.end(); ++p2 ) {
@@ -65,37 +71,42 @@ void School::applyForce(float zoneRadiusSqrd, float thresh){
 			if( distSqrd < zoneRadiusSqrd ) { // If the neighbor is within the zone radius...
 				float percent = distSqrd/zoneRadiusSqrd;
 
-				if( percent < thresh ) { // ... and is within the threshold limits, separate...
-					float F = ( thresh/percent - 1.0f ) * 0.01f;
-					dir = normalize(dir) * F;
+				if( percent < lowThresh ) { // ... and is within the threshold limits, separate...
+					float F = ( lowThresh/percent - 1.0f ) * 0.01f;
+					dir = normalize(dir) * F * jFactor;
 					p1->mAccel += dir;
 					p2->mAccel -= dir;
-					cout << "mod accel1" << endl;
-				}
-				else { // ... else attract
-					float threshDelta = 1.0f - thresh;
-					float adjustedPercent = ( percent - thresh )/threshDelta;
-					float F = ( 1.0 - ( cos( adjustedPercent * math::pi()*2.0f ) * -0.5f + 0.5f ) ) * 0.04f;
-					dir = normalize(dir) * F;
+					//cout << "mod accel1" << endl;
+				}else if( percent < highThresh ) { // ... else if it is within the higher threshold limits, align...
+					float threshDelta = highThresh - lowThresh;
+					float adjustedPercent = ( percent - lowThresh )/threshDelta;
+					// float F = ( 0.5f - cos( adjustedPercent * math::pi() * 2.0f ) * 0.5f + 0.5f ) * 0.01f;
+					float F = ( 0.5f - cos( adjustedPercent * math::pi() * 2.0f ) * 0.5f + 0.5f ) * 0.01f;
+					p1->mAccel += normalize(p2->mVelocity) * F * jFactor;
+					p2->mAccel += normalize(p1->mVelocity) * F * jFactor;
+				} else { // ... else attract
+					float threshDelta = 1.0f - highThresh;
+					float adjustedPercent = ( percent -highThresh )/threshDelta;
+					//float F = ( 1.0 - ( cos( adjustedPercent * math::pi()*2.0f ) * -0.5f + 0.5f ) ) * 0.04f;
+					float F = ( 1.0 - ( cos( adjustedPercent * math::pi()*2.0f ) * -0.5f + 0.5f ) ) * 0.01f;
+					dir = normalize(dir) * F * jFactor;
 					p1->mAccel -= dir;
 					p2->mAccel += dir;
-					cout << "mod accel2" << endl;
+					//cout << "mod accel2" << endl;
 				}
 			}else{
-					cout << "no change" << endl;
+					//cout << "no change" << endl;
 				}
 		}
 	}
 }
 
-float School::lengthSquared(const vec3 &vec){
-	return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
-}
-
 void School::update(){
-	for (int i = 0; i < boids.size(); ++i){
-		//cout << i << "-> ";
-		boids[i].update();
+
+	for(vector<Boid>::iterator b = boids.begin(); b != boids.end(); ++b) {
+		
+		b->pullToCentre(vec3(0,0,0));
+		b->update();
 	}
 }
 
