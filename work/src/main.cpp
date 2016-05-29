@@ -22,11 +22,16 @@
 #include "cgra_math.hpp"
 #include "simple_image.hpp"
 #include "simple_shader.hpp"
+<<<<<<< HEAD
 #include "wave.hpp"
+=======
+#include "simple_gui.hpp"
+>>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 
 #include "shady_geometry.hpp"
 #include "opengl.hpp"
 #include "school.hpp"
+#include "helpers.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -40,7 +45,7 @@ GLFWwindow* g_window;
 // 
 float g_fovy = 20.0;
 float g_znear = 0.1;
-float g_zfar = 1000.0;
+float g_zfar = 10000.0;
 
 
 // Mouse controlled Camera values
@@ -50,6 +55,16 @@ vec2 g_mousePosition;
 float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
+
+BoundingBox scene_bounds = BoundingBox(vec3(-100,-100,-100),vec3(100,100,100));
+
+//school related
+School * g_school;
+bool draw_school = true;
+
+//performance
+float frameSpeed = 0;
+int fps = 0;
 
 // Values and fields to showcase the use of shaders
 // Remove when modifying main.cpp for Assignment 3
@@ -111,6 +126,11 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 	// 	<< "action=" << action << "mods=" << mods << endl;
 	// YOUR CODE GOES HERE
 	// ...
+	switch(key){
+		case 'F':
+			if(action == 1)draw_school = !draw_school;
+		break;
+	}
 }
 
 
@@ -122,6 +142,44 @@ void charCallback(GLFWwindow *win, unsigned int c) {
 	// Not needed for this assignment, but useful to have later on
 }
 
+void renderGUI() {
+	// Start registering GUI components
+	SimpleGUI::newFrame();
+
+	if (ImGui::IsMouseClicked(1))
+		ImGui::OpenPopup("Controls");
+
+	if (ImGui::BeginPopup("Controls")) {
+		if (ImGui::Selectable("Play")) {
+
+		}
+
+		if (ImGui::Selectable("Pause")) {
+
+		}
+
+		ImGui::EndPopup();
+	}
+
+	
+
+	ImGui::SetNextWindowPos(ImVec2(10,10));
+	ImGui::Begin("Fixed Overlay", nullptr, ImVec2(0,0), 0.3f,
+	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_AlwaysAutoResize|
+	ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings);
+	ostringstream ss;
+	// Replace this with your code
+	ss << frameSpeed << " ms/frame  " << fps << " fps";
+	ImGui::Text(ss.str().c_str());
+	ImGui::End();
+
+	// Flush components and render
+	SimpleGUI::render();
+}
+
+void initSchool(){
+	g_school = new School(200,scene_bounds);
+}
 
 // Sets up where and what the light is
 // Called once on start up
@@ -218,7 +276,7 @@ void drawOrigin(){
 // Draw function
 //
 void render(int width, int height) {
-
+	glViewport(0,0,width,height);
 	// Grey/Blueish background
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -235,8 +293,15 @@ void render(int width, int height) {
 	//draw unlit stuff here
 	drawOrigin();
 	glColor3f(1,1,1);
-	cgraCube(vec3(0,0,0),vec3(20,0.5,20));
-
+	cgraCube(
+		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
+		(scene_bounds.max.y+scene_bounds.min.y)/2,
+		(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
+		abs(scene_bounds.max.x-scene_bounds.min.x),
+		abs(scene_bounds.max.y-scene_bounds.min.y),
+		abs(scene_bounds.max.z-scene_bounds.min.z)
+	));
+	if(draw_school) g_school->renderSchool();
 	glEnable(GL_LIGHTING);
 
 	// Without shaders
@@ -244,6 +309,7 @@ void render(int width, int height) {
 	//
 	if (!g_useShader) {
 
+<<<<<<< HEAD
 		// Texture setup
 		//
 
@@ -273,6 +339,34 @@ void render(int width, int height) {
 		//glVertex3f(5.0, -5.0, 0.0);
 		//glEnd();
 		glFlush();
+=======
+		// // Texture setup
+		// //
+
+		// // Enable Drawing texures
+		// glEnable(GL_TEXTURE_2D);
+		// // Use Texture as the color
+		// glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		// // Set the location for binding the texture
+		// glActiveTexture(GL_TEXTURE0);
+		// // Bind the texture
+		// glBindTexture(GL_TEXTURE_2D, g_texture);
+
+		// // Render a single square as our geometry
+		// // You would normally render your geometry here
+		// glBegin(GL_QUADS);
+		// glNormal3f(0.0, 0.0, 1.0);
+		// glTexCoord2f(0.0, 0.0);
+		// glVertex3f(-5.0, -5.0, 0.0);
+		// glTexCoord2f(0.0, 1.0);
+		// glVertex3f(-5.0, 5.0, 0.0);
+		// glTexCoord2f(1.0, 1.0);
+		// glVertex3f(5.0, 5.0, 0.0);
+		// glTexCoord2f(1.0, 0.0);
+		// glVertex3f(5.0, -5.0, 0.0);
+		// glEnd();
+		// glFlush();
+>>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 	}
 
 
@@ -396,6 +490,15 @@ int main(int argc, char **argv) {
 		cout << "GL_ARB_debug_output not available. No worries." << endl;
 	}
 
+	// Initialize IMGUI
+	// Second argument is true if we dont need to use GLFW bindings for input
+	// if set to false we must manually call the SimpleGUI callbacks when we
+	// process the input.
+	if (!SimpleGUI::init(g_window, false)) {
+		cerr << "Error: Could not initialize IMGUI" << endl;
+		abort();
+	}
+
 
 	// Initialize Geometry/Material/Lights
 	// YOUR CODE GOES HERE
@@ -403,12 +506,29 @@ int main(int argc, char **argv) {
 	initLight();
 	initTexture();
 	initShader();
+	initSchool();
 
+<<<<<<< HEAD
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+=======
+	//for fps calculation
+	double lastTime = glfwGetTime();
+	int nbFrames = 0;
+>>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
+
+		double currentTime = glfwGetTime();
+		nbFrames++;
+		if ( currentTime - lastTime >= 1.0 ){ 
+
+		    frameSpeed = 1000.0/double(nbFrames);
+		    fps = nbFrames;
+		    nbFrames = 0;
+		    lastTime += 1.0;
+		}
 
 		// Make sure we draw to the WHOLE window
 		int width, height;
@@ -417,8 +537,13 @@ int main(int argc, char **argv) {
 		// Main Render
 		render(width, height);
 
+<<<<<<< HEAD
 
 		//w.render();
+=======
+		//Render GUI on top
+		renderGUI();
+>>>>>>> d9dae2be7e21ec3038b38786c37dea2328a89996
 
 		// Swap front and back buffers
 		glfwSwapBuffers(g_window);
