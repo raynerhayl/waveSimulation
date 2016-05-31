@@ -14,9 +14,16 @@
 
 #version 120
 
+#define M_PI 3.1415926535897932384626433832795
+
+
+
+
 // Constant across both shaders
 uniform sampler2D texture0;
 uniform float time;
+
+
 
 // Values to pass to the fragment shader
 varying vec3 vNormal;
@@ -24,6 +31,15 @@ varying vec3 vPosition;
 varying vec2 vTextureCoord0;
 
 void main() {
+
+// wave properties
+
+ 	float wavelength = 20;
+	float amplitude = 2;
+	float waveSpeed = 1.0;
+	float phase = (waveSpeed * 2.0 * M_PI)/ wavelength; // wave speed
+	float frequency = (2 * M_PI) /wavelength ; // angular frequency
+ 	vec2 d = vec2(-1,0); // direction of wave propagation
 
 	// Transform and pass on the normal/position/texture to fragment shader
 	vec4 worldPos = gl_Vertex;
@@ -34,7 +50,8 @@ void main() {
 
 	// transform worldPos
 
-	worldPos.y = sin(worldPos.x+time);
+	worldPos.y = amplitude * sin(dot(d , vec2(worldPos.x, worldPos.y) * frequency + time * phase));
+
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;

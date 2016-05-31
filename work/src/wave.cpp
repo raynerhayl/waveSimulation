@@ -93,6 +93,9 @@ void Wave::createTriangles() {
 		triEven.v[2].p = off + square + squareDensity + 2;
 		triEven.v[2].n = 0;
 
+		vec3 v = vec3(0, 0, 0);
+		v = cgra::cross(v, v);
+
 		m_triangles.push_back(triEven);
 
 	}
