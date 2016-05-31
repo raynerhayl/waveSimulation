@@ -32,7 +32,9 @@ using namespace std;
 
 Wave::Wave() {
 	//memset(planeVert, 0, sizeof(vec2) * total_vertices);
-	
+
+	createVertices();
+	createTriangles();
 
 	//make_plane(plane_width, plane_height, planeVert, planeInd);
 }
@@ -48,12 +50,97 @@ void Wave::createNormals() {
 
 }
 
-void Wave::createDisplayListPoly() {
+void Wave::createVertices() {
+	double x_space = width / squareDensity;
+	double z_space = height / squareDensity;
+
+	for (int x = 0; x <= squareDensity; x++) {
+	for (int z = 0; z <= squareDensity; z++) {
+			m_points.push_back(vec3(x*x_space-width/2, 0, z*z_space-height/2));
+		}
+	}
+
+	m_normals.push_back(vec3(0, 1, 0));
 
 }
 
-void Wave::createDisplayListWire() {
+void Wave::createTriangles() {
+	int numSquares = squareDensity * squareDensity;
+	int off = 0;
 
+	for (int square = 0; square < numSquares; square++) {
+
+		if (square > 0 && (int)square % (int)squareDensity == 0) {
+			off = off + 1;
+		}
+
+		triangle triOdd = triangle();
+
+		triOdd.v[0].p = off + square;
+		triOdd.v[0].n = 0;
+		triOdd.v[1].p = off + square + 1;
+		triOdd.v[1].n = 0;
+		triOdd.v[2].p = off + square + squareDensity + 1;
+		triOdd.v[2].n = 0;
+
+		m_triangles.push_back(triOdd);
+		triangle triEven = triangle();
+
+		triEven.v[0].p = off + square + 1;
+		triEven.v[0].n = 0;
+		triEven.v[1].p = off + square + squareDensity + 1;
+		triEven.v[1].n = 0;
+		triEven.v[2].p = off + square + squareDensity + 2;
+		triEven.v[2].n = 0;
+
+		m_triangles.push_back(triEven);
+
+	}
+}
+
+void Wave::createDisplayListPoly() {
+	// Delete old list if there is one
+	if (m_displayListPoly) glDeleteLists(m_displayListPoly, 1);
+
+	// Create a new list
+	//cout << "Creating Poly Geometry" << endl;
+	m_displayListPoly = glGenLists(1);
+	glNewList(m_displayListPoly, GL_COMPILE);
+	glBegin(GL_TRIANGLES);
+
+
+	for (int tri = 0; tri < m_triangles.size(); tri++) {
+		for (int vtri = 0; vtri < 3; vtri++) {
+			glNormal3f(m_normals[m_triangles[tri].v[vtri].n].x, m_normals[m_triangles[tri].v[vtri].n].y, m_normals[m_triangles[tri].v[vtri].n].z);
+			glVertex3f(m_points[m_triangles[tri].v[vtri].p].x, m_points[m_triangles[tri].v[vtri].p].y, m_points[m_triangles[tri].v[vtri].p].z);
+		}
+	}
+
+	glEnd();
+	glEndList();
+}
+
+void Wave::createDisplayListWire() {
+	// Delete old list if there is one
+	if (m_displayListWire) glDeleteLists(m_displayListWire, 1);
+
+	// Create a new list
+	//cout << "Creating Wire Geometry" << endl;
+	m_displayListWire = glGenLists(1);
+	glNewList(m_displayListWire, GL_COMPILE);
+
+	glBegin(GL_TRIANGLES);
+
+	for (int tri = 0; tri < m_triangles.size(); tri++) {
+		for (int vtri = 0; vtri < 3; vtri++) {
+			glNormal3f(m_normals[m_triangles[tri].v[vtri].n].x, m_normals[m_triangles[tri].v[vtri].n].y, m_normals[m_triangles[tri].v[vtri].n].z);
+			glVertex3f(m_points[m_triangles[tri].v[vtri].p].x, m_points[m_triangles[tri].v[vtri].p].y, m_points[m_triangles[tri].v[vtri].p].z);
+		}
+	}
+
+	glEnd();
+
+	glEndList();
 }
 
 //void Wave::make_plane(int width, int height, vec2 * vertices, int * indices)
@@ -106,7 +193,39 @@ void Wave::createDisplayListWire() {
 //}
 
 void Wave::render() {
+	//m_normals.clear();
+	//createNormals();
 
+	if (m_wireFrameOn) {
+		createDisplayListWire();
+		//-------------------------------------------------------------
+		// [Assignment 1] :
+		// When moving on to displaying your obj, comment out the
+		// wire_cow function & uncomment the glCallList function
+		//-------------------------------------------------------------
+
+		glShadeModel(GL_SMOOTH);
+		//wire_cow();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		glCallList(m_displayListWire);
+
+	}
+	else {
+		createDisplayListPoly();
+		//-------------------------------------------------------------
+		// [Assignment 1] :
+		// When moving on to displaying your obj, comment out the
+		// cow function & uncomment the glCallList function
+		//-------------------------------------------------------------
+
+		glShadeModel(GL_SMOOTH);
+		//cow();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+		glCallList(m_displayListPoly);
+
+	}
 }
 
 

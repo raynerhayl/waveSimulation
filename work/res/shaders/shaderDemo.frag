@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
 //
 // This software is provided 'as-is' for assignment of COMP308 in ECS,
-// Victoria University of Wellington, without any express or implied warranty. 
+// Victoria University of Wellington, without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from
 // the use of this software.
 //
@@ -16,6 +16,8 @@
 
 // Constant across both shaders
 uniform sampler2D texture0;
+uniform float time;
+
 
 // Values passed in from the vertex shader
 varying vec3 vNormal;

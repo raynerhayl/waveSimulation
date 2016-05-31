@@ -33,13 +33,21 @@ private:
 	std::vector<cgra::vec3> m_normals;	// Normal list
 	std::vector<triangle> m_triangles;	// Triangle/Face list
 
-	bool m_wireFrameOn = false;
+	double squareDensity = 100;
+	double width = 50;
+	double height = 50;
+
+	bool m_wireFrameOn = true;
+
 
 	// IDs for the display list to render
 	GLuint m_displayListPoly = 0; // DisplayList for Polygon
 	GLuint m_displayListWire = 0; // DisplayList for Wireframe
 
 	void createNormals();
+
+	void createVertices();
+	void createTriangles();
 
 	void createDisplayListPoly();
 	void createDisplayListWire();

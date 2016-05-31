@@ -15,16 +15,16 @@ SET(headers
 	"boid.hpp"
 	"wave.hpp"
 	"simple_gui.hpp"
-
+)
 
 # TODO list your source files (.cpp) here
 SET(sources
 	"main.cpp"
 	"school.cpp"
 	"boid.cpp"
-"wave.cpp"
-"simple_gui.cpp"
-
+	"wave.cpp"
+	"simple_gui.cpp"
+)
 
 # Add executable target and link libraries
 # You do not need to touch this

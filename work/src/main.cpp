@@ -54,11 +54,16 @@ float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
 
-BoundingBox scene_bounds = BoundingBox(vec3(-100,-100,-100),vec3(100,100,100));
+BoundingBox scene_bounds = BoundingBox(vec3(-100, -100, -100), vec3(100, 100, 100));
 
 //school related
 School * g_school;
 bool draw_school = true;
+
+//wave related
+Wave * wave;
+float waveTime = 0.0;
+
 
 //performance
 float frameSpeed = 0;
@@ -67,12 +72,9 @@ int fps = 0;
 // Values and fields to showcase the use of shaders
 // Remove when modifying main.cpp for Assignment 3
 //
-bool g_useShader = false;
+bool g_useShader = true;
 GLuint g_texture = 0;
 GLuint g_shader = 0;
-
-Wave w = Wave();
-
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -124,9 +126,9 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 	// 	<< "action=" << action << "mods=" << mods << endl;
 	// YOUR CODE GOES HERE
 	// ...
-	switch(key){
-		case 'F':
-			if(action == 1)draw_school = !draw_school;
+	switch (key) {
+	case 'F':
+		if (action == 1)draw_school = !draw_school;
 		break;
 	}
 }
@@ -161,10 +163,10 @@ void renderGUI() {
 
 
 
-	ImGui::SetNextWindowPos(ImVec2(10,10));
-	ImGui::Begin("Fixed Overlay", nullptr, ImVec2(0,0), 0.3f,
-	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_AlwaysAutoResize|
-	ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings);
+	ImGui::SetNextWindowPos(ImVec2(10, 10));
+	ImGui::Begin("Fixed Overlay", nullptr, ImVec2(0, 0), 0.3f,
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
 	ostringstream ss;
 	// Replace this with your code
 	ss << frameSpeed << " ms/frame  " << fps << " fps";
@@ -175,8 +177,12 @@ void renderGUI() {
 	SimpleGUI::render();
 }
 
-void initSchool(){
-	g_school = new School(200,scene_bounds);
+void initSchool() {
+	g_school = new School(200, scene_bounds);
+}
+
+void initWave() {
+	wave = new Wave();
 }
 
 // Sets up where and what the light is
@@ -224,7 +230,7 @@ void initShader() {
 	// To create a shader program we use a helper function
 	// We pass it an array of the types of shaders we want to compile
 	// and the corrosponding locations for the files of each stage
-	g_shader = makeShaderProgramFromFile({GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderDemo.vert", "./work/res/shaders/shaderDemo.frag" });
+	g_shader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderDemo.vert", "./work/res/shaders/shaderDemo.frag" });
 }
 
 
@@ -247,25 +253,25 @@ void setupCamera(int width, int height) {
 
 
 
-void drawOrigin(){
+void drawOrigin() {
 	//x
-	glColor3f(1,0,0);
-	glPushMatrix();{
-		glRotatef(90,0,1,0);
-		glTranslatef(0,0,50);
+	glColor3f(1, 0, 0);
+	glPushMatrix(); {
+		glRotatef(90, 0, 1, 0);
+		glTranslatef(0, 0, 50);
 		cgraLine(100);
 	}glPopMatrix();
 	//y
-	glColor3f(0,1,0);
-	glPushMatrix();{
-		glRotatef(90,1,0,0);
-		glTranslatef(0,0,50);
+	glColor3f(0, 1, 0);
+	glPushMatrix(); {
+		glRotatef(90, 1, 0, 0);
+		glTranslatef(0, 0, 50);
 		cgraLine(100);
 	}glPopMatrix();
 	//z
-	glColor3f(0,0,1);
-	glPushMatrix();{
-		glTranslatef(0,0,50);
+	glColor3f(0, 0, 1);
+	glPushMatrix(); {
+		glTranslatef(0, 0, 50);
 		cgraLine(100);
 	}glPopMatrix();
 }
@@ -274,7 +280,7 @@ void drawOrigin(){
 // Draw function
 //
 void render(int width, int height) {
-	glViewport(0,0,width,height);
+	glViewport(0, 0, width, height);
 	// Grey/Blueish background
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -290,16 +296,19 @@ void render(int width, int height) {
 	glDisable(GL_LIGHTING);
 	//draw unlit stuff here
 	drawOrigin();
-	glColor3f(1,1,1);
+	glColor3f(1, 1, 1);
 	cgraCube(
-		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
-		(scene_bounds.max.y+scene_bounds.min.y)/2,
-		(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
-		abs(scene_bounds.max.x-scene_bounds.min.x),
-		abs(scene_bounds.max.y-scene_bounds.min.y),
-		abs(scene_bounds.max.z-scene_bounds.min.z)
-	));
-	if(draw_school) g_school->renderSchool();
+		vec3((scene_bounds.max.x + scene_bounds.min.x) / 2,
+			(scene_bounds.max.y + scene_bounds.min.y) / 2,
+			(scene_bounds.max.z + scene_bounds.min.z) / 2), vec3(
+				abs(scene_bounds.max.x - scene_bounds.min.x),
+				abs(scene_bounds.max.y - scene_bounds.min.y),
+				abs(scene_bounds.max.z - scene_bounds.min.z)
+				));
+	if (draw_school) {
+		g_school->renderSchool();
+	}
+
 	glEnable(GL_LIGHTING);
 
 	// Without shaders
@@ -356,9 +365,17 @@ void render(int width, int height) {
 		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
 		glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 
+		glUniform1f(glGetUniformLocation(g_shader, "time"), waveTime);
+
 
 		// Render a single square as our geometry
 		// You would normally render your geometry here
+
+		if (draw_school == false) {
+			wave->render();
+
+		}
+
 		glBegin(GL_QUADS);
 		glNormal3f(0.0, 0.0, 1.0);
 		glTexCoord2f(0.0, 0.0);
@@ -473,6 +490,8 @@ int main(int argc, char **argv) {
 	initTexture();
 	initShader();
 	initSchool();
+	initWave();
+
 
 	//for fps calculation
 	double lastTime = glfwGetTime();
@@ -483,13 +502,15 @@ int main(int argc, char **argv) {
 
 		double currentTime = glfwGetTime();
 		nbFrames++;
-		if ( currentTime - lastTime >= 1.0 ){
+		if (currentTime - lastTime >= 1.0) {
 
-		    frameSpeed = 1000.0/double(nbFrames);
-		    fps = nbFrames;
-		    nbFrames = 0;
-		    lastTime += 1.0;
+			frameSpeed = 1000.0 / double(nbFrames);
+			fps = nbFrames;
+			nbFrames = 0;
+			lastTime += 1.0;
 		}
+
+		waveTime=waveTime + 0.1;
 
 		// Make sure we draw to the WHOLE window
 		int width, height;
@@ -497,7 +518,6 @@ int main(int argc, char **argv) {
 
 		// Main Render
 		render(width, height);
-
 
 		//Render GUI on top
 		renderGUI();
