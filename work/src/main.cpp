@@ -367,6 +367,38 @@ void render(int width, int height) {
 
 		glUniform1f(glGetUniformLocation(g_shader, "time"), waveTime);
 
+		int waves = 1 * 5; // number of wave properties
+
+		GLfloat props[100];
+
+		// populate wave property array
+
+		/*for (int i = 0; i < waves; i = i + 5) {
+			props[i] = 20;
+			props[i + 1] = 2.0;
+			props[i + 2] = 1.0;
+			props[i + 3] = -1.0;
+			props[i + 4] = 0.0;
+		}*/
+
+		int i = 0;
+
+		props[i] = 20;	     // wavelength
+		props[i + 1] = 2.0;  // amplitude
+		props[i + 2] = 1.0;  // velocity
+		props[i + 3] = -1.0; // direction x
+		props[i + 4] = 0.0;  // direction y
+
+		i = i + 5;
+		
+		// repeate for next wave
+
+		glUniform1fv(glGetUniformLocation(g_shader, "waveProperties"), 100, props);
+
+		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), 1);  // specify the number of waves
+
+
+
 
 		// Render a single square as our geometry
 		// You would normally render your geometry here

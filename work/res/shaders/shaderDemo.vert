@@ -17,32 +17,53 @@
 #define M_PI 3.1415926535897932384626433832795
 
 
-
-
 // Constant across both shaders
 uniform sampler2D texture0;
 uniform float time;
+uniform float [100] waveProperties;
+uniform int numWaves;
 
-
+vec4 worldPos;
 
 // Values to pass to the fragment shader
 varying vec3 vNormal;
 varying vec3 vPosition;
 varying vec2 vTextureCoord0;
 
+
+struct sWave
+{
+	float wavelength;
+	float amplitude;
+	float waveSpeed;
+	float phase;
+	float frequency;
+	vec2 d;
+};
+
+sWave[100] waves;
+
+float height(sWave wave);
+
+void createWaves();
+
 void main() {
 
 // wave properties
 
+	createWaves();
+
  	float wavelength = 20;
-	float amplitude = 2;
+	float amplitude = 2.0;
 	float waveSpeed = 1.0;
 	float phase = (waveSpeed * 2.0 * M_PI)/ wavelength; // wave speed
 	float frequency = (2 * M_PI) /wavelength ; // angular frequency
  	vec2 d = vec2(-1,0); // direction of wave propagation
 
+	sWave waveTest = sWave(wavelength,amplitude,waveSpeed,phase,frequency, d);
+
 	// Transform and pass on the normal/position/texture to fragment shader
-	vec4 worldPos = gl_Vertex;
+	worldPos = gl_Vertex;
 
 	vNormal = normalize(gl_NormalMatrix * gl_Normal);
 	vPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
@@ -50,9 +71,41 @@ void main() {
 
 	// transform worldPos
 
-	worldPos.y = amplitude * sin(dot(d , vec2(worldPos.x, worldPos.y) * frequency + time * phase));
+	for(int i = 0; i < numWaves; i ++){
+			worldPos.y = worldPos.y + height(waves[i]);
+	}
 
+	//worldPos.y = height(waves[1]);
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
+}
+
+/*
+Creates a wave struct from the given properties, the vector contains the 
+wavelength, amplitude and waveSpeed in that order
+*/
+
+void createWaves(){
+
+	for(int i = 0; i < numWaves; i ++){
+		int index = i * 5;
+
+		float wavelength = waveProperties[index];
+		float amplitude = waveProperties[index + 1];
+		float waveSpeed = waveProperties[index + 2];
+		float phase = (waveSpeed * 2.0 * M_PI)/ wavelength; // wave speed
+		float frequency = (2 * M_PI) /wavelength ; // angular frequency
+ 		vec2 d = vec2(waveProperties[index + 3],waveProperties[index + 4]); // direction of wave propagation
+
+		waves[i] = sWave(wavelength, amplitude, waveSpeed, phase, frequency, d);
+	}
+}
+
+float height(sWave wave){
+	float height = 0.0;
+
+	height = wave.amplitude * sin(dot(wave.d , vec2(worldPos.x, worldPos.y) * wave.frequency + time * wave.phase));
+
+	return height;
 }
