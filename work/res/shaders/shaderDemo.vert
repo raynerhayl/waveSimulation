@@ -45,6 +45,8 @@ sWave[100] waves;
 
 float height(sWave wave);
 
+vec4 gerstnerFun(sWave wave);
+
 void createWaves();
 
 void main() {
@@ -75,7 +77,12 @@ void main() {
 			worldPos.y = worldPos.y + height(waves[i]);
 	}
 
-	//worldPos.y = height(waves[1]);
+	//vec4 temp = gerstnerFun(waves[0]);
+
+	//worldPos.x = temp.x;
+	//worldPos.y = temp.y;
+	//worldPos.z = temp.z;
+	//worldPos.w = temp.w;
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
@@ -96,7 +103,7 @@ void createWaves(){
 		float waveSpeed = waveProperties[index + 2];
 		float phase = (waveSpeed * 2.0 * M_PI)/ wavelength; // wave speed
 		float frequency = (2 * M_PI) /wavelength ; // angular frequency
- 		vec2 d = vec2(waveProperties[index + 3],waveProperties[index + 4]); // direction of wave propagation
+ 		vec2 d = normalize(vec2(waveProperties[index + 3],waveProperties[index + 4])); // direction of wave propagation
 
 		waves[i] = sWave(wavelength, amplitude, waveSpeed, phase, frequency, d);
 	}
@@ -105,7 +112,21 @@ void createWaves(){
 float height(sWave wave){
 	float height = 0.0;
 
-	height = wave.amplitude * sin(dot(wave.d , vec2(worldPos.x, worldPos.y) * wave.frequency + time * wave.phase));
+	height = wave.amplitude * sin(dot(wave.d , vec2(worldPos.x, worldPos.z) * wave.frequency + time * wave.phase));
 
 	return height;
+}
+
+vec4 gerstnerFun(sWave wave){
+	vec4 result = vec4(0,0,0,0);
+
+	float steepF = 1/(wave.frequency * wave.amplitude);
+
+	result.x = worldPos.x + steepF * wave.amplitude * wave.d.x * cos(wave.frequency * dot( wave.d , vec2(worldPos.x, worldPos.y) + time * wave.phase));
+	result.y = worldPos.y + steepF * wave.amplitude * wave.d.y * cos(wave.frequency *dot( wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase));
+	result.z = wave.amplitude * sin( wave.frequency *dot(wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase)); // cos gives a nice effect
+
+	result.w = worldPos.w;
+
+	return result;
 }

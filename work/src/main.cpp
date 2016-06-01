@@ -390,6 +390,12 @@ void render(int width, int height) {
 		props[i + 4] = 0.0;  // direction y
 
 		i = i + 5;
+
+		props[i] = 20;	    
+		props[i + 1] = 2.0;  
+		props[i + 2] = -1.0; 
+		props[i + 3] = 1.0; 
+		props[i + 4] = 1.0;  
 		
 		// repeate for next wave
 
