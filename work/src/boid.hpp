@@ -26,6 +26,7 @@ public:
 	vec3 mPosition;
 	vec3 mVelocity;
 	vec3 mAccel;
+	vec3 getPosition();
 
 	void pullToCentre(const vec3 &);
 	

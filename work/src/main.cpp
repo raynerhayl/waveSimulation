@@ -28,6 +28,7 @@
 #include "opengl.hpp"
 #include "school.hpp"
 #include "helpers.hpp"
+#include "boid.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -110,8 +111,8 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	// cout << "Scroll Callback :: xoffset=" << xoffset << "yoffset=" << yoffset << endl;
 	g_zoom -= yoffset * g_zoom * 0.2;
 }
-
-
+Octree * m_octree;
+std::vector<Boid*> temp_boids;
 // Keyboard callback
 // Called for every key event on since the last glfwPollEvents
 //
@@ -123,6 +124,16 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 	switch(key){
 		case 'F':
 			if(action == 1)draw_school = !draw_school;
+		break;
+		case 'O':
+			if(action == 1){
+				for(int i = 0; i != 50; i++){
+					vec3 position = vec3(math::random(scene_bounds.min.x,scene_bounds.max.x),math::random(scene_bounds.min.y,scene_bounds.max.y),math::random(scene_bounds.min.z,scene_bounds.max.z));
+					Prey* b = new Prey(position);
+					temp_boids.push_back(b);
+					m_octree->insert(b);
+				}
+			}
 		break;
 	}
 }
@@ -173,6 +184,19 @@ void renderGUI() {
 
 void initSchool(){
 	g_school = new School(800,2,scene_bounds);
+
+	vec3 origin;
+	origin.x = (scene_bounds.max.x + scene_bounds.min.x)/2;
+	origin.y = (scene_bounds.max.y + scene_bounds.min.y)/2;
+	origin.z = (scene_bounds.max.z + scene_bounds.min.z)/2;
+	vec3 halfSize;
+	halfSize.x = abs(scene_bounds.max.x - scene_bounds.min.x)/2;
+	halfSize.y = abs(scene_bounds.max.y - scene_bounds.min.y)/2;
+	halfSize.z = abs(scene_bounds.max.z - scene_bounds.min.z)/2;
+	cout << origin << endl;
+	m_octree = new Octree(origin,halfSize);
+	int octant = m_octree->getOctant(vec3(-50,50,50));
+	cout << octant << endl;
 }
 
 // Sets up where and what the light is
@@ -296,6 +320,16 @@ void render(int width, int height) {
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
 	if(draw_school) g_school->renderSchool();
+	{
+		//m_octree->draw();
+		std::vector<Boid*> v;
+		m_octree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(50,100,10),v);
+		cout << "--------- " << v.size() << endl;
+		for(int i =0; i != v.size(); i++){
+			//cout << "size " << v.size() << endl;
+			v[i]->draw();
+		}
+	}
 	glEnable(GL_LIGHTING);
 
 	// Without shaders

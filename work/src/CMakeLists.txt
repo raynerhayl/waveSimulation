@@ -14,6 +14,7 @@ SET(headers
 	"school.hpp"
 	"boid.hpp"
 	"simple_gui.hpp"
+	"octree.hpp"
 )
 
 

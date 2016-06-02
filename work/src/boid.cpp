@@ -64,6 +64,10 @@ void Boid::update(){
 	mAccel = vec3(0,0,0);
 }
 
+cgra::vec3 Boid::getPosition(){
+	return mPosition;
+}
+
 Predator::Predator(vec3 loc) : Boid(loc){
 	mMaxSpeed = 1.2;
 }

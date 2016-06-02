@@ -19,12 +19,12 @@
 #include "helpers.hpp"
 #include "shady_geometry.hpp"
 
+
 using namespace std;
 using namespace cgra;
 
 School::School(int numPrey, int numPredators, BoundingBox bounds) {
-	
-
+	testSchool(bounds);
 
 	for(int i = 0; i < numPrey; i++){
 
@@ -39,6 +39,10 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 
 
 	cout << "created "<< numPrey <<" prey " << endl;
+}
+
+void School::testSchool(BoundingBox bounds){
+	
 }
 
 void School::renderSchool() {
