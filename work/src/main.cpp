@@ -388,20 +388,23 @@ void render(int width, int height) {
 		props[i + 2] = 1.0;  // velocity
 		props[i + 3] = -1.0; // direction x
 		props[i + 4] = 0.0;  // direction y
+		props[i + 5] = 0.5;  // steepness
 
-		i = i + 5;
+
+		i = i + 6;
 
 		props[i] = 20;	    
-		props[i + 1] = 2.0;  
-		props[i + 2] = -1.0; 
-		props[i + 3] = 1.0; 
-		props[i + 4] = 1.0;  
+		props[i + 1] = 0.1;  
+		props[i + 2] = -0.7; 
+		props[i + 3] = 2.0; 
+		props[i + 4] = 1.0;
+		props[i + 5] = 1.0;
 		
 		// repeate for next wave
 
 		glUniform1fv(glGetUniformLocation(g_shader, "waveProperties"), 100, props);
 
-		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), 1);  // specify the number of waves
+		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), 2);  // specify the number of waves
 
 
 

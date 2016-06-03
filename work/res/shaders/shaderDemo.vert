@@ -39,6 +39,7 @@ struct sWave
 	float phase;
 	float frequency;
 	vec2 d;
+	float steepness;
 };
 
 sWave[100] waves;
@@ -46,6 +47,9 @@ sWave[100] waves;
 float height(sWave wave);
 
 vec4 gerstnerFun(sWave wave);
+
+vec3 gerstnerNorm(sWave wave, vec2 worldPlane);
+
 
 void createWaves();
 
@@ -55,15 +59,6 @@ void main() {
 
 	createWaves();
 
- 	float wavelength = 20;
-	float amplitude = 2.0;
-	float waveSpeed = 1.0;
-	float phase = (waveSpeed * 2.0 * M_PI)/ wavelength; // wave speed
-	float frequency = (2 * M_PI) /wavelength ; // angular frequency
- 	vec2 d = vec2(-1,0); // direction of wave propagation
-
-	sWave waveTest = sWave(wavelength,amplitude,waveSpeed,phase,frequency, d);
-
 	// Transform and pass on the normal/position/texture to fragment shader
 	worldPos = gl_Vertex;
 
@@ -72,20 +67,28 @@ void main() {
 	vTextureCoord0 = gl_MultiTexCoord0.xy;
 
 	// transform worldPos
+	//vec4 normTemp = vec4(0,0,0,0);
 
 	for(int i = 0; i < numWaves; i ++){
-			worldPos.y = worldPos.y + height(waves[i]);
+	//	worldPos.y = worldPos.y + height(waves[i]);
+		vec4 gerstner = gerstnerFun(waves[i]);
+		vec3 gerstnerNorm = gerstnerNorm(waves[i], vec2(gerstner.x,gerstner.z));
+
+		worldPos.x = worldPos.x + gerstner.x;
+		worldPos.y = worldPos.y + gerstner.y;
+		worldPos.z = worldPos.z + gerstner.z;
+		worldPos.w = worldPos.w + gerstner.w;
+
+		//normTemp.x = normTemp.x + gerstnerNorm.x;
+		//normTemp.y = normTemp.y + gerstnerNorm.y;
+		//normTemp.z = normTemp.z + gerstnerNorm.z;
 	}
 
-	//vec4 temp = gerstnerFun(waves[0]);
 
-	//worldPos.x = temp.x;
-	//worldPos.y = temp.y;
-	//worldPos.z = temp.z;
-	//worldPos.w = temp.w;
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
+	//gl_Normal = normTemp;
 }
 
 /*
@@ -96,7 +99,7 @@ wavelength, amplitude and waveSpeed in that order
 void createWaves(){
 
 	for(int i = 0; i < numWaves; i ++){
-		int index = i * 5;
+		int index = i * 6;
 
 		float wavelength = waveProperties[index];
 		float amplitude = waveProperties[index + 1];
@@ -104,8 +107,9 @@ void createWaves(){
 		float phase = (waveSpeed * 2.0 * M_PI)/ wavelength; // wave speed
 		float frequency = (2 * M_PI) /wavelength ; // angular frequency
  		vec2 d = normalize(vec2(waveProperties[index + 3],waveProperties[index + 4])); // direction of wave propagation
+		float steepness = waveProperties[index + 5];
 
-		waves[i] = sWave(wavelength, amplitude, waveSpeed, phase, frequency, d);
+		waves[i] = sWave(wavelength, amplitude, waveSpeed, phase, frequency, d, steepness);
 	}
 }
 
@@ -120,13 +124,31 @@ float height(sWave wave){
 vec4 gerstnerFun(sWave wave){
 	vec4 result = vec4(0,0,0,0);
 
-	float steepF = 1/(wave.frequency * wave.amplitude);
+	float steepF = wave.steepness * 1/(wave.frequency * wave.amplitude);
 
-	result.x = worldPos.x + steepF * wave.amplitude * wave.d.x * cos(wave.frequency * dot( wave.d , vec2(worldPos.x, worldPos.y) + time * wave.phase));
-	result.y = worldPos.y + steepF * wave.amplitude * wave.d.y * cos(wave.frequency *dot( wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase));
-	result.z = wave.amplitude * sin( wave.frequency *dot(wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase)); // cos gives a nice effect
+	//result.x = worldPos.x + steepF * wave.amplitude * wave.d.x * cos(wave.frequency * dot( wave.d , vec2(worldPos.x, worldPos.y) + time * wave.phase));
+	//result.y = worldPos.y + steepF * wave.amplitude * wave.d.y * cos(wave.frequency *dot( wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase));
+	//result.z = wave.amplitude * sin( wave.frequency *dot(wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase)); // cos gives a nice effect
+
+
+	result.x = steepF * wave.amplitude * wave.d.x * cos(dot(wave.frequency *  wave.d , vec2(worldPos.x, worldPos.z) + time * wave.phase));
+	result.y = wave.amplitude * sin( dot(wave.frequency *wave.d , vec2(worldPos.x, worldPos.z)  + time * wave.phase)); // cos gives a nice effect
+	result.z = steepF * wave.amplitude * wave.d.y * cos(dot( wave.frequency *wave.d , vec2(worldPos.x, worldPos.z)  + time * wave.phase));
 
 	result.w = worldPos.w;
 
 	return result;
+}
+
+vec3 gerstnerNorm(sWave wave, vec2 worldPlane){
+	vec3 result = vec3(0,0,0);
+
+	float steepF = wave.steepness * 1/(wave.frequency * wave.amplitude);
+
+	result.x = -wave.d.x * wave.frequency * wave.amplitude * cos(dot(wave.frequency * wave.d, worldPlane) + wave.phase * time);
+	result.y = 1 - steepF * wave.frequency * wave.amplitude * sin(dot(wave.frequency * wave.d, worldPlane) + wave.phase * time);
+	result.z = -wave.d.y * wave.frequency * wave.amplitude * cos(dot(wave.frequency * wave.d, worldPlane) + wave.phase * time);
+
+	return result;
+
 }
