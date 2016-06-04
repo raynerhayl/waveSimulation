@@ -113,7 +113,7 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	// cout << "Scroll Callback :: xoffset=" << xoffset << "yoffset=" << yoffset << endl;
 	g_zoom -= yoffset * g_zoom * 0.2;
 }
-Octree * m_octree;
+OctreeNode * m_octree;
 std::vector<Boid*> temp_boids;
 // Keyboard callback
 // Called for every key event on since the last glfwPollEvents
@@ -129,13 +129,31 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 		break;
 		case 'O':
 			if(action == 1){
-				for(int i = 0; i != 50; i++){
+				for(int i = 0; i != 1; i++){
 					vec3 position = vec3(math::random(scene_bounds.min.x,scene_bounds.max.x),math::random(scene_bounds.min.y,scene_bounds.max.y),math::random(scene_bounds.min.z,scene_bounds.max.z));
 					Prey* b = new Prey(position);
 					temp_boids.push_back(b);
+					cout << b << endl;
 					m_octree->insert(b);
 				}
 			}
+		break;
+		case 'P':
+			{
+				int ind = int(math::random(0.0f,float(temp_boids.size())));
+				temp_boids[0]->mPosition += vec3(0,0.4,0);
+				//cout << "added amt" << endl;
+			}
+		break;
+		case 'L':
+		{
+			temp_boids[0]->mPosition += vec3(0.4,0,0);
+		}
+		break;
+		case 'M':
+		{
+			temp_boids[0]->mPosition += vec3(0,0,0.4);
+		}
 		break;
 	}
 }
@@ -196,9 +214,8 @@ void initSchool(){
 	halfSize.y = abs(scene_bounds.max.y - scene_bounds.min.y)/2;
 	halfSize.z = abs(scene_bounds.max.z - scene_bounds.min.z)/2;
 	cout << origin << endl;
-	m_octree = new Octree(origin,halfSize);
-	int octant = m_octree->getOctant(vec3(-50,50,50));
-	cout << octant << endl;
+	m_octree = new OctreeNode(origin,halfSize);
+
 }
 
 // Sets up where and what the light is
@@ -323,14 +340,19 @@ void render(int width, int height) {
 	));
 	if(draw_school) g_school->renderSchool();
 	{
-		//m_octree->draw();
+		m_octree->draw();
 		std::vector<Boid*> v;
-		m_octree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(50,100,10),v);
-		cout << "--------- " << v.size() << endl;
+		m_octree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
+		//cout << "--------- " << v.size() << endl;
 		for(int i =0; i != v.size(); i++){
 			//cout << "size " << v.size() << endl;
 			v[i]->draw();
 		}
+		std::vector<Boid*> toAdd;
+		m_octree->clean(toAdd);
+		if(toAdd.size() > 0)
+			cout << toAdd.size() << endl;
+
 	}
 	glEnable(GL_LIGHTING);
 
@@ -425,6 +447,25 @@ void APIENTRY debugCallbackARB(GLenum, GLenum, GLuint, GLenum, GLsizei, const GL
 // 
 int main(int argc, char **argv) {
 
+
+	PerlinNoise p_noise;
+
+	cout << "Perlinine" <<  endl;
+
+	for (int x = 0; x < 10; x++) {
+		for (int y = 0; y < 10; y++) {
+			double dx = x/double(9);
+			double dy = y/double(9);
+
+			cout << p_noise.noise(dx, dy, 0);
+		
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+
+
 	// Initialize the GLFW library
 	if (!glfwInit()) {
 		cerr << "Error: Could not initialize GLFW" << endl;
@@ -515,8 +556,7 @@ int main(int argc, char **argv) {
 
 		double currentTime = glfwGetTime();
 		nbFrames++;
-		if ( currentTime - lastTime >= 1.0 ){ 
-
+		if ( currentTime - lastTime >= 1.0 ) {
 		    frameSpeed = 1000.0/double(nbFrames);
 		    fps = nbFrames;
 		    nbFrames = 0;

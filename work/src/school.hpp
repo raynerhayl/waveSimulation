@@ -15,7 +15,7 @@
 #include "cgra_math.hpp"
 #include "opengl.hpp"
 #include "boid.hpp"
-#include "octree.hpp"
+#include "octree_node.hpp"
 
 
 enum primitives {
@@ -37,7 +37,7 @@ private:
 	BoundingBox bounding_box;
 	bool draw_bounds = true;
 
-	Octree* m_octree;
+	OctreeNode* m_octree;
 	std::vector<Prey> prey;
 	std::vector<Predator> predators;
 
