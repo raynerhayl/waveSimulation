@@ -27,7 +27,9 @@ varying vec2 vTextureCoord0;
 void main() {
 
 	// Can do all sorts of cool stuff here
-	vec3 color = texture2D(texture0, vTextureCoord0).rgb;
+	vec3 color = vec3(0,0,0);//texture2D(texture0, vTextureCoord0).rgb;
+
+	color.x = vNormal.x;
 
 	// IMPORTANT tell OpenGL what the final color of the fragment is (vec4)
 	gl_FragColor = vec4(color, 1);

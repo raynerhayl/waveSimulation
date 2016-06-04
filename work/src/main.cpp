@@ -189,7 +189,7 @@ void initWave() {
 // Called once on start up
 //
 void initLight() {
-	float direction[] = { 0.0f, 0.0f, 1.0f, 0.0f };
+	float direction[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 
@@ -385,26 +385,26 @@ void render(int width, int height) {
 
 		props[i] = 20;	     // wavelength
 		props[i + 1] = 2.0;  // amplitude
-		props[i + 2] = 1.0;  // velocity
+		props[i + 2] = 2.0;  // velocity
 		props[i + 3] = -1.0; // direction x
 		props[i + 4] = 0.0;  // direction y
-		props[i + 5] = 0.5;  // steepness
+		props[i + 5] = 0.0;  // steepness
 
 
 		i = i + 6;
 
-		props[i] = 20;	    
-		props[i + 1] = 0.1;  
-		props[i + 2] = -0.7; 
-		props[i + 3] = 2.0; 
-		props[i + 4] = 1.0;
-		props[i + 5] = 1.0;
+		//props[i] = 10;	    
+		//props[i + 1] = 0.1;  
+		//props[i + 2] = -0.7; 
+		//props[i + 3] = 2.0; 
+		//props[i + 4] = 1.0;
+		//props[i + 5] = 1.0;
 		
 		// repeate for next wave
 
 		glUniform1fv(glGetUniformLocation(g_shader, "waveProperties"), 100, props);
 
-		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), 2);  // specify the number of waves
+		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), 1);  // specify the number of waves
 
 
 

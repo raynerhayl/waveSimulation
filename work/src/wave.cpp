@@ -60,7 +60,7 @@ void Wave::createVertices() {
 		}
 	}
 
-	m_normals.push_back(vec3(0, 1, 0));
+	m_normals.push_back(vec3(1, 0, 0));
 
 }
 

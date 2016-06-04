@@ -62,33 +62,32 @@ void main() {
 	// Transform and pass on the normal/position/texture to fragment shader
 	worldPos = gl_Vertex;
 
-	vNormal = normalize(gl_NormalMatrix * gl_Normal);
+	//vNormal = normalize(gl_NormalMatrix * gl_Normal);
+	vNormal = vec3(0,0,0);
+
 	vPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
 	vTextureCoord0 = gl_MultiTexCoord0.xy;
 
 	// transform worldPos
-	//vec4 normTemp = vec4(0,0,0,0);
 
 	for(int i = 0; i < numWaves; i ++){
-	//	worldPos.y = worldPos.y + height(waves[i]);
 		vec4 gerstner = gerstnerFun(waves[i]);
-		vec3 gerstnerNorm = gerstnerNorm(waves[i], vec2(gerstner.x,gerstner.z));
+		vec3 gerstnerNorm = normalize(gerstnerNorm(waves[i], vec2(gerstner.x,gerstner.z)));
 
 		worldPos.x = worldPos.x + gerstner.x;
 		worldPos.y = worldPos.y + gerstner.y;
 		worldPos.z = worldPos.z + gerstner.z;
-		worldPos.w = worldPos.w + gerstner.w;
 
-		//normTemp.x = normTemp.x + gerstnerNorm.x;
-		//normTemp.y = normTemp.y + gerstnerNorm.y;
-		//normTemp.z = normTemp.z + gerstnerNorm.z;
+		vNormal.x = gerstnerNorm.x + vNormal.x;
+		vNormal.y = gerstnerNorm.y + vNormal.y;
+		vNormal.z = gerstnerNorm.y + vNormal.z;
+
 	}
 
 
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
-	//gl_Normal = normTemp;
 }
 
 /*
@@ -124,16 +123,13 @@ float height(sWave wave){
 vec4 gerstnerFun(sWave wave){
 	vec4 result = vec4(0,0,0,0);
 
+	float term = wave.frequency * dot(wave.d, vec2(worldPos.x, worldPos.z)) + time * wave.phase;
+
 	float steepF = wave.steepness * 1/(wave.frequency * wave.amplitude);
 
-	//result.x = worldPos.x + steepF * wave.amplitude * wave.d.x * cos(wave.frequency * dot( wave.d , vec2(worldPos.x, worldPos.y) + time * wave.phase));
-	//result.y = worldPos.y + steepF * wave.amplitude * wave.d.y * cos(wave.frequency *dot( wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase));
-	//result.z = wave.amplitude * sin( wave.frequency *dot(wave.d , vec2(worldPos.x, worldPos.y)  + time * wave.phase)); // cos gives a nice effect
-
-
-	result.x = steepF * wave.amplitude * wave.d.x * cos(dot(wave.frequency *  wave.d , vec2(worldPos.x, worldPos.z) + time * wave.phase));
-	result.y = wave.amplitude * sin( dot(wave.frequency *wave.d , vec2(worldPos.x, worldPos.z)  + time * wave.phase)); // cos gives a nice effect
-	result.z = steepF * wave.amplitude * wave.d.y * cos(dot( wave.frequency *wave.d , vec2(worldPos.x, worldPos.z)  + time * wave.phase));
+	result.x = steepF * wave.amplitude * wave.d.x * cos(term);
+	result.y = wave.amplitude * sin(term); // cos gives a nice effect
+	result.z = steepF * wave.amplitude * wave.d.y * cos(term);
 
 	result.w = worldPos.w;
 
@@ -145,9 +141,11 @@ vec3 gerstnerNorm(sWave wave, vec2 worldPlane){
 
 	float steepF = wave.steepness * 1/(wave.frequency * wave.amplitude);
 
-	result.x = -wave.d.x * wave.frequency * wave.amplitude * cos(dot(wave.frequency * wave.d, worldPlane) + wave.phase * time);
-	result.y = 1 - steepF * wave.frequency * wave.amplitude * sin(dot(wave.frequency * wave.d, worldPlane) + wave.phase * time);
-	result.z = -wave.d.y * wave.frequency * wave.amplitude * cos(dot(wave.frequency * wave.d, worldPlane) + wave.phase * time);
+	float term =wave.frequency * dot( wave.d, worldPlane) + wave.phase * time;
+
+	result.x = -wave.d.x * wave.frequency * wave.amplitude * cos(term);
+	result.y = 1 - steepF * wave.frequency * wave.amplitude * sin(term);
+	result.z = -wave.d.y * wave.frequency * wave.amplitude * cos(term);
 
 	return result;
 
