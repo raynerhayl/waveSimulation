@@ -30,6 +30,8 @@
 #include "helpers.hpp"
 #include "boid.hpp"
 
+#include "perlin_noise.hpp"
+
 using namespace std;
 using namespace cgra;
 
