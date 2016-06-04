@@ -69,11 +69,11 @@ public:
 	}
 
 	/*check and reshuffle all points*/
-	void clean(std::vector<Boid*>& toShuffle){
+	void clean(vector<Boid*>& toShuffle){
 		//break
 		//second to bottom node
 		if(!isLeafNode() && children[0]->isLeafNode()){
-			cout << "leaf parent" << endl;
+			//cout << "leaf parent" << endl;
 			int hadData = 0;
 			int removedData = 0;
 			//vector<Boid *> toMove;
@@ -85,23 +85,26 @@ public:
 				if(!children[i]->dataInBounds()){
 					cout << "adding child" << endl;
 					toShuffle.push_back(children[i]->data);
+					children[i]->data = NULL;
 					removedData++;
 				}
 			}
+
 			//TODO dont bother checking original child
 			//check back down the list
-			for(int i = toShuffle.size()-1; i != -1 && i != toShuffle.size()-removedData; i--){
+			for(int i = toShuffle.size()-1; i != -1 && i != toShuffle.size()-(removedData+1); i--){
+				cout << "trying to shuffle " << removedData << endl;
 				int oct = getOctant(toShuffle[i]->mPosition);
-				if(children[oct]->inBounds(toShuffle[i]->mPosition)) {//if is in bounds of child octant in exprected direection
-					cout << "Out of range" << endl;
+				if(inBounds(toShuffle[i]->mPosition) && children[oct]->inBounds(toShuffle[i]->mPosition)) {//if is in bounds of child octant in exprected direection
+					cout << "inserted in different child" << endl;
 					children[i]->insert(toShuffle[i]);//add to octant
 					toShuffle.erase(toShuffle.begin()+i);//remove from list
 				}
 			}
 			//if all children had data removed, delete children
-			if(hadData == removedData){
-				deleteChildren();
-			}
+			// if(hadData == removedData){
+			// 	deleteChildren();
+			// }
 		} else if(!isLeafNode()){ //is an internal node and tree has at least one layer
 			//check all children
 			for (int i = 0; i != 8; ++i){

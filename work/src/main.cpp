@@ -29,6 +29,7 @@
 #include "school.hpp"
 #include "helpers.hpp"
 #include "boid.hpp"
+#include "octree.hpp"
 
 #include "perlin_noise.hpp"
 
@@ -114,6 +115,7 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	g_zoom -= yoffset * g_zoom * 0.2;
 }
 OctreeNode * m_octree;
+Octree * m_newtree;
 std::vector<Boid*> temp_boids;
 // Keyboard callback
 // Called for every key event on since the last glfwPollEvents
@@ -134,7 +136,7 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 					Prey* b = new Prey(position);
 					temp_boids.push_back(b);
 					cout << b << endl;
-					m_octree->insert(b);
+					m_newtree->insert(b);
 				}
 			}
 		break;
@@ -214,8 +216,8 @@ void initSchool(){
 	halfSize.y = abs(scene_bounds.max.y - scene_bounds.min.y)/2;
 	halfSize.z = abs(scene_bounds.max.z - scene_bounds.min.z)/2;
 	cout << origin << endl;
-	m_octree = new OctreeNode(origin,halfSize);
-
+	//m_octree = new OctreeNode(origin,halfSize);
+	m_newtree = new Octree(origin,halfSize);
 }
 
 // Sets up where and what the light is
@@ -340,18 +342,17 @@ void render(int width, int height) {
 	));
 	if(draw_school) g_school->renderSchool();
 	{
-		m_octree->draw();
+		m_newtree->draw();
 		std::vector<Boid*> v;
-		m_octree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
-		//cout << "--------- " << v.size() << endl;
-		for(int i =0; i != v.size(); i++){
-			//cout << "size " << v.size() << endl;
-			v[i]->draw();
-		}
-		std::vector<Boid*> toAdd;
-		m_octree->clean(toAdd);
-		if(toAdd.size() > 0)
-			cout << toAdd.size() << endl;
+		m_newtree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
+		//if(v.size() != 0) cout << v[0] << " " << v[0]->mPosition  << endl;
+		//if(temp_boids.size() != 0) cout << temp_boids[0]<< " " << temp_boids[0]->mPosition << endl;
+
+		// for(int i =0; i != v.size(); i++){
+		// 	v[i]->draw();
+		// }
+
+		m_newtree->check();
 
 	}
 	glEnable(GL_LIGHTING);

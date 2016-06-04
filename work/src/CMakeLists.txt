@@ -14,6 +14,7 @@ SET(headers
 	"school.hpp"
 	"boid.hpp"
 	"simple_gui.hpp"
+	"octree_node.hpp"
 	"octree.hpp"
 	"perlin_noise.hpp"
 )
