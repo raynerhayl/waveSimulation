@@ -34,10 +34,10 @@ private:
 	std::vector<triangle> m_triangles;	// Triangle/Face list
 
 	double squareDensity = 100;
-	double width = 100;
-	double height = 100;
+	double width = 500;
+	double height = 500;
 
-	bool m_wireFrameOn = true;
+	bool m_wireFrameOn = false;
 
 
 	// IDs for the display list to render

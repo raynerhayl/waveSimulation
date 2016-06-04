@@ -146,58 +146,20 @@ void Wave::createDisplayListWire() {
 	glEndList();
 }
 
-//void Wave::make_plane(int width, int height, vec2 * vertices, int * indices)
-//{
-//	width++;
-//	height++;
-//
-//	int size = sizeof(cgra::vec2);
-//	// Set up vertices
-//	for (int y = 0; y < height; y++)
-//	{
-//		int base = y * width;
-//		for (int x = 0; x < width; x++)
-//		{
-//			int index = base + x;
-//			vec2 *v = vertices + index;
-//			v->x = (float)x;
-//			v->y = (float)y;
-//			cout << index << " " << v->x << " " << v->y << endl;
-//
-//		}
-//	}
-//
-//	cout << "-------------------------" << endl;
-//
-//	// Set up indices
-//	int i = 0;
-//	height--;
-//	for (int y = 0; y < height; y++)
-//	{
-//		int base = y * width;
-//
-//		//indices[i++] = (uint16)base;
-//		for (int x = 0; x < width; x++)
-//		{
-//			indices[i++] = (int)(base + x);
-//			indices[i++] = (int)(base + width + x);
-//		}
-//		// add a degenerate triangle (except in a last row)
-//		if (y < height - 1)
-//		{
-//			indices[i++] = (int)((y + 1) * width + (width - 1));
-//			indices[i++] = (int)((y + 1) * width);
-//		}
-//	}
-//
-//	for (int ind = 0; ind < i; ind++)
-//		cout << indices[ind] << endl;
-//
-//}
 
 void Wave::render() {
 	//m_normals.clear();
 	//createNormals();
+
+	
+	float ambient[]= { 0.0,119.0 / 256.0,190.0 / 256.0, 0.5 };
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+	float diffuse[] = { 0.0,50.0 / 256.0,150 / 256.0, 0.5 };
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+	float specular[] = { 0.0,50.0 / 256.0,150 / 256.0, 0.5 };
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+	float shininess[] = { 0.8*128.0 };
+	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 
 	if (m_wireFrameOn) {
 		createDisplayListWire();
@@ -210,6 +172,8 @@ void Wave::render() {
 		glShadeModel(GL_SMOOTH);
 		//wire_cow();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+
 
 		glCallList(m_displayListWire);
 

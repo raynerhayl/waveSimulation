@@ -68,23 +68,25 @@ void main() {
 	vPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
 	vTextureCoord0 = gl_MultiTexCoord0.xy;
 
-	// transform worldPos
-
+	// calculate vertex position
 	for(int i = 0; i < numWaves; i ++){
 		vec4 gerstner = gerstnerFun(waves[i]);
-		vec3 gerstnerNorm = normalize(gerstnerNorm(waves[i], vec2(gerstner.x,gerstner.z)));
 
 		worldPos.x = worldPos.x + gerstner.x;
 		worldPos.y = worldPos.y + gerstner.y;
 		worldPos.z = worldPos.z + gerstner.z;
+
+	}
+
+	// calculate normal 
+	for(int i = 0; i < numWaves; i ++){
+		vec3 gerstnerNorm = normalize(gerstnerNorm(waves[i], vec2(worldPos.x,worldPos.z)));
 
 		vNormal.x = gerstnerNorm.x + vNormal.x;
 		vNormal.y = gerstnerNorm.y + vNormal.y;
 		vNormal.z = gerstnerNorm.y + vNormal.z;
 
 	}
-
-
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
@@ -141,12 +143,11 @@ vec3 gerstnerNorm(sWave wave, vec2 worldPlane){
 
 	float steepF = wave.steepness * 1/(wave.frequency * wave.amplitude);
 
-	float term =wave.frequency * dot( wave.d, worldPlane) + wave.phase * time;
+	float term =wave.frequency * dot( wave.d, vec2(worldPos.x, worldPos.z)) + wave.phase * time;
 
 	result.x = -wave.d.x * wave.frequency * wave.amplitude * cos(term);
-	result.y = 1 - steepF * wave.frequency * wave.amplitude * sin(term);
-	result.z = -wave.d.y * wave.frequency * wave.amplitude * cos(term);
+	result.z = 1 - steepF * wave.frequency * wave.amplitude * sin(term);
+	result.y = -wave.d.y * wave.frequency * wave.amplitude * cos(term);
 
 	return result;
-
 }
