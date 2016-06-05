@@ -68,12 +68,12 @@ int numWaves = 14;
 GLfloat propsBuf[100]; // seto of properties to fade in
 GLfloat props[100]; // main set of properties
 
-float medianWavelength = 100;
-float amplitudeR = 1 / medianWavelength; // numerator is median amplitude
+float medianWavelength = 30;
+float amplitudeR = 0.5 / medianWavelength; // numerator is median amplitude
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 20; // difference in angle from windDir
-float medianS = 0.4;
-float speedFactor = 0.5; // scales the speed
+float medianS = 0.1;
+float speedFactor = 0.02; // scales the speed
 
 
 
@@ -207,14 +207,14 @@ void fillProps(GLfloat* properties, int waveIndex) {
 	float wavelength = medianWavelength / 2 + randF()*(medianWavelength * 2 - medianWavelength / 2);
 
 	float frequency = sqrt((9.81 * 2 * 3.145) / wavelength);
-	float speed = speedFactor * (frequency*wavelength) / (2 * 3.145);
+	float speed = speedFactor * (frequency*wavelength);
 	float amplitude = wavelength * amplitudeR;
 
 	float angle = windDir - dAngle + randF() * 2 * dAngle;
 
 	vec2 dir = vec2(std::sin((3.145 * angle) / 180), std::cos((3.145 * angle) / 180));
 
-	float steepness = randF()*(medianS * 0.2) + medianS *0.8;
+	float steepness = randF()*(medianS * 0.2) + medianS *0.7;
 
 	cout << wavelength << " " << frequency << " " << speed << " " << amplitude << " " << dir.x << " " << dir.y << " " << steepness;
 

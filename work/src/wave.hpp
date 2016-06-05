@@ -37,7 +37,7 @@ private:
 	double width = 500;
 	double height = 500;
 
-	bool m_wireFrameOn = false;
+	bool m_wireFrameOn = true;
 
 
 	// IDs for the display list to render
