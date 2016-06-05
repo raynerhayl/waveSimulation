@@ -63,16 +63,16 @@ bool draw_school = true;
 //wave related
 Wave * wave;
 float waveTime = 0.0;
-int numWaves = 0;
+int numWaves = 14;
 
 GLfloat propsBuf[100]; // seto of properties to fade in
 GLfloat props[100]; // main set of properties
 
-float medianWavelength = 200;
-float amplitudeR = 6 / medianWavelength; // numerator is median amplitude
+float medianWavelength = 100;
+float amplitudeR = 1 / medianWavelength; // numerator is median amplitude
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 20; // difference in angle from windDir
-float medianS = 0.5;
+float medianS = 0.4;
 float speedFactor = 0.5; // scales the speed
 
 
@@ -230,12 +230,10 @@ void fillProps(GLfloat* properties, int waveIndex) {
 /*
 	Initiate the wave class and populate property arrays
 */
-void initWaves(int waves) {
+void initWaves() {
 	wave = new Wave();
 
-	numWaves = 6;
-
-	for (int i = 0; i < waves; i++) {
+	for (int i = 0; i < numWaves; i++) {
 
 		fillProps(props, i);
 		fillProps(propsBuf, i);
@@ -534,7 +532,7 @@ int main(int argc, char **argv) {
 	initTexture();
 	initShader();
 	initSchool();
-	initWaves(14);
+	initWaves();
 
 
 	//for fps calculation
