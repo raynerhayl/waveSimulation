@@ -96,7 +96,7 @@ public:
 						cout << "shsize: " << toShuffle.size() << endl;
 						childDataCount++;
 					} else {
-						cout << "didnt fit, continued up" << endl;
+						//cout << "didnt fit, continued up" << endl;
 					}//add to this
 				}
 			}
@@ -106,15 +106,16 @@ public:
 	}
 
 	bool insert(Boid* boid){
-		cout << "inserting" << endl;
+		//cout << "inserting" << endl;
 		if(inBounds(boid->getPosition())){
 			if(isLeafNode()){
-				cout << "Is leaf" << endl;
+				//cout << "Is leaf" << endl;
 				if(data == NULL){
-					cout << "Inserted into data" << endl;
+					//cout << "Inserted into data" << endl;
 					data = boid;
 					return true;
 				} else {
+					//cout << "not leaf" << endl;
 					//split and put boid and data in new octants
 					for(int i = 0; i != 8; i++){
 						float x = origin.x + ((i&1 ? 1 : -1) * halfDimension.x/2);
@@ -181,7 +182,7 @@ public:
 				float red = (i&1 ? 1 : 0);
 				float green = (i&2 ? 1 : 0);
 				float blue = (i&4 ? 1 : 0);
-				glColor3f(red,green,blue);
+				//glColor3f(red,green,blue);
 				cgraCube(children[i]->origin,children[i]->halfDimension*2);
 				children[i]->draw();
 			}
@@ -189,7 +190,7 @@ public:
 			glPushMatrix();{
 				glTranslatef(data->getPosition().x,data->getPosition().y,data->getPosition().z);
 				//glColor3f(1,1,1);
-				cgraSphere(2,3,3);
+				//cgraSphere(2,3,3);
 				//cout << "drawing data" << endl;
 			}glPopMatrix();
 		}

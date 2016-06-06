@@ -25,18 +25,36 @@ using namespace cgra;
 
 School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	testSchool(bounds);
+	BoundingBox scaledBounds = bounds*2;
+	vec3 origin;
+	origin.x = (scaledBounds.max.x + scaledBounds.min.x)/2;
+	origin.y = (scaledBounds.max.y + scaledBounds.min.y)/2;
+	origin.z = (scaledBounds.max.z + scaledBounds.min.z)/2;
+	vec3 halfSize;
+	halfSize.x = abs(scaledBounds.max.x - scaledBounds.min.x)/2;
+	halfSize.y = abs(scaledBounds.max.y - scaledBounds.min.y)/2;
+	halfSize.z = abs(scaledBounds.max.z - scaledBounds.min.z)/2;
+	
+	m_octree = new Octree(origin,halfSize);
+
+	cout << "adding boids" << endl;
 
 	for(int i = 0; i < numPrey; i++){
 
 		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
-		prey.push_back(Prey(position));
+		Prey b = Prey(position);
+		prey.push_back(b);
+		Prey * p = &(*(prey.begin()+i));
+		cout << p->mPosition << endl;
+		m_octree->insert(p);
 	}
 
-	for(int i = 0; i < numPredators; i++){
-		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
-		predators.push_back(Predator(position));
-	}
-
+	// for(int i = 0; i < numPredators; i++){
+	// 	vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
+	// 	Predator  b = Predator(position);
+	// 	predators.push_back(b);
+	// 	//m_octree->insert(&b);
+	// }
 
 	cout << "created "<< numPrey <<" prey " << endl;
 }
@@ -67,6 +85,7 @@ void School::renderSchool() {
 
 	// Clean up
 	glPopMatrix();
+	m_octree->draw();
 }
 
 void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh){
@@ -146,6 +165,17 @@ void School::update(){
 		pred->pullToCentre(vec3(0,0,0));
 		pred->update();
 	}
+	cout << "checking" << endl;
+	//m_octree->check();
+	m_octree->clear();
+	buildTree();
+}
+
+void School::buildTree(){
+	for(int i = 0; i < prey.size(); i++){
+		Prey * p = &(*(prey.begin()+i));
+		m_octree->insert(p);
+	}
 }
 
 void School::drawBounds(){
@@ -154,9 +184,9 @@ void School::drawBounds(){
 	glPopMatrix();
 }
 
-void School::addCollider(primitives){
+// void School::addCollider(primitives){
 
-}
+// }
 
 // YOUR CODE GOES HERE
 // ...

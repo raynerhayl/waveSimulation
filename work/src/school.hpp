@@ -15,7 +15,7 @@
 #include "cgra_math.hpp"
 #include "opengl.hpp"
 #include "boid.hpp"
-#include "octree_node.hpp"
+#include "octree.hpp"
 
 
 class School {
@@ -24,14 +24,13 @@ public:
 	//methods
 	School(int, int, BoundingBox);
 	void renderSchool();
-	void addCollider(primitives);
 	
 private:
 	//fields
 	BoundingBox bounding_box;
 	bool draw_bounds = true;
 
-	OctreeNode* m_octree;
+	Octree* m_octree;
 	std::vector<Prey> prey;
 	std::vector<Predator> predators;
 
@@ -41,4 +40,5 @@ private:
 	void applyForce(float,float,float);
 
 	void testSchool(BoundingBox);
+	void buildTree();
 };

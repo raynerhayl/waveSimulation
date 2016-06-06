@@ -209,19 +209,12 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(800,2,scene_bounds*.2);
+	g_school = new School(800,0,scene_bounds);
 
-	vec3 origin;
-	origin.x = (scene_bounds.max.x + scene_bounds.min.x)/2;
-	origin.y = (scene_bounds.max.y + scene_bounds.min.y)/2;
-	origin.z = (scene_bounds.max.z + scene_bounds.min.z)/2;
-	vec3 halfSize;
-	halfSize.x = abs(scene_bounds.max.x - scene_bounds.min.x)/2;
-	halfSize.y = abs(scene_bounds.max.y - scene_bounds.min.y)/2;
-	halfSize.z = abs(scene_bounds.max.z - scene_bounds.min.z)/2;
-	cout << origin << endl;
+	
+	//cout << origin << endl;
 	//m_octree = new OctreeNode(origin,halfSize);
-	m_newtree = new Octree(origin,halfSize);
+	//m_newtree = new Octree(origin,halfSize);
 }
 
 // Sets up where and what the light is
@@ -345,13 +338,13 @@ void render(int width, int height) {
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
 	if(draw_school) g_school->renderSchool();
-	{
-		m_newtree->draw();
-		// std::vector<Boid*> v;
-		// m_newtree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
-		m_newtree->check();
+	// {
+	// 	m_newtree->draw();
+	// 	// std::vector<Boid*> v;
+	// 	// m_newtree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
+	// 	m_newtree->check();
 
-	}
+	// }
 	glEnable(GL_LIGHTING);
 
 	// Without shaders
