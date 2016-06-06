@@ -116,6 +116,7 @@ void Wave::createDisplayListPoly() {
 		for (int vtri = 0; vtri < 3; vtri++) {
 			glNormal3f(m_normals[m_triangles[tri].v[vtri].n].x, m_normals[m_triangles[tri].v[vtri].n].y, m_normals[m_triangles[tri].v[vtri].n].z);
 			glVertex3f(m_points[m_triangles[tri].v[vtri].p].x, m_points[m_triangles[tri].v[vtri].p].y, m_points[m_triangles[tri].v[vtri].p].z);
+			//glTexCoord2f(((m_points[m_triangles[tri].v[vtri].p].x + width / 2) / width), ((m_points[m_triangles[tri].v[vtri].p].z + height / 2) / height));
 		}
 	}
 
@@ -152,13 +153,13 @@ void Wave::render() {
 	//createNormals();
 
 	
-	float ambient[]= { 0.0,119.0 / 256.0,190.0 / 256.0, 0.5 };
+	float ambient[]= { 0.0,119.0 / 256.0,250.0 / 256.0, 0.5 };
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-	float diffuse[] = { 0.0,50.0 / 256.0,150 / 256.0, 0.5 };
+	float diffuse[] = { 0.0,0.0 / 256.0,0.0 / 256.0, 0.5 };
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-	float specular[] = { 0.0,50.0 / 256.0,150 / 256.0, 0.5 };
+	float specular[] = { 0.0,0.0 / 256.0,0.0 / 256.0, 0.5 };
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-	float shininess[] = { 0.8*128.0 };
+	float shininess[] = { 0.1*128.0 };
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 
 	if (m_wireFrameOn) {

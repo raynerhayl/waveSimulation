@@ -63,18 +63,18 @@ bool draw_school = true;
 //wave related
 Wave * wave;
 float waveTime = 0.0;
-int numWaves = 5;
+int numWaves = 15;
 
-GLfloat propsBuf[100]; // seto of properties to fade in
-GLfloat props[100]; // main set of properties
-GLfloat activeBuf[100]; // properties which actually get sent to shader
+GLfloat propsBuf[200]; // seto of properties to fade in
+GLfloat props[200]; // main set of properties
+GLfloat activeBuf[200]; // properties which actually get sent to shader
 
 float medianWavelength = 30;
-float amplitudeR = 1 / medianWavelength; // numerator is median amplitude
+float amplitudeR = 0.5;
 float windDir = 0; // wind direction from (x = 1, z = 0)
-float dAngle = 10; // difference in angle from windDir
-float medianS = 0.6;
-float speedFactor = 0.05; // scales the speed
+float dAngle = 30; // difference in angle from windDir
+float medianS = 0.2;
+float speedFactor = 1; // scales the speed
 
 
 
@@ -200,50 +200,22 @@ float randF() {
 	return r;
 }
 
-/*
-	Mix the two waves at the corresponding index and update the active
-	buffer of properties. The ratio of the mix is r where r = 1 means
-	the value is wholey that of which is in propsBuf. r = 0 means the value
-	is wholey that of what is in the props array.
-*/
-void mixProps(int waveIndex, float r){
-	activeBuf[waveIndex * 6] = props[waveIndex*6] * (1.0 - r) + propsBuf[waveIndex*6] * r;
-	activeBuf[waveIndex * 6 + 1] = props[waveIndex * 6+1 ] * (1.0 - r) + propsBuf[waveIndex * 6+1 ] * r;
-	activeBuf[waveIndex * 6 + 2] = props[waveIndex*6+2] * (1.0 - r) + propsBuf[waveIndex*6+2] * r;
-	activeBuf[waveIndex * 6 + 3] = props[waveIndex*6+3] * (1.0 - r) + propsBuf[waveIndex*6+3] * r;
-	activeBuf[waveIndex * 6 + 4] = props[waveIndex*6+4] * (1.0 - r) + propsBuf[waveIndex*6+4] * r;
-	activeBuf[waveIndex * 6 + 5] = props[waveIndex*6+5] * (1.0 - r) + propsBuf[waveIndex*6+5] * r;
-
-}
-
-void copyProp(GLfloat* properties1, GLfloat* properties2, int waveIndex){
-
-	properties1[waveIndex * 6] = properties2[waveIndex*6];
-	properties1[waveIndex * 6 + 1] = properties2[waveIndex * 6+1 ];
-	properties1[waveIndex * 6 + 2] = properties2[waveIndex*6+2];
-	properties1[waveIndex * 6 + 3] = properties2[waveIndex*6+3];
-	properties1[waveIndex * 6 + 4] = properties2[waveIndex*6+4];
-	properties1[waveIndex * 6 + 5] = properties2[waveIndex*6+5];
-}
 
 /*
 	Populates an array of properties at the given wave index
 */
-void fillProps(GLfloat* properties, int waveIndex) {
+void fillProps(GLfloat properties[], int waveIndex) {
 
-	float wavelength = medianWavelength / 2 + randF()*(medianWavelength * 1 - medianWavelength / 2);
-
-	float frequency = sqrt((9.81 * 2 * 3.145) / wavelength);
-	float speed = speedFactor * (frequency*wavelength);
-	float amplitude = wavelength * amplitudeR;
+	float wavelength = medianWavelength - medianWavelength*0.4 + randF() *0.8 * medianWavelength;
+	float speed = sqrt((9.81*wavelength) / (2 * 3.14));//speedFactor * (frequency*wavelength);
+	float frequency = speed / wavelength;// sqrt((9.81 * 2 * 3.145) / wavelength);
+	float amplitude = amplitudeR - amplitudeR*0.3 + randF() * 0.6 * amplitudeR;
 
 	float angle = windDir - dAngle + randF() * 2 * dAngle;
 
 	vec2 dir = vec2(std::sin((3.145 * angle) / 180), std::cos((3.145 * angle) / 180));
 
-	float steepness = randF()*(medianS * 0.2) + medianS *0.7;
-
-	cout << wavelength << " " << frequency << " " << speed << " " << amplitude << " " << dir.x << " " << dir.y << " " << steepness;
+	float steepness =randF()*(medianS * 0.2) + medianS *0.7;
 
 	properties[waveIndex * 6] = wavelength;	     // wavelength
 	properties[waveIndex * 6 + 1] = amplitude;  // amplitude
@@ -270,9 +242,9 @@ void initWaves() {
 
 }
 
-void fillAllProps(GLfloat* properties){
-	for(int i = 0; i < numWaves; i ++){
-		fillProps(properties,i);
+void fillAllProps(GLfloat properties[]) {
+	for (int i = 0; i < numWaves; i++) {
+		fillProps(properties, i);
 	}
 }
 
@@ -280,10 +252,10 @@ void fillAllProps(GLfloat* properties){
 // Called once on start up
 //
 void initLight() {
-	float direction[] = { 1.0f, -2.0f, 0.0f, 1.0f };
-	float diffintensity[] = { 1.0, 1.0, 1.0, 1.0f };
-	float ambient[] = { 0.5, 0.5, 0.5, 0.5 };
-	float specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float direction[] = { 0.0f, 0.0f, 0.0f, 1.0 };
+	float diffintensity[] = { 0.0, 0.2, 1.0, 1.0f };
+	float ambient[] = { 0.1, 0.1, 0.1, 0.2 };
+	float specular[] = { 0.2, 0.2, 0.2, 1.0f };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
@@ -292,13 +264,26 @@ void initLight() {
 
 
 	glEnable(GL_LIGHT0);
+
+	//float direction2[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	//float diffintensity2[] = { 1.0, 1.0, 1.0, 1.0f };
+	//float ambient2[] = { 0.2, 0.2, 0.2, 0.2 };
+	//float specular2[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	//glLightfv(GL_LIGHT1, GL_POSITION, direction2);
+	//glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity2);
+	//glLightfv(GL_LIGHT1, GL_SPECULAR, specular2);
+	//glLightfv(GL_LIGHT1, GL_AMBIENT, ambient2);
+
+
+	//glEnable(GL_LIGHT1);
 }
 
 
 // An example of how to load a texure from a hardcoded location
 //
 void initTexture() {
-	Image tex("./work/res/textures/brick.jpg");
+	Image tex("./work/res/textures/water.jpg");
 
 	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
 	glGenTextures(1, &g_texture); // Generate texture ID
@@ -399,12 +384,19 @@ void render(int width, int height) {
 		// Send the shader the current main buffer of wave properties
 		glUniform1fv(glGetUniformLocation(g_shader, "waveProperties"), 100, activeBuf);
 		// Specify the number of waves to use from the buffer
-		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), numWaves);\
+		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), numWaves); \
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		wave->render();
 
 		// Unbind our shader
 		glUseProgram(0);
+		glUseProgramObjectARB(0);
 
 	}
 
@@ -424,54 +416,7 @@ void render(int width, int height) {
 		g_school->renderSchool();
 	}
 
-	glEnable(GL_LIGHTING);
-
-	// Without shaders
-	// Uses the default OpenGL pipeline
-	//
-	if (!g_useShader) {
-
-		// // Texture setup
-		// //
-
-		// // Enable Drawing texures
-		// glEnable(GL_TEXTURE_2D);
-		// // Use Texture as the color
-		// glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		// // Set the location for binding the texture
-		// glActiveTexture(GL_TEXTURE0);
-		// // Bind the texture
-		// glBindTexture(GL_TEXTURE_2D, g_texture);
-
-		// // Render a single square as our geometry
-		// // You would normally render your geometry here
-		// glBegin(GL_QUADS);
-		// glNormal3f(0.0, 0.0, 1.0);
-		// glTexCoord2f(0.0, 0.0);
-		// glVertex3f(-5.0, -5.0, 0.0);
-		// glTexCoord2f(0.0, 1.0);
-		// glVertex3f(-5.0, 5.0, 0.0);
-		// glTexCoord2f(1.0, 1.0);
-		// glVertex3f(5.0, 5.0, 0.0);
-		// glTexCoord2f(1.0, 0.0);
-		// glVertex3f(5.0, -5.0, 0.0);
-		// glEnd();
-		// glFlush();
-	}
-
-
-	// With shaders (no lighting)
-	// Uses the shaders that you bind for the graphics pipeline
-	//
-	else {
-
-
-		
-	}
-
-
 	// Disable flags for cleanup (optional)
-	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
@@ -574,10 +519,23 @@ int main(int argc, char **argv) {
 	int nbFrames = 0;
 
 	float r = 1.0; // mix ratio, for fading waves
+	float dr = 0.01;
+
 
 	int wave = 0;
 
 	bool fade = true; // fade out
+
+					  // Enable Drawing texures
+	glEnable(GL_TEXTURE_2D);
+	// Use Texture as the color
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	// Set the location for binding the texture
+	glActiveTexture(GL_TEXTURE0);
+	// Bind the texture
+	glBindTexture(GL_TEXTURE_2D, g_texture);
+
+
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
@@ -591,44 +549,36 @@ int main(int argc, char **argv) {
 			nbFrames = 0;
 			lastTime += 1.0;
 		}
-		if(draw_school == false){
-		
-		waveTime=waveTime + 0.1;
+		if (draw_school == false) {
 
+			waveTime = waveTime + 0.1;
 
-			activeBuf[wave*6 + 1] = propsBuf[wave*6 + 1] * r;
-			
-			float dr = 0.01;
-			if(fade){
+			activeBuf[wave * 6 + 1] = propsBuf[wave * 6 + 1] * r;
+
+			if (fade) {
 				r = r - dr;
-
-				if(r < 0){
+				if (r <= 0) {
+					r = 0 + dr;
 					fade = false;
-
-					copyProp(activeBuf,propsBuf,wave);
-
-					fillProps(propsBuf, wave);
-
-					r = 0;
-
+					fillProps(propsBuf, wave); // add new wave
+				}
 			}
-
-			} else {
+			else { // fade in new wave
 				r = r + dr;
-
-				if(r > 1){
+				if (r > 1) {
+					r = 1;
 					fade = true;
-					r = 1.0;
-
 					wave = wave + 1;
-					if(wave >=numWaves){
+					if (wave > numWaves) {
 						wave = 0;
 					}
 				}
 			}
 
-			
+
 		}
+
+
 
 
 		// Make sure we draw to the WHOLE window
@@ -647,6 +597,9 @@ int main(int argc, char **argv) {
 		// Poll for and process events
 		glfwPollEvents();
 	}
+
+	glDisable(GL_TEXTURE_2D);
+
 
 	glfwTerminate();
 }

@@ -33,7 +33,7 @@ private:
 	std::vector<cgra::vec3> m_normals;	// Normal list
 	std::vector<triangle> m_triangles;	// Triangle/Face list
 
-	double squareDensity = 200;
+	double squareDensity = 150;
 	double width = 200;
 	double height = 200;
 

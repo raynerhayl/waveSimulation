@@ -24,35 +24,71 @@ varying vec3 vNormal;
 varying vec3 vPosition;
 varying vec2 vTextureCoord0;
 
-vec3 colorFromLight(int, vec3, vec3);
-
 
 void main() {
 
+	vec3 CAMERA_POSITION = gl_ModelViewMatrixInverse[3].xyz;
+
+	vec4 specular = vec4(0.0);
+	vec4 diffuse;
+	vec3 norm = normalize(vNormal); //Important: after interpolation normal modulus != 1.
+	vec3 lightVector = gl_LightSource[0].position.xyz - vPosition;
+	float dist = length(lightVector);
+	float attenuation = 1.0 / (gl_LightSource[0].constantAttenuation + gl_LightSource[0].linearAttenuation * dist + gl_LightSource[0].quadraticAttenuation * dist * dist);
+
+	lightVector = normalize(lightVector);
+	float nxDir = max(0.0, dot(lightVector, norm));
+	diffuse = gl_LightSource[0].diffuse * nxDir * attenuation;
+
+		if(nxDir != 0.0)
+		{
+			vec3 cameraVector = normalize(CAMERA_POSITION - vPosition.xyz);
+			vec3 halfVector = normalize(lightVector + cameraVector);
+			float nxHalf = max(0.0,dot(norm, halfVector));
+			float specularPower = pow(nxHalf, gl_FrontMaterial.shininess);
+			specular = gl_LightSource[0].specular * specularPower * attenuation;
+		}
+		vec4 texColor = texture2D(texture0, gl_TexCoord[0].st);
+		gl_FragColor = gl_LightSource[0].ambient + (diffuse) + (specular);
+		//gl_FragColor = gl_LightSource[0].ambient + (diffuse );//* vec4(texColor.rgb,1.0)) ;//+ (specular * texColor.a);
+
+}
+
+
+
+
+	/*
+
 	// Can do all sorts of cool stuff here
-	vec3 color = vec3(0,0,0);//texture2D(texture0, vTextureCoord0).rgb;
+	vec3 color = texture2D(texture0, vTextureCoord0).rgb;
 
-	color = colorFromLight(0, vPosition, vNormal);
-
-
+	//color = colorFromLight(0, vPosition, vNormal);
 	// IMPORTANT tell OpenGL what the final color of the fragment is (vec4)
-	gl_FragColor = vec4(color, 0.1);
-	
-}
+	//gl_FragColor = vec4(color, 0.1);
 
-vec3 colorFromLight(int light_idx, vec3 viewspace_position, vec3 viewspace_normal) {
-	vec3 light_viewspace_position =
-	gl_LightSource[light_idx].position.xyz;
-	vec3 light_direction = normalize(light_viewspace_position -
-	viewspace_position);
+	vec4 finalColor = vec4(0.0, 0.0, 0.0, 0.0);
 
-	// Ambient
-	vec3 ambient = gl_LightSource[light_idx].ambient.rgb * gl_FrontMaterial.ambient.rgb;
 
-	// Diffuse
-	float s_dot_n = max(dot(light_direction, viewspace_normal), 0.0);
-	vec3 diffuse = gl_LightSource[light_idx].diffuse.rgb *
-	gl_FrontMaterial.diffuse.rgb * s_dot_n;
-	return ambient + diffuse;
-}
+   for (int i=0;i<1;i++)
+   {
+      vec3 L = normalize(gl_LightSource[i].position.xyz - vPosition); 
+      vec3 E = normalize(-vPosition); // we are in Eye Coordinates, so EyePos is (0,0,0) 
+      vec3 R = normalize(-reflect(L,vNormal)); 
+   
+      //calculate Ambient Term: 
+      vec4 Iamb = gl_FrontLightProduct[i].ambient; 
+      //calculate Diffuse Term: 
+      vec4 Idiff = gl_FrontLightProduct[i].diffuse * max(dot(vNormal,L), 0.0);
+      Idiff = clamp(Idiff, 0.0, 1.0); 
+   
+      // calculate Specular Term:
+      vec4 Ispec = gl_FrontLightProduct[i].specular * pow(max(dot(R,E),0.0),0.3*gl_FrontMaterial.shininess);
+      Ispec = clamp(Ispec, 0.0, 1.0); 
+   
+      finalColor += Iamb + Idiff + Ispec;
+   }
+   
+   // write Total Color: 
+   gl_FragColor = gl_FrontLightModelProduct.sceneColor + finalColor; 
 
+	*/
