@@ -71,39 +71,33 @@ public:
 		return !(p.x > max.x || p.x < min.x || p.y > max.y || p.y < min.y || p.z > max.z || p.z < min.z);
 	}
 
-	/*check and reshuffle all points, returns number of children in tree*/
 	int clean(vector<Boid*>& toShuffle){
-		//break
-		//bool deletedChildren = false;
 		int childDataCount = 0;
-		//second to bottom node
-		if(!isLeafNode()){
-			//bool allLeaves = true;
-			//int removed = 0;
-			for (int i = 0; i != 8; ++i){
-				if(children[i]->isLeafNode()){
-					if(children[i]->data != NULL){
-						if(!children[i]->dataInBounds()){
-							toShuffle.push_back(children[i]->data);
-							children[i]->data = NULL;
-						} else {
-							childDataCount ++;
-						}
-					}
-				}else{
-					int dataCount = children[i]->clean(toShuffle);
-					if(dataCount == 0){
-						cout << "deleting Children "<< endl;
-						children[i]->deleteChildren();
-					}
+		if(isLeafNode()){
+			if(data != NULL){
+				if(dataInBounds()) return 1;
+				else {
+					toShuffle.push_back(data);
+					data = NULL;
 				}
 			}
-
+		} else {
+			for (int i = 0; i != 8; ++i){
+				int dataCount = children[i]->clean(toShuffle);
+				if(dataCount == 0){
+					children[i] -> deleteChildren();
+				}
+				childDataCount+= dataCount;
+			}
 			for(int i = toShuffle.size()-1; i != -1; i--){
 				if(inBounds(toShuffle[i]->mPosition)){
-					insert(toShuffle[i]); //add to this
-					toShuffle.erase(toShuffle.begin()+i); //remove from list
-					childDataCount++;
+					if(insert(toShuffle[i])){
+						toShuffle.erase(toShuffle.begin()+i); //remove from list
+						cout << "shsize: " << toShuffle.size() << endl;
+						childDataCount++;
+					} else {
+						cout << "didnt fit, continued up" << endl;
+					}//add to this
 				}
 			}
 		}
@@ -111,36 +105,37 @@ public:
 		return childDataCount;
 	}
 
-	void insert(Boid* boid){
+	bool insert(Boid* boid){
 		cout << "inserting" << endl;
-		if(isLeafNode()){
-			cout << "Is leaf" << endl;
-			if(data == NULL){
-				cout << "Inserted into data" << endl;
-				data = boid;
-			} else {
-				//split and put boid and data in new octants
-				for(int i = 0; i != 8; i++){
-					float x = origin.x + ((i&1 ? 1 : -1) * halfDimension.x/2);
-					float y = origin.y + ((i&2 ? 1 : -1) * halfDimension.y/2);
-					float z = origin.z + ((i&4 ? 1 : -1) * halfDimension.z/2);
-					children[i] = new OctreeNode(vec3(x,y,z),halfDimension/2.0);
+		if(inBounds(boid->getPosition())){
+			if(isLeafNode()){
+				cout << "Is leaf" << endl;
+				if(data == NULL){
+					cout << "Inserted into data" << endl;
+					data = boid;
+					return true;
+				} else {
+					//split and put boid and data in new octants
+					for(int i = 0; i != 8; i++){
+						float x = origin.x + ((i&1 ? 1 : -1) * halfDimension.x/2);
+						float y = origin.y + ((i&2 ? 1 : -1) * halfDimension.y/2);
+						float z = origin.z + ((i&4 ? 1 : -1) * halfDimension.z/2);
+						children[i] = new OctreeNode(vec3(x,y,z),halfDimension/2.0);
+					}
+					//insert the new one
+					int oct = getOctant(boid->getPosition());
+					children[oct]->insert(boid);
+					//insert the old one
+					oct = getOctant(data->getPosition());
+					return children[oct]->insert(data);
 				}
-				//insert the new one
-				int oct = getOctant(boid->getPosition());
-				children[oct]->insert(boid);
-				//insert the old one
-				oct = getOctant(data->getPosition());
-				children[oct]->insert(data);
+			} else {
+				//put it in the appropriate octant
+				int oct = getOctant(boid->mPosition);
+				return children[oct]->insert(boid);
 			}
-		} else {
-			//put it in the appropriate octant
-			int oct = getOctant(boid->mPosition);
-			children[oct]->insert(boid);
 		}
-		vec3 point = boid->getPosition();
-		// x 1, y 2, z 4
-		int octant = getOctant(point);
+		return false;
 	}
 
 	void getBoidsInsideCube(const cgra::vec3& min, const cgra::vec3& max, std::vector<Boid*>& results) {

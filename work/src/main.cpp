@@ -56,7 +56,7 @@ float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
 
-BoundingBox scene_bounds = BoundingBox(vec3(-100,-100,-100),vec3(100,100,100));
+BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
 
 //school related
 School * g_school;
@@ -209,7 +209,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(800,2,scene_bounds);
+	g_school = new School(800,2,scene_bounds*.2);
 
 	vec3 origin;
 	origin.x = (scene_bounds.max.x + scene_bounds.min.x)/2;
