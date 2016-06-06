@@ -63,17 +63,17 @@ bool draw_school = true;
 //wave related
 Wave * wave;
 float waveTime = 0.0;
-int numWaves = 14;
+int numWaves = 3;
 
 GLfloat propsBuf[100]; // seto of properties to fade in
 GLfloat props[100]; // main set of properties
 
 float medianWavelength = 30;
-float amplitudeR = 0.5 / medianWavelength; // numerator is median amplitude
+float amplitudeR = 1 / medianWavelength; // numerator is median amplitude
 float windDir = 0; // wind direction from (x = 1, z = 0)
-float dAngle = 20; // difference in angle from windDir
+float dAngle = 10; // difference in angle from windDir
 float medianS = 0.1;
-float speedFactor = 0.02; // scales the speed
+float speedFactor = 0.3; // scales the speed
 
 
 
