@@ -117,6 +117,7 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 OctreeNode * m_octree;
 Octree * m_newtree;
 std::vector<Boid*> temp_boids;
+int boid = 0;
 // Keyboard callback
 // Called for every key event on since the last glfwPollEvents
 //
@@ -141,20 +142,23 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 			}
 		break;
 		case 'P':
-			{
-				int ind = int(math::random(0.0f,float(temp_boids.size())));
-				temp_boids[0]->mPosition += vec3(0,0.4,0);
-				//cout << "added amt" << endl;
-			}
+		{
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0.4,0);
+		}
 		break;
 		case 'L':
 		{
-			temp_boids[0]->mPosition += vec3(0.4,0,0);
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0.4,0,0);
 		}
 		break;
 		case 'M':
 		{
-			temp_boids[0]->mPosition += vec3(0,0,0.4);
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0,0.4);
+		}
+		break;
+		case 'I':
+		{
+			if(action ==1)boid++;
 		}
 		break;
 	}
@@ -343,15 +347,8 @@ void render(int width, int height) {
 	if(draw_school) g_school->renderSchool();
 	{
 		m_newtree->draw();
-		std::vector<Boid*> v;
-		m_newtree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
-		//if(v.size() != 0) cout << v[0] << " " << v[0]->mPosition  << endl;
-		//if(temp_boids.size() != 0) cout << temp_boids[0]<< " " << temp_boids[0]->mPosition << endl;
-
-		// for(int i =0; i != v.size(); i++){
-		// 	v[i]->draw();
-		// }
-
+		// std::vector<Boid*> v;
+		// m_newtree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
 		m_newtree->check();
 
 	}

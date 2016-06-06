@@ -43,7 +43,10 @@ public:
 
 	void deleteChildren(){
 		for(int i=0; i !=8; i++){
-			delete children[i];
+			if(children[i] != NULL){
+				delete children[i];
+				children[i]	= NULL;
+			} 
 		}
 	}
 
@@ -65,65 +68,47 @@ public:
 	bool inBounds(const vec3& p){
 		vec3 max = origin + halfDimension;
 		vec3 min = origin - halfDimension;
-		return (p.x < max.x && p.x > min.x && p.y < max.y && p.y > min.y && p.z < max.z && p.z > min.z);
+		return !(p.x > max.x || p.x < min.x || p.y > max.y || p.y < min.y || p.z > max.z || p.z < min.z);
 	}
 
-	/*check and reshuffle all points*/
-	void clean(vector<Boid*>& toShuffle){
+	/*check and reshuffle all points, returns number of children in tree*/
+	int clean(vector<Boid*>& toShuffle){
 		//break
+		//bool deletedChildren = false;
+		int childDataCount = 0;
 		//second to bottom node
-		if(!isLeafNode() && children[0]->isLeafNode()){
-			int hadData = 0; //number of children which have data
-			int removedData = 0; //number of children who's data doesn't fit
-			cout << "leaf parent" << endl;
-			//check through all children
+		if(!isLeafNode()){
+			//bool allLeaves = true;
+			//int removed = 0;
 			for (int i = 0; i != 8; ++i){
-				if(children[i]->data == NULL) 
-					continue;
-				hadData++;
-				if(!children[i]->dataInBounds()){
-					cout << "adding child" << endl;
-					toShuffle.push_back(children[i]->data);
-					children[i]->data = NULL;
-					removedData++;
+				if(children[i]->isLeafNode()){
+					if(children[i]->data != NULL){
+						if(!children[i]->dataInBounds()){
+							toShuffle.push_back(children[i]->data);
+							children[i]->data = NULL;
+						} else {
+							childDataCount ++;
+						}
+					}
+				}else{
+					int dataCount = children[i]->clean(toShuffle);
+					if(dataCount == 0){
+						cout << "deleting Children "<< endl;
+						children[i]->deleteChildren();
+					}
 				}
 			}
 
-			//check back down the list
-			for(int i = toShuffle.size()-1; i != -1 && i != toShuffle.size()-(removedData+1); i--){
-				cout << "trying to shuffle " << removedData << endl;
-				int oct = getOctant(toShuffle[i]->mPosition);
-				if(inBounds(toShuffle[i]->mPosition) && children[oct]->inBounds(toShuffle[i]->mPosition)) {//if is in bounds of child octant in exprected direection
-					cout << "inserted in different child" << endl;
-					children[oct]->insert(toShuffle[i]);//add to octant
-					toShuffle.erase(toShuffle.begin()+i);//remove from list
-					removedData--;
-				}
-				cout << "toShuffle size " << toShuffle.size() << endl;
-			}
-
-			//if all children had data removed, delete children
-			if(hadData == removedData){
-				deleteChildren();
-			}
-		} else if(!isLeafNode()){
-			cout << "internal" << endl;
-			//check all children
-			for (int i = 0; i != 8; ++i){
-				children[i]->clean(toShuffle);
-			}
-
-			// Check if children can be inserted here.
-			// TODO refactor into insert function returning false if cant add
 			for(int i = toShuffle.size()-1; i != -1; i--){
-				//if in the bounds of this bucket
 				if(inBounds(toShuffle[i]->mPosition)){
-					int oct = getOctant(toShuffle[i]->mPosition);
-					children[oct]->insert(toShuffle[i]);//add to octant
-					toShuffle.erase(toShuffle.begin()+i);//remove from list
+					insert(toShuffle[i]); //add to this
+					toShuffle.erase(toShuffle.begin()+i); //remove from list
+					childDataCount++;
 				}
 			}
 		}
+		//cout << "#ch: " << childDataCount << " #orph: "<< toShuffle.size() << endl;
+		return childDataCount;
 	}
 
 	void insert(Boid* boid){
@@ -210,7 +195,7 @@ public:
 				glTranslatef(data->getPosition().x,data->getPosition().y,data->getPosition().z);
 				//glColor3f(1,1,1);
 				cgraSphere(2,3,3);
-				cout << "drawing data" << endl;
+				//cout << "drawing data" << endl;
 			}glPopMatrix();
 		}
 	}
