@@ -78,31 +78,26 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 			vec3 dir = p1->mPosition - p2->mPosition;
 			float distSqrd = lengthSquared(dir);
 
-			if( distSqrd < zoneRadiusSqrd ) { // If the neighbor is within the zone radius...
+			if( distSqrd < zoneRadiusSqrd ) { // inside zone
 				float percent = distSqrd/zoneRadiusSqrd;
-
-				if( percent < lowThresh ) { // ... and is within the threshold limits, separate...
+				if( percent < lowThresh ) { // seperate
 					float F = ( lowThresh/percent - 1.0f ) * 0.01f;
 					dir = normalize(dir) * F * jFactor;
 					p1->mAccel += dir;
 					p2->mAccel -= dir;
-					//cout << "mod accel1" << endl;
 				}else if( percent < highThresh ) { // ... else if it is within the higher threshold limits, align...
 					float threshDelta = highThresh - lowThresh;
 					float adjustedPercent = ( percent - lowThresh )/threshDelta;
-					// float F = ( 0.5f - cos( adjustedPercent * math::pi() * 2.0f ) * 0.5f + 0.5f ) * 0.01f;
 					float F = ( 0.5f - cos( adjustedPercent * math::pi() * 2.0f ) * 0.5f + 0.5f ) * 0.01f;
 					p1->mAccel += normalize(p2->mVelocity) * F * jFactor;
 					p2->mAccel += normalize(p1->mVelocity) * F * jFactor;
-				} else { // ... else attract
+				} else { // attract
 					float threshDelta = 1.0f - highThresh;
 					float adjustedPercent = ( percent -highThresh )/threshDelta;
-					//float F = ( 1.0 - ( cos( adjustedPercent * math::pi()*2.0f ) * -0.5f + 0.5f ) ) * 0.04f;
 					float F = ( 1.0 - ( cos( adjustedPercent * math::pi()*2.0f ) * -0.5f + 0.5f ) ) * 0.01f;
 					dir = normalize(dir) * F * jFactor;
 					p1->mAccel -= dir;
 					p2->mAccel += dir;
-					//cout << "mod accel2" << endl;
 				}
 			}
 		}
@@ -116,6 +111,7 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 					float F = ( predatorZoneRadiusSqrd/distSqrd - 1.0f ) * 0.1f;
 					p1->mFear += F * 0.1f;
 					//cout << "fear add" <<F * 0.1f << endl;
+
 					dir = normalize(dir) * F;
 					p1->mAccel+= dir;
 					predator->mAccel += dir;

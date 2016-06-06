@@ -18,12 +18,6 @@
 #include "octree_node.hpp"
 
 
-enum primitives {
-	cube = 0,
-	cylinder = 1
-};
-
-
 class School {
 
 public:
