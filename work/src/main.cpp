@@ -179,10 +179,9 @@ void initSchool(){
 // Called once on start up
 // 
 void initLight() {
-	float direction[] = { 0.0f, 0.0f, 1.0f, 0.0f };
+	float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
 	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
@@ -283,7 +282,7 @@ void render(int width, int height) {
 
 	setupCamera(width, height);
 
-	glDisable(GL_LIGHTING);
+	//glDisable(GL_LIGHTING);
 	//draw unlit stuff here
 	drawOrigin();
 	glColor3f(1,1,1);
@@ -296,7 +295,7 @@ void render(int width, int height) {
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
 	if(draw_school) g_school->renderSchool();
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 
 	// Without shaders
 	// Uses the default OpenGL pipeline
@@ -349,24 +348,14 @@ void render(int width, int height) {
 		// Use the shader we made
 		glUseProgram(g_shader);
 
-		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
-		glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
+
+		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
+		glLightfv(GL_LIGHT0, GL_POSITION, direction);
 
 
 		// Render a single square as our geometry
 		// You would normally render your geometry here
-		glBegin(GL_QUADS);
-		glNormal3f(0.0, 0.0, 1.0);
-		glTexCoord2f(0.0, 0.0);
-		glVertex3f(-5.0, -5.0, 0.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3f(-5.0, 5.0, 0.0);
-		glTexCoord2f(1.0, 1.0);
-		glVertex3f(5.0, 5.0, 0.0);
-		glTexCoord2f(1.0, 0.0);
-		glVertex3f(5.0, -5.0, 0.0);
-		glEnd();
-		glFlush();
+		cgraSphere(1);
 
 		// Unbind our shader
 		glUseProgram(0);

@@ -14,19 +14,26 @@
 
 #version 120
 
-// Constant across both shaders
-uniform sampler2D texture0;
+varying vec3 normal;
+varying vec3 vertex_light_position;
+varying vec3 vertex_light_half_vector;
+varying vec3 vertex_normal;
+varying vec4 direction;
+void main()
+{
+	float intensity;
+	vec4 color;
+	vec3 n = normalize(vertex_normal);
+	intensity = dot(vec3(gl_LightSource[0].position),n);
+	vec4 ambient_color = gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient * gl_FrontMaterial.ambient;
+	vec4 diffuse_color = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
+	vec4 specular_color = gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(max(dot(vertex_normal, vertex_light_half_vector), 0.0) , gl_FrontMaterial.shininess);
+	float black = 1;
+	if (dot(vec3(normalize(direction)), vertex_normal) < 0.25){
+		black = 0;
+	}
+	gl_FragColor = (ambient_color + diffuse_color) * (floor(intensity*5)/5) * black;
 
-// Values passed in from the vertex shader
-varying vec3 vNormal;
-varying vec3 vPosition;
-varying vec2 vTextureCoord0;
 
-void main() {
 
-	// Can do all sorts of cool stuff here
-	vec3 color = texture2D(texture0, vTextureCoord0).rgb;
-
-	// IMPORTANT tell OpenGL what the final color of the fragment is (vec4)
-	gl_FragColor = vec4(color, 1);
 }

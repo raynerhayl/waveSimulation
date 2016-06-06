@@ -13,22 +13,22 @@
 //----------------------------------------------------------------------------
 
 #version 120
-
-// Constant across both shaders
-uniform sampler2D texture0;
-
-// Values to pass to the fragment shader
-varying vec3 vNormal;
-varying vec3 vPosition;
-varying vec2 vTextureCoord0;
-
-void main() {
-
-	// Transform and pass on the normal/position/texture to fragment shader
-	vNormal = normalize(gl_NormalMatrix * gl_Normal);
-	vPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
-	vTextureCoord0 = gl_MultiTexCoord0.xy;
-
-	// IMPORTANT tell OpenGL where the vertex is
-	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+uniform vec4 cameraPos;
+varying vec3 vertex_light_position;
+varying vec3 vertex_light_half_vector;
+varying vec3 vertex_normal;
+varying vec4 direction;
+void main() {            
+	vec4 vertexWorld = gl_ModelViewMatrix * gl_Vertex;
+	vec4 cameraWorld = gl_ModelViewMatrix * cameraPos;
+	direction = normalize(cameraWorld-vertexWorld);
+    vertex_normal = normalize(gl_NormalMatrix * gl_Normal);
+    // Calculate the light position for this vertex
+    vertex_light_position = normalize(gl_LightSource[0].position.xyz);
+    // Calculate the light’s half vector
+    vertex_light_half_vector = normalize(gl_LightSource[0].halfVector.xyz);
+    // Set the front color to the color passed through with glColor*f
+    gl_FrontColor = gl_Color;
+    // Set the position of the current vertex 
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }
