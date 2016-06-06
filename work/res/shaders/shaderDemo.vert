@@ -22,6 +22,7 @@ uniform sampler2D texture0;
 uniform float time;
 uniform float [100] waveProperties;
 uniform int numWaves;
+uniform float frameWidth = 200;
 
 vec4 worldPos;
 
@@ -50,17 +51,20 @@ vec4 gerstnerFun(sWave wave);
 
 vec3 gerstnerNorm(sWave wave, vec2 worldPlane);
 
-
 void createWaves();
 
 void main() {
 
 // wave properties
 
-	createWaves();
 
 	// Transform and pass on the normal/position/texture to fragment shader
 	worldPos = gl_Vertex;
+
+	createWaves();
+
+
+	vec3 oldPos = vec3(worldPos.x, worldPos.y, worldPos.z);
 
 	//vNormal = normalize(gl_NormalMatrix * gl_Normal);
 	vNormal = vec3(0,0,0);
@@ -77,7 +81,7 @@ void main() {
 		worldPos.z = worldPos.z + gerstner.z;
 
 	}
-
+	
 	// calculate normal 
 	for(int i = 0; i < numWaves; i ++){
 		vec3 gerstnerNorm = normalize(gerstnerNorm(waves[i], vec2(worldPos.x,worldPos.z)));
@@ -87,6 +91,8 @@ void main() {
 		vNormal.z = gerstnerNorm.y + vNormal.z;
 
 	}
+
+	//vNormal = normalize(gl_NormalMatrix * vNormal);
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
@@ -109,6 +115,10 @@ void createWaves(){
 		float frequency = (2 * M_PI) /wavelength ; // angular frequency
  		vec2 d = normalize(vec2(waveProperties[index + 3],waveProperties[index + 4])); // direction of wave propagation
 		float steepness = waveProperties[index + 5];
+ /*
+ 		circular waves
+		d = ((vec2(worldPos.x, worldPos.z) - vec2(1,0))/length((vec2(worldPos.x, worldPos.z) - vec2(1,0))));
+		*/
 
 		waves[i] = sWave(wavelength, amplitude, waveSpeed, phase, frequency, d, steepness);
 	}

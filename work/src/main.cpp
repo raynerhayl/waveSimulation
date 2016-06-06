@@ -63,17 +63,18 @@ bool draw_school = true;
 //wave related
 Wave * wave;
 float waveTime = 0.0;
-int numWaves = 3;
+int numWaves = 5;
 
 GLfloat propsBuf[100]; // seto of properties to fade in
 GLfloat props[100]; // main set of properties
+GLfloat activeBuf[100]; // properties which actually get sent to shader
 
 float medianWavelength = 30;
 float amplitudeR = 1 / medianWavelength; // numerator is median amplitude
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 10; // difference in angle from windDir
-float medianS = 0.1;
-float speedFactor = 0.3; // scales the speed
+float medianS = 0.6;
+float speedFactor = 0.05; // scales the speed
 
 
 
@@ -200,11 +201,37 @@ float randF() {
 }
 
 /*
+	Mix the two waves at the corresponding index and update the active
+	buffer of properties. The ratio of the mix is r where r = 1 means
+	the value is wholey that of which is in propsBuf. r = 0 means the value
+	is wholey that of what is in the props array.
+*/
+void mixProps(int waveIndex, float r){
+	activeBuf[waveIndex * 6] = props[waveIndex*6] * (1.0 - r) + propsBuf[waveIndex*6] * r;
+	activeBuf[waveIndex * 6 + 1] = props[waveIndex * 6+1 ] * (1.0 - r) + propsBuf[waveIndex * 6+1 ] * r;
+	activeBuf[waveIndex * 6 + 2] = props[waveIndex*6+2] * (1.0 - r) + propsBuf[waveIndex*6+2] * r;
+	activeBuf[waveIndex * 6 + 3] = props[waveIndex*6+3] * (1.0 - r) + propsBuf[waveIndex*6+3] * r;
+	activeBuf[waveIndex * 6 + 4] = props[waveIndex*6+4] * (1.0 - r) + propsBuf[waveIndex*6+4] * r;
+	activeBuf[waveIndex * 6 + 5] = props[waveIndex*6+5] * (1.0 - r) + propsBuf[waveIndex*6+5] * r;
+
+}
+
+void copyProp(GLfloat* properties1, GLfloat* properties2, int waveIndex){
+
+	properties1[waveIndex * 6] = properties2[waveIndex*6];
+	properties1[waveIndex * 6 + 1] = properties2[waveIndex * 6+1 ];
+	properties1[waveIndex * 6 + 2] = properties2[waveIndex*6+2];
+	properties1[waveIndex * 6 + 3] = properties2[waveIndex*6+3];
+	properties1[waveIndex * 6 + 4] = properties2[waveIndex*6+4];
+	properties1[waveIndex * 6 + 5] = properties2[waveIndex*6+5];
+}
+
+/*
 	Populates an array of properties at the given wave index
 */
 void fillProps(GLfloat* properties, int waveIndex) {
 
-	float wavelength = medianWavelength / 2 + randF()*(medianWavelength * 2 - medianWavelength / 2);
+	float wavelength = medianWavelength / 2 + randF()*(medianWavelength * 1 - medianWavelength / 2);
 
 	float frequency = sqrt((9.81 * 2 * 3.145) / wavelength);
 	float speed = speedFactor * (frequency*wavelength);
@@ -237,9 +264,16 @@ void initWaves() {
 
 		fillProps(props, i);
 		fillProps(propsBuf, i);
+		fillProps(activeBuf, i);
+
 	}
 
+}
 
+void fillAllProps(GLfloat* properties){
+	for(int i = 0; i < numWaves; i ++){
+		fillProps(properties,i);
+	}
 }
 
 // Sets up where and what the light is
@@ -363,7 +397,7 @@ void render(int width, int height) {
 		// Set the current time for the shader 
 		glUniform1f(glGetUniformLocation(g_shader, "time"), waveTime);
 		// Send the shader the current main buffer of wave properties
-		glUniform1fv(glGetUniformLocation(g_shader, "waveProperties"), 100, props);
+		glUniform1fv(glGetUniformLocation(g_shader, "waveProperties"), 100, activeBuf);
 		// Specify the number of waves to use from the buffer
 		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), numWaves);\
 
@@ -539,6 +573,12 @@ int main(int argc, char **argv) {
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
 
+	float r = 1.0; // mix ratio, for fading waves
+
+	int wave = 0;
+
+	bool fade = true; // fade out
+
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
 
@@ -551,8 +591,45 @@ int main(int argc, char **argv) {
 			nbFrames = 0;
 			lastTime += 1.0;
 		}
-
+		if(draw_school == false){
+		
 		waveTime=waveTime + 0.1;
+
+
+			activeBuf[wave*6 + 1] = propsBuf[wave*6 + 1] * r;
+			
+			float dr = 0.01;
+			if(fade){
+				r = r - dr;
+
+				if(r < 0){
+					fade = false;
+
+					copyProp(activeBuf,propsBuf,wave);
+
+					fillProps(propsBuf, wave);
+
+					r = 0;
+
+			}
+
+			} else {
+				r = r + dr;
+
+				if(r > 1){
+					fade = true;
+					r = 1.0;
+
+					wave = wave + 1;
+					if(wave >=numWaves){
+						wave = 0;
+					}
+				}
+			}
+
+			
+		}
+
 
 		// Make sure we draw to the WHOLE window
 		int width, height;

@@ -33,11 +33,11 @@ private:
 	std::vector<cgra::vec3> m_normals;	// Normal list
 	std::vector<triangle> m_triangles;	// Triangle/Face list
 
-	double squareDensity = 100;
-	double width = 500;
-	double height = 500;
+	double squareDensity = 200;
+	double width = 200;
+	double height = 200;
 
-	bool m_wireFrameOn = true;
+	bool m_wireFrameOn = false;
 
 
 	// IDs for the display list to render
