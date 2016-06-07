@@ -16,9 +16,13 @@ using namespace std;
 class Octree{
 private:
 	OctreeNode* root;
+	vec3 m_origin;
+	vec3 m_halfDimension;
 public:
 	Octree(const vec3& origin, const vec3& halfDimension) {
-		root = new OctreeNode(origin,halfDimension);
+		m_origin = origin;
+		m_halfDimension = halfDimension;
+		root = new OctreeNode(m_origin,m_halfDimension);
 	}
 
 	~Octree(){
@@ -30,14 +34,14 @@ public:
 	}
 
 	void clear(){
-		if(!root->isLeafNode())root->deleteChildren();
-		root->data = NULL;
+		delete root;
+		root = new OctreeNode(m_origin,m_halfDimension);
 	}
 
 	/*Check and reshuffle all nodes*/
 	void check(){
 		vector<Boid *> shuffleList;
-		root->clean(shuffleList);
+		//root->clean(shuffleList);
 		for(int i = 0; i < shuffleList.size(); i++){
 			if(root->inBounds(shuffleList[i]->mPosition)){
 				root->insert(shuffleList[i]);
@@ -53,6 +57,6 @@ public:
 	}
 
 	void getBoidsInsideCube(const cgra::vec3& min, const cgra::vec3& max, std::vector<Boid*>& results){
-		root->getBoidsInsideCube(min,max,results);
+		root->getBoidsInArea(min,max,results);
 	}
 };

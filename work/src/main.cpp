@@ -132,13 +132,14 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 		break;
 		case 'O':
 			if(action == 1){
-				for(int i = 0; i != 1; i++){
+				for(int i = 0; i != 2000; i++){
 					vec3 position = vec3(math::random(scene_bounds.min.x,scene_bounds.max.x),math::random(scene_bounds.min.y,scene_bounds.max.y),math::random(scene_bounds.min.z,scene_bounds.max.z));
 					Prey* b = new Prey(position);
 					temp_boids.push_back(b);
 					cout << b << endl;
 					m_newtree->insert(b);
 				}
+				//cout << temp_boids.size() << endl;
 			}
 		break;
 		case 'P':
@@ -159,6 +160,11 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 		case 'I':
 		{
 			if(action ==1)boid++;
+		}
+		break;
+		case 'D':
+		{
+			m_newtree->clear();
 		}
 		break;
 	}
@@ -209,12 +215,20 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(800,0,scene_bounds);
-
+	//g_school = new School(800,0,scene_bounds);
+	BoundingBox scaledBounds = scene_bounds;
+	vec3 origin;
+	origin.x = (scaledBounds.max.x + scaledBounds.min.x)/2;
+	origin.y = (scaledBounds.max.y + scaledBounds.min.y)/2;
+	origin.z = (scaledBounds.max.z + scaledBounds.min.z)/2;
+	vec3 halfSize;
+	halfSize.x = abs(scaledBounds.max.x - scaledBounds.min.x)/2;
+	halfSize.y = abs(scaledBounds.max.y - scaledBounds.min.y)/2;
+	halfSize.z = abs(scaledBounds.max.z - scaledBounds.min.z)/2;
 	
 	//cout << origin << endl;
 	//m_octree = new OctreeNode(origin,halfSize);
-	//m_newtree = new Octree(origin,halfSize);
+	m_newtree = new Octree(origin,halfSize);
 }
 
 // Sets up where and what the light is
@@ -337,14 +351,21 @@ void render(int width, int height) {
 		abs(scene_bounds.max.y-scene_bounds.min.y),
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
-	if(draw_school) g_school->renderSchool();
-	// {
-	// 	m_newtree->draw();
-	// 	// std::vector<Boid*> v;
-	// 	// m_newtree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),v);
-	// 	m_newtree->check();
-
-	// }
+	//if(draw_school) g_school->renderSchool();
+	{
+		m_newtree->clear();
+		for(int i = 0; i != temp_boids.size(); i++){
+			m_newtree->insert(temp_boids[i]);
+		}
+		cout << temp_boids.size() << endl;
+		//m_newtree->draw();
+		std::vector<Boid*> v;
+		m_newtree->getBoidsInsideCube(vec3(-200,-200,-200),vec3(200,200,200),v);
+		m_newtree->check();
+		for (int i = 0; i < v.size(); ++i){
+			v[i]->draw();
+		}
+	}
 	glEnable(GL_LIGHTING);
 
 	// Without shaders
