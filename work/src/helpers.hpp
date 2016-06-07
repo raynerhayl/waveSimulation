@@ -12,6 +12,9 @@ struct BoundingBox {
 		min = _min;
 		max = _max;
 	}
+    bool inside(const vec3 p){
+        return !(p.x > max.x || p.x < min.x || p.y > max.y || p.y < min.y || p.z > max.z || p.z < min.z);
+    }
 };
 
 inline BoundingBox operator* (float lhs, const BoundingBox& rhs)
