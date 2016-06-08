@@ -69,10 +69,10 @@ GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
 
-float medianWavelength = 30;
-float amplitudeR = 1;
+float medianWavelength = 20;
+float amplitudeR = 0.5;
 float windDir = 0; // wind direction from (x = 1, z = 0)
-float dAngle = 20; // difference in angle from windDir
+float dAngle = 45; // difference in angle from windDir
 float medianS = 0.1;
 float speedFactor = 1; // scales the speed
 
@@ -210,10 +210,10 @@ float randF() {
 */
 void fillProps(GLfloat properties[], int waveIndex) {
 
-	float wavelength = medianWavelength - medianWavelength*0.4 + randF() *0.8 * medianWavelength;
+	float wavelength = medianWavelength - medianWavelength*0.4 + 2* randF() *0.8 * medianWavelength;
 	float speed = sqrt((9.81*wavelength) / (2 * 3.14));//speedFactor * (frequency*wavelength);
 	float frequency = speed / wavelength;// sqrt((9.81 * 2 * 3.145) / wavelength);
-	float amplitude = amplitudeR - amplitudeR*0.1 + randF() * 0.2 * amplitudeR;
+	float amplitude = amplitudeR - amplitudeR*0.2 + randF() * 0.4 * amplitudeR;
 
 	float angle = windDir - dAngle + randF() * 2 * dAngle;
 
@@ -256,8 +256,8 @@ void fillAllProps(GLfloat properties[]) {
 // Called once on start up
 //
 void initLight() {
-	float direction[] = { 0.0, 1.0, 0.0, 0.0 };
-	float diffintensity[] = { 0.5, 0.5, 0.5, 1.0 };
+	float direction[] = { 1.0, 1.0, 0.0, 0.0 };
+	float diffintensity[] = { 0.8, 0.8, 0.8, 1.0 };
 	float ambient[] = { 0.7, 0.7, 0.7, 1.0 };
 	//float specular[] = { 0.0, 0.0, 0.0, 1.0 };
 
@@ -439,88 +439,6 @@ void renderWave() {
 	//glBindTexture(GL_TEXTURE_2D, brickTex);
 
 	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
-
-	glPushMatrix(); {
-		glBindTexture(GL_TEXTURE_2D, causTex);
-		float ambient[] = { 1.0,1.0,1.0, 1.0 };
-		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-		float diffuse[] = { 1.0,1.0,1.0, 1.0 };
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-		float specular[] = { 1.0,1.0,1.0, 1.0 };
-		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-		float shininess[] = { 0.1*128.0 };
-		glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
-
-		glBegin(GL_QUADS); {
-			glVertex3f(100, -100, 100);
-			glNormal3f(0, 1, 0);
-			glTexCoord2f(0, 0);
-
-			glVertex3f(-100, -100, 100);
-			glNormal3f(0, 1, 0);
-			glTexCoord2f(0, 1);
-
-
-			glVertex3f(-100, -100, -100);
-			glNormal3f(0, 1, 0);
-			glTexCoord2f(1, 1);
-
-
-			glVertex3f(100, -100, -100);
-			glNormal3f(0, 1, 0);
-			glTexCoord2f(1, 0);
-
-
-
-			glVertex3f(100, 100, 100);
-			glNormal3f(-1, 0, 0);
-			glTexCoord2f(0, 0);
-
-
-			glVertex3f(100, -100, 100);
-			glNormal3f(-1, 0, 0);
-			glTexCoord2f(0, 1);
-
-
-			glVertex3f(100, -100, -100);
-			glNormal3f(-1, 0, 0);
-			glTexCoord2f(1, 1);
-
-
-			glVertex3f(100, 100, -100);
-			glNormal3f(-1, 0, 0);
-			glTexCoord2f(1, 0);
-
-
-
-			glVertex3f(100, 100, -100);
-			glNormal3f(0, 0, 1);
-			glTexCoord2f(0, 0);
-
-
-			glVertex3f(100, -100, -100);
-			glNormal3f(0, 0, 1);
-			glTexCoord2f(0, 1);
-
-
-			glVertex3f(-100, -100, -100);
-			glNormal3f(0, 0, 1);
-			glTexCoord2f(1, 1);
-
-
-			glVertex3f(-100, 100, -100);
-			glNormal3f(0, 0, 1);
-			glTexCoord2f(1, 0);
-
-
-
-
-		} glEnd();
-
-		//glTranslatef(0, -30, 0);
-		//cgraSphere(10.0);
-
-	} glPopMatrix();
 
 	// Unbind our shader
 	glUseProgram(0);

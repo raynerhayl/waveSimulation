@@ -44,7 +44,6 @@ void main() {
 
 	vec4 amb = gl_FrontLightProduct[0].ambient;
 	color = diff + amb;
-
 	gl_FragColor = color;
 
 

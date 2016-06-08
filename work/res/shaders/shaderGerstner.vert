@@ -57,6 +57,10 @@ vec3 gerstnerNorm(sWave wave, vec2 worldPlane);
 
 void createWaves();
 
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 void main() {
 
 // wave properties
@@ -79,6 +83,8 @@ void main() {
 
 	}
 
+	worldPos.y = worldPos.y +  rand(vec2(0.0,1.0));
+
 	// calculate normal 
 	for(int i = 0; i < numWaves; i ++){
 		vec3 gerstnerNorm = (gerstnerNorm(waves[i], vec2(worldPos.x,worldPos.z)));
@@ -89,7 +95,10 @@ void main() {
 
 	}
 
+
 	vNormal.y = 1 - vNormal.y;
+
+
 	vPosition = worldPos.xyz;
 
 	// IMPORTANT tell OpenGL where the vertex is
