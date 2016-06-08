@@ -51,7 +51,7 @@ float g_zfar = 10000.0;
 bool g_leftMouseDown = false;
 vec2 g_mousePosition;
 float g_pitch = 0;
-float g_yaw = 0;
+float g_yaw = 90;
 float g_zoom = 1.0;
 
 BoundingBox scene_bounds = BoundingBox(vec3(-100, -100, -100), vec3(100, 100, 100));
@@ -63,7 +63,7 @@ bool draw_school = true;
 //wave related
 Wave * wave;
 float waveTime = 0.0;
-int numWaves = 15;
+int numWaves = 10;
 
 GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
@@ -72,8 +72,8 @@ GLfloat activeBuf[200]; // properties which actually get sent to shader
 float medianWavelength = 30;
 float amplitudeR = 0.5;
 float windDir = 0; // wind direction from (x = 1, z = 0)
-float dAngle = 30; // difference in angle from windDir
-float medianS = 0.2;
+float dAngle = 20; // difference in angle from windDir
+float medianS = 0.1;
 float speedFactor = 1; // scales the speed
 
 
@@ -88,7 +88,11 @@ int fps = 0;
 //
 bool g_useShader = true;
 GLuint g_texture = 0;
-GLuint g_shader = 0;
+GLuint g_shaderGerstner = 0;
+GLuint g_shaderPhong = 1;
+
+GLuint causTex = 1;
+GLuint brickTex = 2;
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -209,7 +213,7 @@ void fillProps(GLfloat properties[], int waveIndex) {
 	float wavelength = medianWavelength - medianWavelength*0.4 + randF() *0.8 * medianWavelength;
 	float speed = sqrt((9.81*wavelength) / (2 * 3.14));//speedFactor * (frequency*wavelength);
 	float frequency = speed / wavelength;// sqrt((9.81 * 2 * 3.145) / wavelength);
-	float amplitude = amplitudeR - amplitudeR*0.3 + randF() * 0.6 * amplitudeR;
+	float amplitude = amplitudeR - amplitudeR*0.1 + randF() * 0.2 * amplitudeR;
 
 	float angle = windDir - dAngle + randF() * 2 * dAngle;
 
@@ -252,10 +256,10 @@ void fillAllProps(GLfloat properties[]) {
 // Called once on start up
 //
 void initLight() {
-	float direction[] = { 0.0f, 0.0f, 0.0f, 1.0 };
-	float diffintensity[] = { 0.0, 0.2, 1.0, 1.0f };
-	float ambient[] = { 0.1, 0.1, 0.1, 0.2 };
-	float specular[] = { 0.2, 0.2, 0.2, 1.0f };
+	float direction[] = { 0.0, 1.0, 0.0, 0.0 };
+	float diffintensity[] = { 0.8, 0.8, 0.8, 1.0 };
+	float ambient[] = { 0.7, 0.7, 0.7, 1.0 };
+	float specular[] = { 0.0, 0.0, 0.0, 1.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
@@ -264,19 +268,6 @@ void initLight() {
 
 
 	glEnable(GL_LIGHT0);
-
-	//float direction2[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-	//float diffintensity2[] = { 1.0, 1.0, 1.0, 1.0f };
-	//float ambient2[] = { 0.2, 0.2, 0.2, 0.2 };
-	//float specular2[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	//glLightfv(GL_LIGHT1, GL_POSITION, direction2);
-	//glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity2);
-	//glLightfv(GL_LIGHT1, GL_SPECULAR, specular2);
-	//glLightfv(GL_LIGHT1, GL_AMBIENT, ambient2);
-
-
-	//glEnable(GL_LIGHT1);
 }
 
 
@@ -298,6 +289,36 @@ void initTexture() {
 
 	// Finnaly, actually fill the data into our texture
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
+
+	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
+	glGenTextures(1, &causTex); // Generate texture ID
+	glBindTexture(GL_TEXTURE_2D, causTex); // Bind it as a 2D texture
+
+											 // Setup sampling strategies
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	tex = Image("./work/res/textures/brick.jpg");
+
+	// Finnaly, actually fill the data into our texture
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
+
+	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
+	glGenTextures(1, &brickTex); // Generate texture ID
+	glBindTexture(GL_TEXTURE_2D, brickTex); // Bind it as a 2D texture
+
+										   // Setup sampling strategies
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// Finnaly, actually fill the data into our texture
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
 }
 
 
@@ -308,7 +329,11 @@ void initShader() {
 	// To create a shader program we use a helper function
 	// We pass it an array of the types of shaders we want to compile
 	// and the corrosponding locations for the files of each stage
-	g_shader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderDemo.vert", "./work/res/shaders/shaderDemo.frag" });
+
+	// shader for gerstner vertex modifications as well as phong shading
+	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/shaderPhong.frag" });
+
+	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
 }
 
 
@@ -368,23 +393,183 @@ void render(int width, int height) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_NORMALIZE);
+	glEnable(GL_TEXTURE_2D);
+
 
 	setupCamera(width, height);
 
+	//glUseProgram(g_shaderPhong);
+
+	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+	glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
+
+	 // render stuff on top
+	glPushMatrix(); {
+		glUseProgram(g_shaderPhong);
+		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		float specular[] = { 0.0,0.0 / 256.0,150.0 / 256.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		float shininess[] = { 0.1*128.0 };
+		glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+		glTranslatef(0, 30, 0);
+		cgraSphere(10.0);
+
+	} glPopMatrix();
+
+	// render stuff on bottom
+	glPushMatrix(); {
+
+		glRotatef(180, 0.0, 0.0, 1.0);
+
+		glPushMatrix(); {
+			float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
+			glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+			float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+			float specular[] = { 0.0,0.0 / 256.0,150.0 / 256.0, 1.0 };
+			glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+			float shininess[] = { 0.1*128.0 };
+			glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+			glTranslatef(0, 30, 0);
+			cgraSphere(10.0);
+
+		} glPopMatrix();
+
+		GLint m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+		//glBindTexture(GL_TEXTURE_2D, causTex);
+		//glCopyTexSubImage2D(GL_TEXTURE_2D, 1, 0, 0, m_viewport[0], m_viewport[1], 200, 200);
+
+	} glPopMatrix();
+
+	glUseProgram(0);
+
+	//// Enable Drawing texures
+	//glEnable(GL_TEXTURE_2D);
+	//// Use Texture as the color
+	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	//// Set the location for binding the texture
+	//glActiveTexture(GL_TEXTURE0);
+	//// Bind the texture
+	//glBindTexture(GL_TEXTURE_2D, brickTex);
+
+	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+
+	glPushMatrix(); {
+		glBindTexture(GL_TEXTURE_2D, causTex);
+		float ambient[] = { 1.0,1.0,1.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		float diffuse[] = { 1.0,1.0,1.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		float specular[] = { 1.0,1.0,1.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		float shininess[] = { 0.1*128.0 };
+		glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+		glBegin(GL_QUADS); {
+			glVertex3f(100, -100, 100);
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(0, 0);
+
+			glVertex3f(-100, -100, 100);
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(0, 1);
+
+
+			glVertex3f(-100, -100, -100);
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(1, 1);
+
+
+			glVertex3f(100, -100, -100);
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(1, 0);
+
+
+
+			glVertex3f(100, 100, 100);
+			glNormal3f(-1, 0, 0);
+			glTexCoord2f(0, 0);
+
+
+			glVertex3f(100, -100, 100);
+			glNormal3f(-1, 0, 0);
+			glTexCoord2f(0, 1);
+
+
+			glVertex3f(100, -100, -100);
+			glNormal3f(-1, 0, 0);
+			glTexCoord2f(1, 1);
+
+
+			glVertex3f(100, 100, -100);
+			glNormal3f(-1, 0, 0);
+			glTexCoord2f(1, 0);
+
+
+
+			glVertex3f(100, 100, -100);
+			glNormal3f(0, 0, 1);
+			glTexCoord2f(0, 0);
+
+
+			glVertex3f(100, -100, -100);
+			glNormal3f(0, 0, 1);
+			glTexCoord2f(0, 1);
+
+
+			glVertex3f(-100, -100, -100);
+			glNormal3f(0, 0, 1);
+			glTexCoord2f(1, 1);
+
+
+			glVertex3f(-100, 100, -100);
+			glNormal3f(0, 0, 1);
+			glTexCoord2f(1, 0);
+
+
+
+
+		} glEnd();
+
+		//glTranslatef(0, -30, 0);
+		//cgraSphere(10.0);
+
+	} glPopMatrix();
+
+	// Unbind our shader
+	glUseProgram(0);
+	glUseProgramObjectARB(0);
 
 	if (draw_school == false) {
 
+		glBindTexture(GL_TEXTURE_2D, g_texture);
+
 		// Use the shader we made
-		glUseProgram(g_shader);
+		glUseProgram(g_shaderGerstner);
 
 		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
-		glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture0"), 0);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 1);
+
 		// Set the current time for the shader 
-		glUniform1f(glGetUniformLocation(g_shader, "time"), waveTime);
+		glUniform1f(glGetUniformLocation(g_shaderGerstner, "time"), waveTime);
 		// Send the shader the current main buffer of wave properties
-		glUniform1fv(glGetUniformLocation(g_shader, "waveProperties"), 100, activeBuf);
+		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
 		// Specify the number of waves to use from the buffer
-		glUniform1i(glGetUniformLocation(g_shader, "numWaves"), numWaves); \
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
+		GLint m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportWidth"), m_viewport[2]);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportHeight"), m_viewport[3]);
+
+
 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -420,6 +605,8 @@ void render(int width, int height) {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
+	glDisable(GL_TEXTURE_2D);
+
 }
 
 
