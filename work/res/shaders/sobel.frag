@@ -54,7 +54,7 @@ vec3 sobel(float step, vec2 center)
 	//return texture2D(colorMap, center).rgb;
 	//return vec3(1.0,1.0,1.0);
 
-    vec3 mixed=  mix(texture2D(colorMap, center).rgb,vec3(117/255.0,17/255.0,92/255.0), maxCol );
+    vec3 mixed=  mix(texture2D(colorMap, center).rgb,vec3(0,0,0), maxCol );
    return mixed;
  }
 
