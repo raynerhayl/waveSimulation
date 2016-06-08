@@ -40,7 +40,6 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	cout << "adding boids" << endl;
 
 	for(int i = 0; i < numPrey; i++){
-
 		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
 		Prey b = Prey(position);
 		prey.push_back(b);
@@ -85,7 +84,7 @@ void School::renderSchool() {
 
 	// Clean up
 	glPopMatrix();
-	m_octree->draw();
+	//m_octree->draw();
 }
 
 void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh){
@@ -161,11 +160,11 @@ void School::update(){
 	}
 
 	for(vector<Predator>::iterator pred = predators.begin(); pred != predators.end(); ++pred) {
-		
+
 		pred->pullToCentre(vec3(0,0,0));
 		pred->update();
 	}
-	cout << "checking" << endl;
+	//cout << "checking" << endl;
 	//m_octree->check();
 	m_octree->clear();
 	buildTree();

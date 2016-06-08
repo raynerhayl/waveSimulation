@@ -215,7 +215,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	//g_school = new School(800,0,scene_bounds);
+	g_school = new School(800,0,scene_bounds);
 	BoundingBox scaledBounds = scene_bounds;
 	vec3 origin;
 	origin.x = (scaledBounds.max.x + scaledBounds.min.x)/2;
@@ -228,7 +228,7 @@ void initSchool(){
 	
 	//cout << origin << endl;
 	//m_octree = new OctreeNode(origin,halfSize);
-	m_newtree = new Octree(origin,halfSize);
+	//m_newtree = new Octree(origin,halfSize);
 }
 
 // Sets up where and what the light is
@@ -351,20 +351,20 @@ void render(int width, int height) {
 		abs(scene_bounds.max.y-scene_bounds.min.y),
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
-	//if(draw_school) g_school->renderSchool();
+	if(draw_school) g_school->renderSchool();
 	{
-		m_newtree->clear();
-		for(int i = 0; i != temp_boids.size(); i++){
-			m_newtree->insert(temp_boids[i]);
-		}
-		cout << temp_boids.size() << endl;
-		//m_newtree->draw();
-		std::vector<Boid*> v;
-		m_newtree->getBoidsInsideCube(vec3(-200,-200,-200),vec3(200,200,200),v);
-		m_newtree->check();
-		for (int i = 0; i < v.size(); ++i){
-			v[i]->draw();
-		}
+		// m_newtree->clear();
+		// for(int i = 0; i != temp_boids.size(); i++){
+		// 	m_newtree->insert(temp_boids[i]);
+		// }
+		// cout << temp_boids.size() << endl;
+		// //m_newtree->draw();
+		// std::vector<Boid*> v;
+		// m_newtree->getBoidsInsideCube(vec3(-200,-200,-200),vec3(200,200,200),v);
+		// m_newtree->check();
+		// for (int i = 0; i < v.size(); ++i){
+		// 	v[i]->draw();
+		// }
 	}
 	glEnable(GL_LIGHTING);
 

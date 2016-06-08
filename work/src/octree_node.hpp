@@ -20,7 +20,7 @@ using namespace std;
 
 class OctreeNode {
 	//maximum number of points for a leaf
-	static const int MAX_SIZE = 16;
+	static const int MAX_SIZE = 8;
 private:
 	Boid * data[MAX_SIZE];
 	int m_dataSize = 0;
