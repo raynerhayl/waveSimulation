@@ -58,7 +58,7 @@ public:
 	Prey(vec3 pos);
 	//fields
 	bool mIsDead = false;
-	float mFear = 0;
+	float mFear = 0.0f;
 	float mMass = 1;
 private:
 	void drawSelf();

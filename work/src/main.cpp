@@ -215,7 +215,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(800,0,scene_bounds);
+	g_school = new School(800,3,scene_bounds);
 	BoundingBox scaledBounds = scene_bounds;
 	vec3 origin;
 	origin.x = (scaledBounds.max.x + scaledBounds.min.x)/2;

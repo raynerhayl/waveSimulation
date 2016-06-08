@@ -27,13 +27,8 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	testSchool(bounds);
 	BoundingBox scaledBounds = bounds*2;
 	vec3 origin;
-	origin.x = (scaledBounds.max.x + scaledBounds.min.x)/2;
-	origin.y = (scaledBounds.max.y + scaledBounds.min.y)/2;
-	origin.z = (scaledBounds.max.z + scaledBounds.min.z)/2;
-	vec3 halfSize;
-	halfSize.x = abs(scaledBounds.max.x - scaledBounds.min.x)/2;
-	halfSize.y = abs(scaledBounds.max.y - scaledBounds.min.y)/2;
-	halfSize.z = abs(scaledBounds.max.z - scaledBounds.min.z)/2;
+	origin = (scaledBounds.max + scaledBounds.min)/2;
+	vec3 halfSize = abs(scaledBounds.max - scaledBounds.min)/2;
 	
 	m_octree = new Octree(origin,halfSize);
 
@@ -48,12 +43,12 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 		m_octree->insert(p);
 	}
 
-	// for(int i = 0; i < numPredators; i++){
-	// 	vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
-	// 	Predator  b = Predator(position);
-	// 	predators.push_back(b);
-	// 	//m_octree->insert(&b);
-	// }
+	for(int i = 0; i < numPredators; i++){
+		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
+		Predator  b = Predator(position);
+		predators.push_back(b);
+		//m_octree->insert(&b);
+	}
 
 	cout << "created "<< numPrey <<" prey " << endl;
 }
@@ -68,23 +63,26 @@ void School::renderSchool() {
 	update(); //update all
 	
 	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	
-	if(draw_bounds)drawBounds();
-	//Actually draw the School
-	for(int i = 0; i < prey.size(); i++){
-		prey[i].draw();
-	}
-	for(int i = 0; i < predators.size(); i++){
-		predators[i].draw();
-	}
-	glRotatef(45,1,1,1);
-	glColor3f(1,1,0);
-	cgraLine(zRad);
-
+	// std::vector<Boid *> t;
+	// m_octree->getBoidsInsideCube(vec3(-100,-100,-100),vec3(100,100,100),t);
+	// for(int i = 0; i < t.size(); i++){
+	// 	t[i]->draw();
+	// }
+	glPushMatrix();{
+		if(draw_bounds)drawBounds();
+		//Actually draw the School
+		for(int i = 0; i < prey.size(); i++){
+			prey[i].draw();
+		}
+		for(int i = 0; i < predators.size(); i++){
+			predators[i].draw();
+		}
+		glRotatef(45,1,1,1);
+		glColor3f(1,1,0);
+		cgraLine(zRad);
 	// Clean up
-	glPopMatrix();
-	//m_octree->draw();
+	}glPopMatrix();
+	// m_octree->draw();
 }
 
 void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh){
@@ -129,7 +127,6 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 					float F = ( predatorZoneRadiusSqrd/distSqrd - 1.0f ) * 0.1f;
 					p1->mFear += F * 0.1f;
 					//cout << "fear add" <<F * 0.1f << endl;
-
 					dir = normalize(dir) * F;
 					p1->mAccel+= dir;
 					predator->mAccel += dir;
@@ -138,8 +135,9 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 					predator->mIsHungry = false;
 					predator->mHunger -= p1->mMass;
 				}
-			} else { //TODO make more elegand, decrement
-				p1->mFear = 0;
+			}
+			if(p1->mFear != 0){ //TODO play with this, make more intuitive
+				p1->mFear = max(p1->mFear-0.001,0);
 			}
 		}
 	}
@@ -165,9 +163,8 @@ void School::update(){
 		pred->update();
 	}
 	//cout << "checking" << endl;
-	//m_octree->check();
-	m_octree->clear();
-	buildTree();
+	//m_octree->clear();
+	//buildTree();
 }
 
 void School::buildTree(){
