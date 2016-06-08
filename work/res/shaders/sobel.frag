@@ -7,14 +7,11 @@ varying float limit;
 float intensity(in vec4 color)
 {
 	//return sqrt((color.x*color.x)+(color.y*color.y)+(color.z*color.z));
-	return (color.x + color.y + color.z)/3;
+	return (color.x + color.y + color.z)/3.0;
 }
 
 float depthIntensity(in vec4 color)
 {
-	float f=1000.0;
-	float n = 0.1;
-	float z = (2 * n) / (f + n - color.x * (f - n));
 	return pow(color.x, 300);
 }
 
