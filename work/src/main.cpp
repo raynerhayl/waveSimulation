@@ -70,7 +70,7 @@ GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
 
 float medianWavelength = 30;
-float amplitudeR = 0.5;
+float amplitudeR = 1;
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 20; // difference in angle from windDir
 float medianS = 0.1;
@@ -257,13 +257,13 @@ void fillAllProps(GLfloat properties[]) {
 //
 void initLight() {
 	float direction[] = { 0.0, 1.0, 0.0, 0.0 };
-	float diffintensity[] = { 0.8, 0.8, 0.8, 1.0 };
+	float diffintensity[] = { 0.5, 0.5, 0.5, 1.0 };
 	float ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-	float specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	//float specular[] = { 0.0, 0.0, 0.0, 1.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	//glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
 

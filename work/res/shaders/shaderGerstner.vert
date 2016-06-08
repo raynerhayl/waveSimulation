@@ -63,13 +63,11 @@ void main() {
 
 
 	// Transform and pass on the normal/position/texture to fragment shader
-	worldPos = vec4(gl_Vertex.x, 0.0, gl_Vertex.z,gl_Vertex.w);
+	worldPos = vec4(gl_Vertex.xyzw);
 
 	createWaves();
-	vNormal = vec3(0,0,0);
-	//vTextureCoord0 = gl_MultiTexCoord0.xy;
-	
-	//vTextureCoord0 = vec3(gl_ModelViewMatrix * gl_Vertex).xz;
+	vNormal = vec3(0.0);
+
 
 	// calculate vertex position
 	for(int i = 0; i < numWaves; i ++){
@@ -92,19 +90,7 @@ void main() {
 	}
 
 	vNormal.y = 1 - vNormal.y;
-
-	vNormal = normalize(vNormal);
-
 	vPosition = worldPos.xyz;
-
-	float r_ratio = 1.0/0.1;
-
-	float term = 1.0 ;//+ r_ratio * r_ratio * (pow(dot(inc, vNormal),2) -1);
-	vec3 inc = vec3(0.0,1.0,0.0);
-	vec3 transP = vNormal * (r_ratio * dot(inc, vNormal) + sqrt(term)) + r_ratio *inc ;
-	vec3 transN = vNormal * (r_ratio * dot(inc, vNormal) - sqrt(term)) + r_ratio *inc ;
-
-	caustic = dot(inc, normalize(transP));
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
@@ -163,7 +149,7 @@ vec3 gerstnerNorm(sWave wave, vec2 worldPlane){
 
 	result.x = -wave.d.x * wave.frequency * wave.amplitude * cos(term);
 	result.y = steepF * wave.frequency * wave.amplitude * sin(term);
-	result.z = -(wave.d.y * wave.frequency * wave.amplitude * cos(term));
+	result.z = -wave.d.y * wave.frequency * wave.amplitude * cos(term);
 
 	return result;
 }
