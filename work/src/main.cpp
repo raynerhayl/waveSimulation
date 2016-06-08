@@ -89,7 +89,7 @@ int fps = 0;
 bool g_useShader = true;
 GLuint g_texture = 0;
 GLuint g_shaderGerstner = 0;
-GLuint g_shaderPhong = 0;
+GLuint g_shaderPhong = 1;
 
 GLuint causTex = 1;
 GLuint brickTex = 2;
@@ -380,10 +380,30 @@ void drawOrigin() {
 }
 
 
-void renderWave() {
+// Draw function
+//
+void render(int width, int height) {
+	glViewport(0, 0, width, height);
+	// Grey/Blueish background
+	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	// Enable flags for normal rendering
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_TEXTURE_2D);
+
+
+	setupCamera(width, height);
+
+	//glUseProgram(g_shaderPhong);
+
+	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
 	glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
 
-	// render stuff on top
+	 // render stuff on top
 	glPushMatrix(); {
 		glUseProgram(g_shaderPhong);
 		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
@@ -406,7 +426,6 @@ void renderWave() {
 		glRotatef(180, 0.0, 0.0, 1.0);
 
 		glPushMatrix(); {
-
 			float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
 			glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
 			float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
@@ -431,8 +450,18 @@ void renderWave() {
 
 	glUseProgram(0);
 
-	glPushMatrix(); {
+	//// Enable Drawing texures
+	//glEnable(GL_TEXTURE_2D);
+	//// Use Texture as the color
+	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	//// Set the location for binding the texture
+	//glActiveTexture(GL_TEXTURE0);
+	//// Bind the texture
+	//glBindTexture(GL_TEXTURE_2D, brickTex);
 
+	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+
+	glPushMatrix(); {
 		glBindTexture(GL_TEXTURE_2D, causTex);
 		float ambient[] = { 1.0,1.0,1.0, 1.0 };
 		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
@@ -504,7 +533,13 @@ void renderWave() {
 			glNormal3f(0, 0, 1);
 			glTexCoord2f(1, 0);
 
+
+
+
 		} glEnd();
+
+		//glTranslatef(0, -30, 0);
+		//cgraSphere(10.0);
 
 	} glPopMatrix();
 
@@ -512,6 +547,7 @@ void renderWave() {
 	glUseProgram(0);
 	glUseProgramObjectARB(0);
 
+	if (draw_school == false) {
 
 		glBindTexture(GL_TEXTURE_2D, g_texture);
 
@@ -546,31 +582,6 @@ void renderWave() {
 		// Unbind our shader
 		glUseProgram(0);
 		glUseProgramObjectARB(0);
-		glDisable(GL_TEXTURE_2D);
-
-}
-
-// Draw function
-//
-void render(int width, int height) {
-	glViewport(0, 0, width, height);
-	// Grey/Blueish background
-	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-	// Enable flags for normal rendering
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_NORMALIZE);
-	glEnable(GL_TEXTURE_2D);
-
-
-	setupCamera(width, height);
-
-	if (draw_school == false) {
-
-		renderWave();
 
 	}
 	else {
@@ -727,8 +738,6 @@ int main(int argc, char **argv) {
 			nbFrames = 0;
 			lastTime += 1.0;
 		}
-
-
 		if (draw_school == false) {
 
 			waveTime = waveTime + 0.1;
@@ -757,6 +766,9 @@ int main(int argc, char **argv) {
 
 
 		}
+
+
+
 
 		// Make sure we draw to the WHOLE window
 		int width, height;
