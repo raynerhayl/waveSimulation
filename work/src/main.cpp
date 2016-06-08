@@ -67,8 +67,8 @@ int fps = 0;
 //
 bool g_useShader = false;
 GLuint g_texture = 0;
-GLuint g_shader = 0;
-
+GLuint g_sobelShader = 0;
+GLuint g_toonShader = 0;
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -172,7 +172,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(200,scene_bounds);
+	g_school = new School(500,scene_bounds);
 }
 
 // Sets up where and what the light is
@@ -219,7 +219,9 @@ void initShader() {
 	// To create a shader program we use a helper function
 	// We pass it an array of the types of shaders we want to compile
 	// and the corrosponding locations for the files of each stage
-	g_shader = makeShaderProgramFromFile({GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderDemo.vert", "./work/res/shaders/shaderDemo.frag" });
+	g_sobelShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/sobel.vert", "./work/res/shaders/sobel.frag" });
+	g_toonShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/toon.vert", "./work/res/shaders/toon.frag" });
+
 }
 
 
@@ -269,6 +271,61 @@ void drawOrigin(){
 // Draw function
 //
 void render(int width, int height) {
+	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+	GLuint FramebufferName = 0;
+	glGenFramebuffers(1, &FramebufferName);
+	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+	GLuint renderedTexture;
+	glGenTextures(1, &renderedTexture);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+	// Give an empty image to OpenGL ( the last "0" )
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// Poor filtering. Needed !
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	GLuint normalTexture;
+	glGenTextures(1, &normalTexture);
+	glBindTexture(GL_TEXTURE_2D, normalTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	GLuint depth_tex;
+	glGenTextures(1, &depth_tex);
+	glBindTexture(GL_TEXTURE_2D, depth_tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	//-------------------------
+	//Attach depth buffer to FBO
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_tex, 0);
+
+	// Set "renderedTexture" as our colour attachement #0
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normalTexture, 0);
+
+
+	// Set the list of draw buffers.
+	GLenum DrawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, DrawBuffers); // "1" is the size of DrawBuffers
+
+								   //glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+
+								   // Always check that our framebuffer is ok
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		return;
+
 	glViewport(0,0,width,height);
 	// Grey/Blueish background
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
@@ -297,45 +354,6 @@ void render(int width, int height) {
 	if(draw_school) g_school->renderSchool();
 	//glEnable(GL_LIGHTING);
 
-	// Without shaders
-	// Uses the default OpenGL pipeline
-	//
-	if (!g_useShader) {
-
-		// // Texture setup
-		// //
-
-		// // Enable Drawing texures
-		// glEnable(GL_TEXTURE_2D);
-		// // Use Texture as the color
-		// glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		// // Set the location for binding the texture
-		// glActiveTexture(GL_TEXTURE0);
-		// // Bind the texture
-		// glBindTexture(GL_TEXTURE_2D, g_texture);
-
-		// // Render a single square as our geometry
-		// // You would normally render your geometry here
-		// glBegin(GL_QUADS);
-		// glNormal3f(0.0, 0.0, 1.0);
-		// glTexCoord2f(0.0, 0.0);
-		// glVertex3f(-5.0, -5.0, 0.0);
-		// glTexCoord2f(0.0, 1.0);
-		// glVertex3f(-5.0, 5.0, 0.0);
-		// glTexCoord2f(1.0, 1.0);
-		// glVertex3f(5.0, 5.0, 0.0);
-		// glTexCoord2f(1.0, 0.0);
-		// glVertex3f(5.0, -5.0, 0.0);
-		// glEnd();
-		// glFlush();
-	}
-
-
-	// With shaders (no lighting)
-	// Uses the shaders that you bind for the graphics pipeline
-	//
-	else {
-
 		// Texture setup
 		
 		// Enable Drawing texures
@@ -346,12 +364,9 @@ void render(int width, int height) {
 		glBindTexture(GL_TEXTURE_2D, g_texture);
 
 		// Use the shader we made
-		glUseProgram(g_shader);
-
-
+		glUseProgram(g_toonShader);
 		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
 		glLightfv(GL_LIGHT0, GL_POSITION, direction);
-
 
 		// Render a single square as our geometry
 		// You would normally render your geometry here
@@ -359,7 +374,52 @@ void render(int width, int height) {
 
 		// Unbind our shader
 		glUseProgram(0);
-	}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+		glUseProgram(g_sobelShader);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		glDisable(GL_LIGHTING);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Enable Drawing texures
+		glEnable(GL_TEXTURE_2D);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		// Set the location for binding the texture
+		glActiveTexture(GL_TEXTURE0);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, normalTexture);
+		glActiveTexture(GL_TEXTURE1);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+		glActiveTexture(GL_TEXTURE2);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, depth_tex);
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+		glUniform1i(glGetUniformLocation(g_sobelShader, "edge"), 0);
+		glUniform1i(glGetUniformLocation(g_sobelShader, "colorMap"), 1);
+		glUniform1i(glGetUniformLocation(g_sobelShader, "depthMap"), 2);
+		glUniform1f(glGetUniformLocation(g_sobelShader, "width"), width);
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glBegin(GL_QUADS);
+		glTexCoord2f(0, 0);
+		glVertex2f(-1, -1);
+		glTexCoord2f(1, 0);
+		glVertex2f(1, -1);
+		glTexCoord2f(1, 1);
+		glVertex2f(1, 1);
+		glTexCoord2f(0, 1);
+		glVertex2f(-1, 1);
+		glEnd();
+
+
+		glEnable(GL_TEXTURE_GEN_S);
+		glEnable(GL_TEXTURE_GEN_T);
 
 
 	// Disable flags for cleanup (optional)
