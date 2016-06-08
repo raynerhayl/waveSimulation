@@ -379,31 +379,10 @@ void drawOrigin() {
 	}glPopMatrix();
 }
 
-
-// Draw function
-//
-void render(int width, int height) {
-	glViewport(0, 0, width, height);
-	// Grey/Blueish background
-	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-	// Enable flags for normal rendering
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_NORMALIZE);
-	glEnable(GL_TEXTURE_2D);
-
-
-	setupCamera(width, height);
-
-	//glUseProgram(g_shaderPhong);
-
-	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+void renderWave() {
 	glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
 
-	 // render stuff on top
+	// render stuff on top
 	glPushMatrix(); {
 		glUseProgram(g_shaderPhong);
 		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
@@ -547,8 +526,6 @@ void render(int width, int height) {
 	glUseProgram(0);
 	glUseProgramObjectARB(0);
 
-	if (draw_school == false) {
-
 		glBindTexture(GL_TEXTURE_2D, g_texture);
 
 		// Use the shader we made
@@ -583,6 +560,29 @@ void render(int width, int height) {
 		glUseProgram(0);
 		glUseProgramObjectARB(0);
 
+
+}
+
+// Draw function
+//
+void render(int width, int height) {
+	glViewport(0, 0, width, height);
+	// Grey/Blueish background
+	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	// Enable flags for normal rendering
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_TEXTURE_2D);
+
+
+	setupCamera(width, height);
+
+	if (draw_school == false) {
+		renderWave();
 	}
 
 	glDisable(GL_LIGHTING);
