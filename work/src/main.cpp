@@ -67,6 +67,7 @@ int fps = 0;
 //
 bool g_useShader = false;
 GLuint g_texture = 0;
+GLuint g_plainShader = 0;
 GLuint g_sobelShader = 0;
 GLuint g_toonShader = 0;
 
@@ -221,6 +222,7 @@ void initShader() {
 	// and the corrosponding locations for the files of each stage
 	g_sobelShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/sobel.vert", "./work/res/shaders/sobel.frag" });
 	g_toonShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/toon.vert", "./work/res/shaders/toon.frag" });
+	g_plainShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/plain.vert", "./work/res/shaders/plain.frag" });
 
 }
 
@@ -347,7 +349,17 @@ void render(int width, int height) {
 
 	setupCamera(width, height);
 
-	//glDisable(GL_LIGHTING);
+
+		// Use the shader we made
+		if (g_useShader){
+			glUseProgram(g_toonShader);
+		} else {
+			glUseProgram(0);
+		}
+		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
+		glLightfv(GL_LIGHT0, GL_POSITION, direction);
+
+	glDisable(GL_LIGHTING);
 	//draw unlit stuff here
 	drawOrigin();
 	glColor3f(1,1,1);
@@ -361,21 +373,8 @@ void render(int width, int height) {
 	));
 
 	if(draw_school) g_school->renderSchool();
-	//glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
 
-		// Texture setup
-		
-		// Enable Drawing texures
-		glEnable(GL_TEXTURE_2D);
-		// Set the location for binding the texture
-		glActiveTexture(GL_TEXTURE0);
-		// Bind the texture
-		glBindTexture(GL_TEXTURE_2D, g_texture);
-
-		// Use the shader we made
-		glUseProgram(g_toonShader);
-		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
-		glLightfv(GL_LIGHT0, GL_POSITION, direction);
 
 		// Render a single square as our geometry
 		// You would normally render your geometry here
@@ -387,7 +386,11 @@ void render(int width, int height) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glViewport(0, 0, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+		if (g_useShader){
 		glUseProgram(g_sobelShader);
+	} else {
+		glUseProgram(g_plainShader);
+	}
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		glDisable(GL_LIGHTING);
@@ -407,10 +410,14 @@ void render(int width, int height) {
 		// Bind the texture
 		glBindTexture(GL_TEXTURE_2D, depth_tex);
 		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+			if (g_useShader){
 		glUniform1i(glGetUniformLocation(g_sobelShader, "edge"), 0);
 		glUniform1i(glGetUniformLocation(g_sobelShader, "colorMap"), 1);
 		glUniform1i(glGetUniformLocation(g_sobelShader, "depthMap"), 2);
 		glUniform1f(glGetUniformLocation(g_sobelShader, "width"), width);
+	} else {
+		glUniform1f(glGetUniformLocation(g_plainShader, "rendered"), 1);
+	}
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -439,6 +446,7 @@ void render(int width, int height) {
 	glDisable(GL_NORMALIZE);
 
 
+		glUseProgram(0);
 	glDeleteTextures(1, &depth_tex);
 	glDeleteTextures(1, &renderedTexture);
 	glDeleteTextures(1, &normalTexture);
