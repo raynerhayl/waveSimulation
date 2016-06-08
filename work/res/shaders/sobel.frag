@@ -10,18 +10,12 @@ float intensity(in vec4 color, int i)
 }
 float depthIntensity(in vec4 otherColor)
 {
-	float f=1000.0;
-
-float n = 0.1;
-
-float z = (2 * n) / (f + n - otherColor.x * (f - n));
-	//return z;
 	return pow(otherColor.x, 400);
 }
 
 vec3 sobel(float step, vec2 center)
 {
-	float norm = 0;
+	float norm = 0.0;
 	for (int i =0; i < 3; i++){
     float tleft = intensity(texture2D(edge,center + vec2(-step,step)), i);
     float left = intensity(texture2D(edge,center + vec2(-step,0)), i);
