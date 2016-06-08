@@ -427,6 +427,12 @@ void render(int width, int height) {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
+
+
+	glDeleteTextures(1, &depth_tex);
+	glDeleteTextures(1, &renderedTexture);
+	glDeleteTextures(1, &normalTexture);
+	glDeleteFramebuffers(1, &FramebufferName);
 }
 
 
