@@ -273,8 +273,10 @@ void drawOrigin(){
 void render(int width, int height) {
 	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 	GLuint FramebufferName = 0;
-	glGenFramebuffers(1, &FramebufferName);
-	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+
+
+	glGenFramebuffersEXT(1, &FramebufferName);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferName);
 	GLuint renderedTexture;
 	glGenTextures(1, &renderedTexture);
 
@@ -283,6 +285,7 @@ void render(int width, int height) {
 
 	// Give an empty image to OpenGL ( the last "0" )
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
 
 	// Poor filtering. Needed !
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -300,7 +303,7 @@ void render(int width, int height) {
 	GLuint depth_tex;
 	glGenTextures(1, &depth_tex);
 	glBindTexture(GL_TEXTURE_2D, depth_tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -309,11 +312,11 @@ void render(int width, int height) {
 	//-------------------------
 	//Attach depth buffer to FBO
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_tex, 0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_tex, 0);
 
 	// Set "renderedTexture" as our colour attachement #0
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normalTexture, 0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
 
 
 	// Set the list of draw buffers.
@@ -323,8 +326,13 @@ void render(int width, int height) {
 								   //glDrawBuffer(GL_NONE); // No color buffer is drawn to.
 
 								   // Always check that our framebuffer is ok
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+	}
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		return;
+	}
 
 	glViewport(0,0,width,height);
 	// Grey/Blueish background
@@ -351,6 +359,7 @@ void render(int width, int height) {
 		abs(scene_bounds.max.y-scene_bounds.min.y),
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
+
 	if(draw_school) g_school->renderSchool();
 	//glEnable(GL_LIGHTING);
 
@@ -376,6 +385,7 @@ void render(int width, int height) {
 		glUseProgram(0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		glViewport(0, 0, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 		glUseProgram(g_sobelShader);
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -408,13 +418,13 @@ void render(int width, int height) {
 		glLoadIdentity();
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 0);
-		glVertex2f(-1, -1);
+		glVertex3f(-1, -1,-1);
 		glTexCoord2f(1, 0);
-		glVertex2f(1, -1);
+		glVertex3f(1, -1,-1);
 		glTexCoord2f(1, 1);
-		glVertex2f(1, 1);
+		glVertex3f(1, 1,-1);
 		glTexCoord2f(0, 1);
-		glVertex2f(-1, 1);
+		glVertex3f(-1, 1,-1);
 		glEnd();
 
 
