@@ -24,29 +24,8 @@ using namespace cgra;
 
 Boid::Boid(vec3 pos) {
 	//calculate once 
-	mMaxSpeedSqrd = mMaxSpeed * mMaxSpeed;
-	mMinSpeedSqrd = mMinSpeed * mMinSpeed;
-
 	mPosition = pos;
 	mVelocity = vec3(math::random(-0.01,0.01), math::random(-0.01,0.01), math::random(-0.01,0.01));
-}
-
-
-/**/
-void Boid::draw() {
-	glPushMatrix();{
-		glTranslatef(mPosition.x,mPosition.y,mPosition.z);
-		float rotation = degrees(acos(dot(normalize(mVelocity), vec3(0,0,1))));
-		vec3 orthog = cross(mVelocity, vec3(0,0,1));
-		glRotatef(-rotation,orthog.x,orthog.y,orthog.z);
-		glColor3f(1,1,1);
-		float len = 2;
-		cgraCone(0.5, len, 4, 4, false);
-		glTranslatef(0,0,4);
-		glColor3f(1,0,0);
-		cgraLine(3);
-	// Clean up
-	}glPopMatrix();
 }
 
 //TODO use dist^2
@@ -69,10 +48,12 @@ void Boid::update(){
 	mVelocity += mAccel;
 
 	float velLengthSqrd = lengthSquared(mVelocity);
-	if( velLengthSqrd > mMaxSpeedSqrd ) {
+	float maxSpeedSqrd = getMaxSpeedSqrd();
+
+	if( velLengthSqrd > maxSpeedSqrd ) {
 		mVelocity = normalize(mVelocity);
 		mVelocity *= mMaxSpeed;
-	} else if( velLengthSqrd < mMinSpeedSqrd ) {
+	} else if( velLengthSqrd < mMinSpeed * mMinSpeed ) {
 		mVelocity = normalize(mVelocity);
 		mVelocity *= mMinSpeed;
 	}
@@ -81,4 +62,62 @@ void Boid::update(){
 	
 	mPosition += mVelocity;
 	mAccel = vec3(0,0,0);
+}
+
+cgra::vec3 Boid::getPosition(){
+	return mPosition;
+}
+
+Predator::Predator(vec3 loc) : Boid(loc){
+	mMaxSpeed = 1.2;
+}
+
+void Boid::draw() {
+	glPushMatrix();{
+		glTranslatef(mPosition.x,mPosition.y,mPosition.z);
+		float rotation = degrees(acos(dot(normalize(mVelocity), vec3(0,0,1))));
+		vec3 orthog = cross(mVelocity, vec3(0,0,1));
+		glRotatef(-rotation,orthog.x,orthog.y,orthog.z);
+		drawSelf();
+	// Clean up
+	}glPopMatrix();
+}
+
+void Predator::drawSelf() {
+	glPushMatrix();{
+		glColor3f(1,0.6,0);
+		float len = 8;
+		cgraCone(len/4, len, 4, 4, false);
+		glTranslatef(0,0,4);
+		glColor3f(1,0,0);
+		cgraLine(3);
+	// Clean up
+	}glPopMatrix();
+}
+
+float Predator::getMaxSpeedSqrd(){
+	return mMaxSpeed * mMaxSpeed;
+}
+
+Prey::Prey(vec3 loc) : Boid(loc){
+
+}
+
+float Prey::getMaxSpeedSqrd(){
+	float speed = min(mMaxSpeed + (((int)(mFear*100) % 10000)*.001), 5.0f);
+	return speed * speed;
+}
+
+/**/
+void Prey::drawSelf() {
+	//cout << mFear << endl;
+	glPushMatrix();{
+		glColor3f(1,1-mFear,1-mFear);
+		float len = 2;
+		cgraCone(len/4, len, 4, 4, false);
+		// glTranslatef(0,0,4);
+		// glColor3f(1,0,0);
+		// cgraLine(3);
+	// Clean up
+	}glPopMatrix();
 }

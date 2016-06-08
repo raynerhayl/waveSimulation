@@ -28,6 +28,10 @@
 #include "opengl.hpp"
 #include "school.hpp"
 #include "helpers.hpp"
+#include "boid.hpp"
+#include "octree.hpp"
+
+#include "perlin_noise.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -52,7 +56,7 @@ float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
 
-BoundingBox scene_bounds = BoundingBox(vec3(-100,-100,-100),vec3(100,100,100));
+BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
 
 //school related
 School * g_school;
@@ -110,8 +114,10 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	// cout << "Scroll Callback :: xoffset=" << xoffset << "yoffset=" << yoffset << endl;
 	g_zoom -= yoffset * g_zoom * 0.2;
 }
-
-
+OctreeNode * m_octree;
+Octree * m_newtree;
+std::vector<Boid*> temp_boids;
+int boid = 0;
 // Keyboard callback
 // Called for every key event on since the last glfwPollEvents
 //
@@ -123,6 +129,43 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 	switch(key){
 		case 'F':
 			if(action == 1)draw_school = !draw_school;
+		break;
+		case 'O':
+			if(action == 1){
+				for(int i = 0; i != 2000; i++){
+					vec3 position = vec3(math::random(scene_bounds.min.x,scene_bounds.max.x),math::random(scene_bounds.min.y,scene_bounds.max.y),math::random(scene_bounds.min.z,scene_bounds.max.z));
+					Prey* b = new Prey(position);
+					temp_boids.push_back(b);
+					cout << b << endl;
+					m_newtree->insert(b);
+				}
+				//cout << temp_boids.size() << endl;
+			}
+		break;
+		case 'P':
+		{
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0.4,0);
+		}
+		break;
+		case 'L':
+		{
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0.4,0,0);
+		}
+		break;
+		case 'M':
+		{
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0,0.4);
+		}
+		break;
+		case 'I':
+		{
+			if(action ==1)boid++;
+		}
+		break;
+		case 'D':
+		{
+			m_newtree->clear();
+		}
 		break;
 	}
 }
@@ -172,7 +215,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(500,scene_bounds);
+	g_school = new School(800,3,scene_bounds);
 }
 
 // Sets up where and what the light is
@@ -454,6 +497,25 @@ void APIENTRY debugCallbackARB(GLenum, GLenum, GLuint, GLenum, GLsizei, const GL
 // 
 int main(int argc, char **argv) {
 
+
+	PerlinNoise p_noise;
+
+	cout << "Perlinine" <<  endl;
+
+	for (int x = 0; x < 10; x++) {
+		for (int y = 0; y < 10; y++) {
+			double dx = x/double(9);
+			double dy = y/double(9);
+
+			cout << p_noise.noise(dx, dy, 0);
+		
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+
+
 	// Initialize the GLFW library
 	if (!glfwInit()) {
 		cerr << "Error: Could not initialize GLFW" << endl;
@@ -544,8 +606,7 @@ int main(int argc, char **argv) {
 
 		double currentTime = glfwGetTime();
 		nbFrames++;
-		if ( currentTime - lastTime >= 1.0 ){ 
-
+		if ( currentTime - lastTime >= 1.0 ) {
 		    frameSpeed = 1000.0/double(nbFrames);
 		    fps = nbFrames;
 		    nbFrames = 0;

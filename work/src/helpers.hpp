@@ -12,6 +12,9 @@ struct BoundingBox {
 		min = _min;
 		max = _max;
 	}
+    bool inside(const vec3 p){
+        return !(p.x > max.x || p.x < min.x || p.y > max.y || p.y < min.y || p.z > max.z || p.z < min.z);
+    }
 };
 
 inline BoundingBox operator* (float lhs, const BoundingBox& rhs)
@@ -33,4 +36,13 @@ inline BoundingBox operator* (const BoundingBox& lhs, float rhs)
 /*Return the non-sqrt length of a vector*/
 inline float lengthSquared(const vec3 &vec){
     return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
+}
+
+
+inline float min(float a, float b){
+    return (a > b)? b : a;
+}
+
+inline float max(float a, float b){
+    return (a < b)? b : a;
 }

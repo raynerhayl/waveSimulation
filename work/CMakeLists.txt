@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 # Assignment Name
-set(CGRA_PROJECT "a3" CACHE STRING "CGRA Project Name")
+set(CGRA_PROJECT "project" CACHE STRING "CGRA Project Name")
 
 # Project
 project("CGRA_PROJECT_${CGRA_PROJECT}" CXX C)

@@ -15,33 +15,30 @@
 #include "cgra_math.hpp"
 #include "opengl.hpp"
 #include "boid.hpp"
-
-
-enum primitives {
-	cube = 0,
-	cylinder = 1
-};
+#include "octree.hpp"
 
 
 class School {
 
 public:
 	//methods
-	School(int,BoundingBox);
+	School(int, int, BoundingBox);
 	void renderSchool();
-	void addCollider(primitives);
 	
 private:
 	//fields
 	BoundingBox bounding_box;
 	bool draw_bounds = true;
 
-	std::vector<Boid> boids;
+	Octree* m_octree;
+	std::vector<Prey> prey;
+	std::vector<Predator> predators;
 
 	// Methods
 	void drawBounds();
 	void update();
 	void applyForce(float,float,float);
 
-
+	void testSchool(BoundingBox);
+	void buildTree();
 };
