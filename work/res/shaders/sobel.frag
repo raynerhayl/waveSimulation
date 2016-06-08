@@ -30,7 +30,7 @@ vec3 sobel(float step, vec2 center)
 	float x = tleft + 2.0*left + bleft - tright - 2.0*right - bright;
 	float y = -tleft - 2.0*top - tright + bleft + 2.0 * bottom + bright;
     float color = sqrt((x*x) + (y*y));
-    if (color > 0.25){return vec3(0.0,0.0,0.0);}
+   // if (color > 0.95){return vec3(0.0,0.0,0.0);}
 
      tleft = depthIntensity(texture2D(depthMap,center + vec2(-step,step)));
      left = depthIntensity(texture2D(depthMap,center + vec2(-step,0)));
@@ -44,7 +44,7 @@ vec3 sobel(float step, vec2 center)
 	 x = tleft + 2.0*left + bleft - tright - 2.0*right - bright;
 	 y = -tleft - 2.0*top - tright + bleft + 2.0 * bottom + bright;
      color = sqrt((x*x) + (y*y));
-    if (color > 0.05){return vec3(0.0,0.0,0.0);}
+    //if (color > 0.02){return vec3(0.0,0.0,0.0);}
 
 
 	return texture2D(colorMap, center).rgb;

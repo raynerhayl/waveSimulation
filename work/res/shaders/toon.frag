@@ -32,7 +32,7 @@ void main()
 	sf = step(0.5, sf);
 	vec4 specular_color = gl_FrontMaterial.specular * gl_LightSource[0].specular * sf;
 
-	gl_FragData[0] = ambient_color + (diffuse_color * ceil(intensity*2)/2)+ specular_color ;
+	gl_FragData[0] = ambient_color + (gl_Color * ceil(intensity*2)/2)+ specular_color ;
 	gl_FragData[1] = vec4(n,1);
 
 

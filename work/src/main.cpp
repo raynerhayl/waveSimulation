@@ -216,7 +216,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(800,3,scene_bounds);
+	g_school = new School(500,3,scene_bounds);
 }
 
 // Sets up where and what the light is
@@ -418,10 +418,6 @@ void render(int width, int height) {
 	if(draw_school) g_school->renderSchool();
 	glEnable(GL_LIGHTING);
 
-
-		// Render a single square as our geometry
-		// You would normally render your geometry here
-		cgraSphere(1);
 
 		// Unbind our shader
 		glUseProgram(0);
