@@ -584,21 +584,23 @@ void render(int width, int height) {
 	if (draw_school == false) {
 		renderWave();
 	}
+	else {
 
-	glDisable(GL_LIGHTING);
-	//draw unlit stuff here
-	drawOrigin();
-	glColor3f(1, 1, 1);
-	cgraCube(
-		vec3((scene_bounds.max.x + scene_bounds.min.x) / 2,
-			(scene_bounds.max.y + scene_bounds.min.y) / 2,
-			(scene_bounds.max.z + scene_bounds.min.z) / 2), vec3(
-				abs(scene_bounds.max.x - scene_bounds.min.x),
-				abs(scene_bounds.max.y - scene_bounds.min.y),
-				abs(scene_bounds.max.z - scene_bounds.min.z)
-				));
-	if (draw_school) {
-		g_school->renderSchool();
+		glDisable(GL_LIGHTING);
+		//draw unlit stuff here
+		drawOrigin();
+		glColor3f(1, 1, 1);
+		cgraCube(
+			vec3((scene_bounds.max.x + scene_bounds.min.x) / 2,
+				(scene_bounds.max.y + scene_bounds.min.y) / 2,
+				(scene_bounds.max.z + scene_bounds.min.z) / 2), vec3(
+					abs(scene_bounds.max.x - scene_bounds.min.x),
+					abs(scene_bounds.max.y - scene_bounds.min.y),
+					abs(scene_bounds.max.z - scene_bounds.min.z)
+					));
+		if (draw_school) {
+			g_school->renderSchool();
+		}
 	}
 
 	// Disable flags for cleanup (optional)
