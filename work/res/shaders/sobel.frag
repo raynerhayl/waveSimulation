@@ -53,16 +53,15 @@ vec3 sobel(float step, vec2 center)
 	 float y = -tleft - 2.0*top - tright + bleft + 2.0 * bottom + bright;
     float depth = sqrt((x*x) + (y*y));
     //if (color > 0.32){return vec3(0.0,0.0,0.0);}
-    float maxCol = mix(depth, norm, 0.1);
+    float maxCol = mix(depth, norm, 0.05) * 2;
    // return vec3(maxCol,maxCol,maxCol);
 
 
 	//return texture2D(colorMap, center).rgb;
 	//return vec3(1.0,1.0,1.0);
 
-    vec3 mixed=  mix(texture2D(colorMap, center).rgb,vec3(0.0,0.0,0.0), maxCol );
-    return mixed;
-    //return vec3(top,top,top);
+    vec3 mixed=  mix(texture2D(colorMap, center).rgb,vec3(117/255.0,17/255.0,92/255.0), maxCol );
+   return mixed;
  }
 
 float rand(float n){return fract(sin(n) * 43758.5453123);}
