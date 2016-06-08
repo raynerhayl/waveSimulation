@@ -101,6 +101,8 @@ void main() {
 
 	vPosition = worldPos.xyz;
 
+	vTextureCoord0 = gl_MultiTexCoord0.xy;
+
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
 	

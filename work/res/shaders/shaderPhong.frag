@@ -39,11 +39,14 @@ void main() {
 	vec4 color = vec4(0.0);
 	
 	vec3 L = normalize(gl_LightSource[0].position.xyz);
-	vec3 norm = normalize(vNormal);
+	vec3 norm = normalize(texture2D(texture0,vTextureCoord0.st).rgb*2.0-1.0);
+	norm = normalize(norm + vNormal);
+	//normalize(vNormal);
 	vec4 diff = gl_FrontLightProduct[0].diffuse * max(dot(norm,L),0.0);
 
 	vec4 amb = gl_FrontLightProduct[0].ambient;
 	color = diff + amb;
+
 	gl_FragColor = color;
 
 

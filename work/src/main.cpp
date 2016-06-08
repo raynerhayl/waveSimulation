@@ -90,9 +90,7 @@ bool g_useShader = true;
 GLuint g_texture = 0;
 GLuint g_shaderGerstner = 0;
 GLuint g_shaderPhong = 1;
-
-GLuint causTex = 1;
-GLuint brickTex = 2;
+GLuint bumpTex = 0;
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -274,11 +272,11 @@ void initLight() {
 // An example of how to load a texure from a hardcoded location
 //
 void initTexture() {
-	Image tex("./work/res/textures/water.jpg");
+	Image tex("./work/res/textures/normalMap.jpg");
+	glGenTextures(1, &bumpTex); // Generate texture ID
 
 	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
-	glGenTextures(1, &g_texture); // Generate texture ID
-	glBindTexture(GL_TEXTURE_2D, g_texture); // Bind it as a 2D texture
+	glBindTexture(GL_TEXTURE_2D, bumpTex); // Bind it as a 2D texture
 
 	// Setup sampling strategies
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -290,35 +288,6 @@ void initTexture() {
 	// Finnaly, actually fill the data into our texture
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
 
-	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
-	glGenTextures(1, &causTex); // Generate texture ID
-	glBindTexture(GL_TEXTURE_2D, causTex); // Bind it as a 2D texture
-
-											 // Setup sampling strategies
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	tex = Image("./work/res/textures/brick.jpg");
-
-	// Finnaly, actually fill the data into our texture
-	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
-
-	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
-	glGenTextures(1, &brickTex); // Generate texture ID
-	glBindTexture(GL_TEXTURE_2D, brickTex); // Bind it as a 2D texture
-
-										   // Setup sampling strategies
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Finnaly, actually fill the data into our texture
-	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
 }
 
 
@@ -380,11 +349,12 @@ void drawOrigin() {
 }
 
 void renderWave() {
-	glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
+	glUseProgram(g_shaderPhong);
+
+
 
 	// render stuff on top
 	glPushMatrix(); {
-		glUseProgram(g_shaderPhong);
 		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
 		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
 		float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
@@ -444,14 +414,26 @@ void renderWave() {
 	glUseProgram(0);
 	glUseProgramObjectARB(0);
 
-		glBindTexture(GL_TEXTURE_2D, g_texture);
+	
 
-		// Use the shader we made
+		// Texture setup
+		//
+		// Enable Drawing texures
+		glEnable(GL_TEXTURE_2D);
+		// Set the location for binding the texture
+		glActiveTexture(GL_TEXTURE0);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, bumpTex);
+
 		glUseProgram(g_shaderGerstner);
+
+
+		glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
+		// Use the shader we made
 
 		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
 		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture0"), 0);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 1);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
 
 		// Set the current time for the shader 
 		glUniform1f(glGetUniformLocation(g_shaderGerstner, "time"), waveTime);
@@ -466,11 +448,11 @@ void renderWave() {
 
 
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		wave->render();
 

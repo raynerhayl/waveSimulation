@@ -116,7 +116,7 @@ void Wave::createDisplayListPoly() {
 		for (int vtri = 0; vtri < 3; vtri++) {
 			glNormal3f(m_normals[m_triangles[tri].v[vtri].n].x, m_normals[m_triangles[tri].v[vtri].n].y, m_normals[m_triangles[tri].v[vtri].n].z);
 			glVertex3f(m_points[m_triangles[tri].v[vtri].p].x, m_points[m_triangles[tri].v[vtri].p].y, m_points[m_triangles[tri].v[vtri].p].z);
-			//glTexCoord2f(((m_points[m_triangles[tri].v[vtri].p].x + width / 2) / width), ((m_points[m_triangles[tri].v[vtri].p].z + height / 2) / height));
+			glTexCoord2f(((m_points[m_triangles[tri].v[vtri].p].x + width / 2) / width)*4, ((m_points[m_triangles[tri].v[vtri].p].z + height / 2) / height)*4);
 		}
 	}
 
