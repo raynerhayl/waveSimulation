@@ -87,10 +87,11 @@ void Predator::drawSelf() {
 	glPushMatrix();{
 		glColor3f(1,0.6,0);
 		float len = 8;
-		cgraCone(len/4, len, 4, 4, false);
-		glTranslatef(0,0,4);
-		glColor3f(1,0,0);
-		cgraLine(3);
+		m_geometry->renderGeometry();
+		//cgraCone(len/4, len, 4, 4, false);
+		//glTranslatef(0,0,4);
+		//glColor3f(1,0,0);
+		//cgraLine(3);
 	// Clean up
 	}glPopMatrix();
 }

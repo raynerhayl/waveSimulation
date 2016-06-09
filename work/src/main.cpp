@@ -786,7 +786,7 @@ int main(int argc, char **argv) {
 	initShader();
 	initSchool();
 	initWaves();
-
+	ship = new Geometry("./work/res/assets/ship.obj");
 	//for fps calculation
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;

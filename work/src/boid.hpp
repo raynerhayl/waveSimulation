@@ -31,6 +31,7 @@ public:
 	vec3 getPosition();
 
 	void pullToCentre(const vec3 &);
+	Geometry * m_geometry;
 	
 private:
 	BoundingBox bounds;
@@ -55,7 +56,6 @@ private:
 };
 
 class Prey : public Boid {
-	
 public:
 	//methods
 	Prey(vec3 pos);
@@ -63,7 +63,6 @@ public:
 	bool mIsDead = false;
 	float mFear = 0.0f;
 	float mMass = 1;
-	Geometry * m_geometry;
 private:
 	void drawSelf();
 	float getMaxSpeedSqrd();

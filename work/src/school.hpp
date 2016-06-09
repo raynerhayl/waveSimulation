@@ -30,6 +30,7 @@ private:
 	BoundingBox bounding_box;
 	bool draw_bounds = true;
 	Geometry m_fishGeometry = Geometry("./work/res/assets/fish1.obj");
+	Geometry m_sharkGeometry = Geometry("./work/res/assets/shark.obj");
 
 	Octree* m_octree;
 	std::vector<Prey> prey;
