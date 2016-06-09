@@ -570,8 +570,8 @@ void render(int width, int height) {
 	glFogfv(GL_FOG_COLOR, fogColor);            // Set Fog Color
 	glFogf(GL_FOG_DENSITY, 0.35f);              // How Dense Will The Fog Be
 	glHint(GL_FOG_HINT, GL_DONT_CARE);          // Fog Hint Value
-	glFogf(GL_FOG_START, 4000.0f);             // Fog Start Depth
-	glFogf(GL_FOG_END, 8000.0f);               // Fog End Depth
+	glFogf(GL_FOG_START, 2800.0f);             // Fog Start Depth
+	glFogf(GL_FOG_END, 4000.0f);               // Fog End Depth
 	glEnable(GL_FOG);                   // Enables GL_FOG
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -610,9 +610,9 @@ void render(int width, int height) {
 	if(draw_school) g_school->renderSchool();
 	//ship->renderGeometry();
 	glPushMatrix();
-	glTranslatef(0, -1000, 0);
+	glTranslatef(0, -500, 0);
 	glColor3f(0.3f,0.3f,0.3f);
-	glScalef(10, 10, 10);
+	glScalef(5, 5, 5);
 	ground->renderGeometry();
 	glPopMatrix();
 	//renderWave();
@@ -815,7 +815,7 @@ int main(int argc, char **argv) {
 	bool fade = true; // fade out
 
 	ship = new Geometry("./work/res/assets/ship.obj");
-	ground = new Geometry("./work/res/assets/ground.obj");
+	ground = new Geometry("./work/res/assets/ground2.obj");
 
 
 	// Loop until the user closes the window
