@@ -52,11 +52,13 @@ float g_zfar = 10000.0;
 
 // Mouse controlled Camera values
 //
+bool dragging = false;
 bool g_leftMouseDown = false;
 vec2 g_mousePosition;
 float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
+vec3 g_camPos = vec3(0,0,0);
 
 BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
 
@@ -106,9 +108,9 @@ GLuint bumpTex = 0;
 //
 void cursorPosCallback(GLFWwindow* win, double xpos, double ypos) {
 	// cout << "Mouse Movement Callback :: xpos=" << xpos << "ypos=" << ypos << endl;
-	if (g_leftMouseDown) {
-		g_yaw -= g_mousePosition.x - xpos;
-		g_pitch -= g_mousePosition.y - ypos;
+	if (g_leftMouseDown || dragging) {
+		g_yaw -= (g_mousePosition.x - xpos)*.2;
+		g_pitch -= (g_mousePosition.y - ypos)*.2;
 	}
 	g_mousePosition = vec2(xpos, ypos);
 }
@@ -118,9 +120,13 @@ void cursorPosCallback(GLFWwindow* win, double xpos, double ypos) {
 // Called for mouse button event on since the last glfwPollEvents
 //
 void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
-	// cout << "Mouse Button Callback :: button=" << button << "action=" << action << "mods=" << mods << endl;
-	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	//cout << "Mouse Button Callback :: button=" << button << "action=" << action << "mods=" << mods << endl;
+	if (button == GLFW_MOUSE_BUTTON_LEFT){
 		g_leftMouseDown = (action == GLFW_PRESS);
+	}
+	if(button == GLFW_MOUSE_BUTTON_MIDDLE){
+		if(action ==1)dragging = ! dragging;
+	}
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 		if (g_useShader) {
 			g_useShader = false;
@@ -132,7 +138,15 @@ void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
 		}
 	}
 }
-
+cgra::vec3 getCamDir(){
+	float yaw = radians(g_yaw);
+	float pitch = radians(g_pitch);
+	float xzLen = cos(pitch);
+	float z = xzLen * cos(yaw);
+	float y = sin(pitch);
+	float x = xzLen * sin(-yaw);
+	return vec3(x,y,z);
+}
 
 // Scroll callback
 // Called for scroll event on since the last glfwPollEvents
@@ -140,12 +154,10 @@ void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
 void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	// cout << "Scroll Callback :: xoffset=" << xoffset << "yoffset=" << yoffset << endl;
 	g_zoom -= yoffset * g_zoom * 0.2;
+	if(yoffset < 0) g_camPos -= getCamDir()*8;
+	else  g_camPos += getCamDir()*8;
 }
 
-OctreeNode * m_octree;
-Octree * m_newtree;
-std::vector<Boid*> temp_boids;
-int boid = 0;
 // Keyboard callback
 // Called for every key event on since the last glfwPollEvents
 //
@@ -160,39 +172,31 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 		break;
 		case 'O':
 			if(action == 1){
-				for(int i = 0; i != 2000; i++){
-					vec3 position = vec3(math::random(scene_bounds.min.x,scene_bounds.max.x),math::random(scene_bounds.min.y,scene_bounds.max.y),math::random(scene_bounds.min.z,scene_bounds.max.z));
-					Prey* b = new Prey(position);
-					temp_boids.push_back(b);
-					cout << b << endl;
-					m_newtree->insert(b);
-				}
-				//cout << temp_boids.size() << endl;
+				cout << "pit: " << g_pitch << " yaw " << g_yaw << endl;
 			}
 		break;
-		case 'P':
+		case 'W':
 		{
-			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0.4,0);
+			g_camPos += normalize(getCamDir()) * 8;
 		}
 		break;
-		case 'L':
+		case 'A':
 		{
-			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0.4,0,0);
+			vec3 camDir = getCamDir();
+			vec3 left = cross(camDir,vec3(0,1,0));
+			g_camPos -= normalize(left);
 		}
 		break;
-		case 'M':
+		case 'S':
 		{
-			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0,0.4);
-		}
-		break;
-		case 'I':
-		{
-			if(action ==1)boid++;
+			g_camPos -= getCamDir()* 4;
 		}
 		break;
 		case 'D':
 		{
-			m_newtree->clear();
+			vec3 camDir = getCamDir();
+			vec3 right = cross(camDir,vec3(0,1,0));
+			g_camPos += normalize(right);
 		}
 		break;
 	}
@@ -367,9 +371,9 @@ void setupCamera(int width, int height) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glTranslatef(0, 0, -50 * g_zoom);
 	glRotatef(g_pitch, 1, 0, 0);
 	glRotatef(g_yaw, 0, 1, 0);
+	glTranslatef(g_camPos.x, g_camPos.y, g_camPos.z);
 }
 
 
@@ -589,7 +593,7 @@ void render(int width, int height) {
 
 	glDisable(GL_LIGHTING);
 	//draw unlit stuff here
-	/*drawOrigin();
+	drawOrigin();
 	glColor3f(1,1,1);
 	cgraCube(
 		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
@@ -598,7 +602,7 @@ void render(int width, int height) {
 		abs(scene_bounds.max.x-scene_bounds.min.x),
 		abs(scene_bounds.max.y-scene_bounds.min.y),
 		abs(scene_bounds.max.z-scene_bounds.min.z)
-	));*/
+	));
 
 	// Use the shader we made
 	if (g_useShader) {
