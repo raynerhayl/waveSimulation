@@ -617,14 +617,14 @@ void render(int width, int height) {
 		glTranslatef(shipPos.x,0.0,shipPos.y);
 
 		glScalef(10,10,10);
-		ship->renderGeometry();
+		//ship->renderGeometry();
 
 	} glPopMatrix();
 
 
 
 		glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
-		renderWave();
+		//renderWave();
 	glEnable(GL_LIGHTING);
 
 
