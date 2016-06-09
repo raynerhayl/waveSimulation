@@ -33,64 +33,6 @@ varying float caustic;
 
 
 void main() {
-
-	/*
-	//vNormal = normalize(vNormal);
-
-	vec4 color = vec4(1.0);
-	vec4 texColor = vec4(texture2D(texture0, vTextureCoord0).rgb,1.0);
-	vec3 bNorm = texture2D(texture0, vTextureCoord0).rgb * 2.0 - 1.0;
-
-	vec3 L = normalize(gl_LightSource[0].position.xyz);
-	vec3 norm = normalize(vNormal);
-	norm =  bNorm;
-
-	vec4 diff = gl_FrontLightProduct[0].diffuse * max(dot(norm,L),0.0);// * vec4(texColor.rgb,1.0);
-	diff.xyz = diff.xyz + 0.4  * max(vPosition.y/3.0,0.0);
-	
-	//vec4 amb = gl_FrontLightProduct[0].ambient;
-	color = diff;
-	color.w=1.0;
-
-
-
-	gl_FragColor = color;
-
-
-	// Can do all sorts of cool stuff here
-	vec3 color = texture2D(texture1, vTextureCoord0).rgb;
-
-	//color = colorFromLight(0, vPosition, vNormal);
-	// IMPORTANT tell OpenGL what the final color of the fragment is (vec4)
-	//gl_FragColor = vec4(color, 0.1);
-
-	vec4 finalColor = vec4(color.rgb,0.0);
-
-
-   for (int i=0;i<1;i++)
-   {
-      vec3 L = normalize(gl_LightSource[i].position.xyz); 
-      vec3 E = normalize(-vPosition); // we are in Eye Coordinates, so EyePos is (0,0,0) 
-      vec3 R = normalize(-reflect(L,vNormal)); 
-   
-      //calculate Ambient Term: 
-      vec4 Iamb = gl_FrontLightProduct[i].ambient; 
-      //calculate Diffuse Term: 
-      vec4 Idiff = gl_FrontLightProduct[i].diffuse * max(dot(vNormal,L), 0.0);
-      Idiff = clamp(Idiff, 0.0, 1.0); 
-   
-      // calculate Specular Term:
-      vec4 Ispec = gl_FrontLightProduct[i].specular * pow(max(dot(R,E),0.0),0.3*gl_FrontMaterial.shininess);
-      Ispec = clamp(Ispec, 0.0, 1.0); 
-   
-      finalColor += Iamb + Idiff + Ispec;
-   }
-   
-   // write Total Color: 
-   gl_FragColor = gl_FrontLightModelProduct.sceneColor + finalColor; 				*/
-
-	
-
 	vec3 CAMERA_POSITION = gl_ModelViewMatrixInverse[3].xyz;
 
 	vec4 specular;

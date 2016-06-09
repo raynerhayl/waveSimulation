@@ -441,7 +441,7 @@ void renderWave() {
 		// Unbind our shader
 		glUseProgram(0);
 		glUseProgramObjectARB(0);
-
+		glDisable(GL_TEXTURE_2D);
 
 }
 
