@@ -61,7 +61,7 @@ float g_zoom = 1.0;
 vec3 g_camPos = vec3(0,0,0);
 
 BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
-
+bool drawOriginAxis = false;
 //school related
 School * g_school;
 bool draw_school = true;
@@ -176,7 +176,7 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 		break;
 		case 'O':
 			if(action == 1){
-				cout << "pit: " << g_pitch << " yaw " << g_yaw << endl;
+				drawOriginAxis = !drawOriginAxis;
 			}
 		break;
 		case 'W':
@@ -220,7 +220,7 @@ void renderGUI() {
 	SimpleGUI::newFrame();
 
 	if (ImGui::IsMouseClicked(1))
-		ImGui::OpenPopup("Controls");
+		//ImGui::OpenPopup("Controls");
 
 	if (ImGui::BeginPopup("Controls")) {
 		if (ImGui::Selectable("Play")) {
@@ -575,17 +575,18 @@ void render(int width, int height) {
 	glDisable(GL_LIGHTING);
 
 	//draw unlit stuff here
-	drawOrigin();
-	glColor3f(1,1,1);
-	cgraCube(
-		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
-		(scene_bounds.max.y+scene_bounds.min.y)/2,
-		(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
-		abs(scene_bounds.max.x-scene_bounds.min.x),
-		abs(scene_bounds.max.y-scene_bounds.min.y),
-		abs(scene_bounds.max.z-scene_bounds.min.z)
-	));
-
+	if(drawOriginAxis){
+		drawOrigin();
+		glColor3f(1,1,1);
+		cgraCube(
+			vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
+			(scene_bounds.max.y+scene_bounds.min.y)/2,
+			(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
+			abs(scene_bounds.max.x-scene_bounds.min.x),
+			abs(scene_bounds.max.y-scene_bounds.min.y),
+			abs(scene_bounds.max.z-scene_bounds.min.z)
+		));
+	}
 	// Use the shader we made
 	if (g_useShader) {
 		glUseProgram(g_toonShader);

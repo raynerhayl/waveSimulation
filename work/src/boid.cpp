@@ -85,8 +85,9 @@ void Boid::draw() {
 
 void Predator::drawSelf() {
 	glPushMatrix();{
-		glColor3f(1,0.6,0);
+		glColor3f(1,1,1);
 		float len = 8;
+		glScalef(2,2,2);
 		m_geometry->renderGeometry();
 		//cgraCone(len/4, len, 4, 4, false);
 		//glTranslatef(0,0,4);
