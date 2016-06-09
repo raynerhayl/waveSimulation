@@ -61,7 +61,7 @@ float g_zoom = 1.0;
 vec3 g_camPos = vec3(0,0,0);
 
 BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
-
+bool drawOriginAxis = false;
 //school related
 School * g_school;
 bool draw_school = true;
@@ -69,7 +69,7 @@ bool draw_school = true;
 //wave related
 Wave * wave;
 float waveTime = 0.0;
-int numWaves = 10;
+int numWaves = 14;
 
 Geometry * ship = nullptr;
 Geometry * ground = nullptr;
@@ -77,15 +77,14 @@ GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
 
-float medianWavelength = 40;
-float amplitudeR = 1;
+float medianWavelength = 80;
+float amplitudeR = 2;
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 45; // difference in angle from windDir
 float medianS = 0.2;
-float speedFactor = 0.2; // scales the speed
+float speedFactor = 1; // scales the speed
 
-
-
+vec2 shipPos = vec2(0.0, -0.5);
 
 //performance
 float frameSpeed = 0;
@@ -102,6 +101,10 @@ GLuint g_toonShader = 0;
 GLuint g_shaderGerstner = 0;
 GLuint g_shaderPhong = 0;
 GLuint bumpTex = 0;
+GLuint g_shipShader = 0;
+GLuint g_gerstNormShader = 0;
+	GLuint gerstNormalTex;
+
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -172,7 +175,7 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 		break;
 		case 'O':
 			if(action == 1){
-				cout << "pit: " << g_pitch << " yaw " << g_yaw << endl;
+				drawOriginAxis = !drawOriginAxis;
 			}
 		break;
 		case 'W':
@@ -216,7 +219,7 @@ void renderGUI() {
 	SimpleGUI::newFrame();
 
 	if (ImGui::IsMouseClicked(1))
-		ImGui::OpenPopup("Controls");
+		//ImGui::OpenPopup("Controls");
 
 	if (ImGui::BeginPopup("Controls")) {
 		if (ImGui::Selectable("Play")) {
@@ -247,7 +250,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(1000,3,scene_bounds);
+	g_school = new School(500,3,scene_bounds);
 }
 
 float randF() {
@@ -310,11 +313,11 @@ void initLight() {
 	float direction[] = { 0.0, 1.0, 1.0, 0.0 };
 	float diffintensity[] = { 0.8, 0.8, 0.8, 1.0 };
 	float ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-	//float specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	float specular[] = { 00.1,0.1,0.1, 1.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
-	//glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
 
@@ -353,8 +356,10 @@ void initShader() {
 	g_sobelShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/sobel.vert", "./work/res/shaders/sobel.frag" });
 	g_toonShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/toon.vert", "./work/res/shaders/toon.frag" });
 	g_plainShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/plain.vert", "./work/res/shaders/plain.frag" });
-	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/shaderPhong.frag" });
+	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/toon.frag" });
 	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
+	g_shipShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/ship.vert", "./work/res/shaders/toon.frag" });
+	g_gerstNormShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/norm.frag" });
 
 }
 
@@ -404,62 +409,21 @@ void drawOrigin(){
 
 void renderWave() {
 	glUseProgram(0);
-
-	// render stuff on top
-	glPushMatrix(); {
-		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
-		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-		float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-		float specular[] = { 0.0,0.0 / 256.0,150.0 / 256.0, 1.0 };
-		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-		float shininess[] = { 0.1*128.0 };
-		glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
-
-		glTranslatef(0, 30, 0);
-		cgraSphere(10.0);
-
-	} glPopMatrix();
-
-	// render stuff on bottom
-	glPushMatrix(); {
-
-		glRotatef(180, 0.0, 0.0, 1.0);
-
-		glPushMatrix(); {
-			float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
-			glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-			float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-			float specular[] = { 0.0,0.0 / 256.0,150.0 / 256.0, 1.0 };
-			glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-			float shininess[] = { 0.1*128.0 };
-			glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
-
-			glTranslatef(0, 30, 0);
-			cgraSphere(10.0);
-
-		} glPopMatrix();
-
-		GLint m_viewport[4];
-		glGetIntegerv(GL_VIEWPORT, m_viewport);
-
-		//glBindTexture(GL_TEXTURE_2D, causTex);
-		//glCopyTexSubImage2D(GL_TEXTURE_2D, 1, 0, 0, m_viewport[0], m_viewport[1], 200, 200);
-
-	} glPopMatrix();
+	glUseProgramObjectARB(0);
 
 	glUseProgram(0);
 	glUseProgramObjectARB(0);
 
-		// Texture setup
+
+				// Texture setup
 		//
 		// Enable Drawing texures
 		glEnable(GL_TEXTURE_2D);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		// Set the location for binding the texture
 		glActiveTexture(GL_TEXTURE0);
 		// Bind the texture
-		glBindTexture(GL_TEXTURE_2D, bumpTex);
+		glBindTexture(GL_TEXTURE_2D, gerstNormalTex);
 
 		glUseProgram(g_shaderGerstner);
 
@@ -477,25 +441,20 @@ void renderWave() {
 		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
 		// Specify the number of waves to use from the buffer
 		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
-		GLint m_viewport[4];
-		glGetIntegerv(GL_VIEWPORT, m_viewport);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportWidth"), m_viewport[2]);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportHeight"), m_viewport[3]);
 
 
+		glPushMatrix;{
+		glScalef(10,10,10);
 
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		wave->render();
+
+	}glPopMatrix;
 
 		// Unbind our shader
 		glUseProgram(0);
 		glUseProgramObjectARB(0);
-		//glDisable(GL_TEXTURE_2D);
+		glDisable(GL_TEXTURE_2D);
 
 }
 
@@ -503,9 +462,15 @@ void renderWave() {
 // Draw function
 //
 void render(int width, int height) {
+
+
+
 	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 	GLuint FramebufferName = 0;
+	//glViewport(0,0,width,height);
+	glViewport(0,0,width,height);
 
+	
 
 	glGenFramebuffersEXT(1, &FramebufferName);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferName);
@@ -541,6 +506,17 @@ void render(int width, int height) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+/*
+	glGenTextures(1, &gerstNormalTex);
+	glBindTexture(GL_TEXTURE_2D, gerstNormalTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	*/
+
+
 	//-------------------------
 	//Attach depth buffer to FBO
 
@@ -549,6 +525,8 @@ void render(int width, int height) {
 	// Set "renderedTexture" as our colour attachement #0
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
+	//glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gerstNormalTex, 0);
+
 
 
 	// Set the list of draw buffers.
@@ -580,6 +558,8 @@ void render(int width, int height) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+	
+
 	// Enable flags for normal rendering
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
@@ -592,17 +572,6 @@ void render(int width, int height) {
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 
 	glDisable(GL_LIGHTING);
-	//draw unlit stuff here
-	drawOrigin();
-	glColor3f(1,1,1);
-	cgraCube(
-		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
-		(scene_bounds.max.y+scene_bounds.min.y)/2,
-		(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
-		abs(scene_bounds.max.x-scene_bounds.min.x),
-		abs(scene_bounds.max.y-scene_bounds.min.y),
-		abs(scene_bounds.max.z-scene_bounds.min.z)
-	));
 
 	// Use the shader we made
 	if (g_useShader) {
@@ -612,7 +581,9 @@ void render(int width, int height) {
 		glUseProgram(0);
 	}
 	if(draw_school) g_school->renderSchool();
-	//ship->renderGeometry();
+
+	
+
 	glPushMatrix();
 	glTranslatef(0, -1000, 0);
 	glColor3f(0.3f,0.3f,0.3f);
@@ -646,18 +617,14 @@ void render(int width, int height) {
 		glTranslatef(shipPos.x,0.0,shipPos.y);
 
 		glScalef(10,10,10);
-		//ship->renderGeometry();
+		ship->renderGeometry();
 
 	} glPopMatrix();
 
 
 
-
-		glPushMatrix();
-		glTranslatef(0, 500, 0);
-		glColor3f(52 / 255.0, 104 / 255.0, 125 / 255.0);
-	renderWave();
-		glPopMatrix();
+		glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
+		renderWave();
 	glEnable(GL_LIGHTING);
 
 
@@ -728,10 +695,14 @@ void render(int width, int height) {
 
 
 		glUseProgram(0);
+	
+	
 	glDeleteTextures(1, &depth_tex);
 	glDeleteTextures(1, &renderedTexture);
 	glDeleteTextures(1, &normalTexture);
 	glDeleteFramebuffers(1, &FramebufferName);
+
+	
 }
 
 
@@ -896,10 +867,6 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-
-
-
-
 
 
 		// Make sure we draw to the WHOLE window
