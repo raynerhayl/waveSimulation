@@ -69,7 +69,7 @@ Wave * wave;
 float waveTime = 0.0;
 int numWaves = 10;
 
-Geometry * ship = new Geometry("./work/res/assets/ship.obj");
+Geometry * ship = nullptr;
 
 GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
@@ -799,6 +799,8 @@ int main(int argc, char **argv) {
 	int wave = 0;
 
 	bool fade = true; // fade out
+
+	ship = new Geometry("./work/res/assets/ship.obj");
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
