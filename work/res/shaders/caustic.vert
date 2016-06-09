@@ -110,10 +110,9 @@ void main() {
 	vNormal = normalize(vNormal);
 
 	vec4 color = gl_Color;
-	
 	float caustic = dot(vNormal, normalize(gl_LightSource[0].position.xyz));
-	color = caustic * color;
-
+	color =   0.5* caustic + 0.5*color;
+	
 	vNormal = gl_NormalMatrix * gl_Normal;
 
 

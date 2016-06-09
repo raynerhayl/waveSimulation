@@ -56,11 +56,12 @@ bool dragging = false;
 bool g_leftMouseDown = false;
 vec2 g_mousePosition;
 float g_pitch = 0;
-float g_yaw = 0;
-float g_zoom = 1.0;
-vec3 g_camPos = vec3(0,100.0,0);
 
-BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
+float g_yaw = -180;
+float g_zoom = 1.5;
+vec3 g_camPos = vec3(-10.5,186,952);
+
+BoundingBox scene_bounds = BoundingBox(vec3(-400,-400,-200),vec3(400,00,200));
 bool drawOriginAxis = false;
 //school related
 School * g_school;
@@ -160,8 +161,8 @@ cgra::vec3 getCamDir(){
 void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	// cout << "Scroll Callback :: xoffset=" << xoffset << "yoffset=" << yoffset << endl;
 	g_zoom -= yoffset * g_zoom * 0.2;
-	if(yoffset < 0) g_camPos -= getCamDir()*8;
-	else  g_camPos += getCamDir()*8;
+	if(yoffset < 0) g_camPos -= getCamDir()*20;
+	else  g_camPos += getCamDir()*20;
 }
 
 // Keyboard callback
@@ -205,13 +206,17 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 			g_camPos += normalize(right);
 		}
 		break;
-		case 'E':
+		case 'C':
 		{
 			if(draw_caustics){
 				draw_caustics = false;
 			} else {
 				draw_caustics = true;
 			}
+		}break;
+		case 'P':
+		{
+			cout << g_camPos << " pitch " << g_pitch << " yaw " << g_yaw << endl;
 		}
 		break;
 	}
@@ -233,7 +238,7 @@ void renderGUI() {
 	SimpleGUI::newFrame();
 
 	if (ImGui::IsMouseClicked(1))
-		ImGui::OpenPopup("Controls");
+		//ImGui::OpenPopup("Controls");
 
 	if (ImGui::BeginPopup("Controls")) {
 		if (ImGui::Selectable("Stormy")) {
@@ -275,7 +280,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(500,3,scene_bounds);
+	g_school = new School(800,3,scene_bounds);
 }
 
 float randF() {
@@ -603,15 +608,8 @@ void render(int width, int height) {
 	//draw unlit stuff here
 	if(drawOriginAxis){
 		drawOrigin();
-		glColor3f(1,1,1);
-		cgraCube(
-			vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
-			(scene_bounds.max.y+scene_bounds.min.y)/2,
-			(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
-			abs(scene_bounds.max.x-scene_bounds.min.x),
-			abs(scene_bounds.max.y-scene_bounds.min.y),
-			abs(scene_bounds.max.z-scene_bounds.min.z)
-		));
+		glColor3f(1,0,0);
+		scene_bounds.draw();
 	}
 	// Use the shader we made
 	if (g_useShader) {
@@ -642,6 +640,8 @@ void render(int width, int height) {
 		
 		glUniform1i(glGetUniformLocation(g_causticShader, "numWaves"), numWaves);
 
+	} else {
+		glUseProgram(g_toonShader);
 	}
 
 	glPushMatrix();
@@ -683,8 +683,8 @@ void render(int width, int height) {
 
 
 
-		glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
-		renderWave();
+	glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
+	renderWave();
 
 	//renderWave();
 	glEnable(GL_LIGHTING);
