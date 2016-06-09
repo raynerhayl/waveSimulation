@@ -75,14 +75,14 @@ GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
 
-float medianWavelength = 40;
+float medianWavelength = 80;
 float amplitudeR = 1;
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 20; // difference in angle from windDir
-float medianS = 0.0;
+float medianS = 0.1;
 float speedFactor = 1; // scales the speed
 
-
+vec2 shipPos = vec2(0.0, -0.5);
 
 
 //performance
@@ -100,6 +100,7 @@ GLuint g_toonShader = 0;
 GLuint g_shaderGerstner = 0;
 GLuint g_shaderPhong = 0;
 GLuint bumpTex = 0;
+GLuint g_shipShader = 0;
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -243,7 +244,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(1000,3,scene_bounds);
+	g_school = new School(500,3,scene_bounds);
 }
 
 float randF() {
@@ -306,11 +307,11 @@ void initLight() {
 	float direction[] = { 0.0, 1.0, 1.0, 0.0 };
 	float diffintensity[] = { 0.8, 0.8, 0.8, 1.0 };
 	float ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-	//float specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	float specular[] = { 00.1,0.1,0.1, 1.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
-	//glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
 
@@ -351,6 +352,7 @@ void initShader() {
 	g_plainShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/plain.vert", "./work/res/shaders/plain.frag" });
 	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
+	g_shipShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/ship.vert", "./work/res/shaders/shaderPhong.frag" });
 
 }
 
@@ -400,6 +402,7 @@ void drawOrigin(){
 
 void renderWave() {
 	glUseProgram(0);
+	glUseProgramObjectARB(0);
 
 	// render stuff on top
 	glPushMatrix(); {
@@ -491,7 +494,7 @@ void renderWave() {
 		// Unbind our shader
 		glUseProgram(0);
 		glUseProgramObjectARB(0);
-		//glDisable(GL_TEXTURE_2D);
+		glDisable(GL_TEXTURE_2D);
 
 }
 
@@ -499,9 +502,15 @@ void renderWave() {
 // Draw function
 //
 void render(int width, int height) {
+
+
+
 	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 	GLuint FramebufferName = 0;
+	//glViewport(0,0,width,height);
+	glViewport(0,0,width,height);
 
+	
 
 	glGenFramebuffersEXT(1, &FramebufferName);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferName);
@@ -568,6 +577,8 @@ void render(int width, int height) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+	
+
 	// Enable flags for normal rendering
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
@@ -598,18 +609,65 @@ void render(int width, int height) {
 		} else {
 			glUseProgram(0);
 		}
-	if(draw_school) g_school->renderSchool();
+
 	
-	if(!draw_school){
-		renderWave();
-		ship->renderGeometry();
-	}
+	if(draw_school) g_school->renderSchool();
+
 	glPushMatrix();
 	glTranslatef(0, -1000, 0);
 	glColor3f(0.4, 0.4, 0.4);
 	glScalef(10, 10, 10);
 	ground->renderGeometry();
 	glPopMatrix();
+
+
+		glUseProgram(g_shipShader);
+
+
+		glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
+		// Use the shader we made
+
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture0"), 0);
+		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+
+		// Set the current time for the shader 
+		glUniform1f(glGetUniformLocation(g_shaderGerstner, "time"), waveTime);
+		// Send the shader the current main buffer of wave properties
+		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
+		// Specify the number of waves to use from the buffer
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
+		GLint m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportWidth"), m_viewport[2]);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportHeight"), m_viewport[3]);
+
+
+
+
+
+	glPushMatrix();{
+		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		float specular[] = { 0.0,0.0 / 256.0,150.0 / 256.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		float shininess[] = { 0.1*128.0 };
+		glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+		glTranslatef(shipPos.x,0.0,shipPos.y);
+
+			ship->renderGeometry();
+
+	} glPopMatrix();
+
+
+
+		if(draw_school == false){
+		renderWave();
+	}
+
 	//renderWave();
 	glEnable(GL_LIGHTING);
 
@@ -681,10 +739,14 @@ void render(int width, int height) {
 
 
 		glUseProgram(0);
+	
+	
 	glDeleteTextures(1, &depth_tex);
 	glDeleteTextures(1, &renderedTexture);
 	glDeleteTextures(1, &normalTexture);
 	glDeleteFramebuffers(1, &FramebufferName);
+
+	
 }
 
 
@@ -849,10 +911,6 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-
-
-
-
 
 
 		// Make sure we draw to the WHOLE window

@@ -34,8 +34,9 @@ varying float caustic;
 
 void main() {
 
+	
 	vec4 color = vec4(0.0);
-	vec4 diffuse = gl_LightSource[0].diffuse * max(dot(normalize(vNormal),normalize(gl_LightSource[0].position.xyz)),0.0);
+	vec4 diffuse = gl_LightSource[0].diffuse * max(dot(normalize(gl_NormalMatrix * vNormal),normalize(gl_LightSource[0].position.xyz)),0.0);
 
 	color = diffuse * gl_FrontMaterial.diffuse;
 

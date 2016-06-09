@@ -97,8 +97,7 @@ void main() {
 
 
 	vNormal.y = 1 - vNormal.y;
-	vNormal = normalize(vNormal * gl_NormalMatrix);
-
+	vNormal = vNormal;
 
 	vPosition = worldPos.xyz;
 
@@ -140,6 +139,7 @@ vec4 gerstnerFun(sWave wave){
 	vec4 result = vec4(0,0,0,0);
 
 	float term = wave.frequency * dot(wave.d, vec2(worldPos.x, worldPos.z)) + time * wave.phase;
+
 
 	float steepF = wave.steepness * 1/(wave.frequency * wave.amplitude);
 
