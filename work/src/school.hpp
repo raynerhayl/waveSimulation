@@ -16,7 +16,7 @@
 #include "opengl.hpp"
 #include "boid.hpp"
 #include "octree.hpp"
-
+#include "geometry.hpp"
 
 class School {
 
@@ -29,6 +29,7 @@ private:
 	//fields
 	BoundingBox bounding_box;
 	bool draw_bounds = true;
+	Geometry m_fishGeometry = Geometry("./work/res/assets/fish1.obj");
 
 	Octree* m_octree;
 	std::vector<Prey> prey;

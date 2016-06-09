@@ -31,6 +31,7 @@
 #include "boid.hpp"
 #include "octree.hpp"
 #include "wave.hpp"
+#include "geometry.hpp"
 
 #include "perlin_noise.hpp"
 
@@ -67,6 +68,8 @@ bool draw_school = true;
 Wave * wave;
 float waveTime = 0.0;
 int numWaves = 10;
+
+Geometry * ship = new Geometry("./work/res/assets/ship.obj");
 
 GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
@@ -596,6 +599,7 @@ void render(int width, int height) {
 	));
 
 	if(draw_school) g_school->renderSchool();
+	ship->renderGeometry();
 	renderWave();
 	glEnable(GL_LIGHTING);
 

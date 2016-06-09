@@ -55,7 +55,7 @@ private:
 };
 
 class Prey : public Boid {
-	//static Geometry g;
+	
 public:
 	//methods
 	Prey(vec3 pos);
@@ -63,6 +63,7 @@ public:
 	bool mIsDead = false;
 	float mFear = 0.0f;
 	float mMass = 1;
+	Geometry * m_geometry;
 private:
 	void drawSelf();
 	float getMaxSpeedSqrd();
