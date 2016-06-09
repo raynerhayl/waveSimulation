@@ -26,17 +26,16 @@ using namespace cgra;
 
 School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	bounding_box = bounds;
-	BoundingBox scaledBounds = bounds*2;
-	origin = (scaledBounds.max + scaledBounds.min)/2;
-	vec3 halfSize = abs(scaledBounds.max - scaledBounds.min)/2;
+	origin = (bounding_box.max + bounding_box.min)/2;
+	//vec3 halfSize = abs(bounding_box.max - bounding_box.min)/2;
 	
-	m_octree = new Octree(origin,halfSize);
+	// m_octree = new Octree(origin,halfSize);
 
 	//m_fishGeometry = Geometry("abc");
 	cout << "adding boids" << endl;
 
 	for(int i = 0; i < numPrey; i++){
-		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
+		vec3 position = vec3(math::random(bounding_box.min.x,bounding_box.max.x),math::random(bounding_box.min.y,bounding_box.max.y),math::random(bounding_box.min.z,bounding_box.max.z));
 		Prey b = Prey(position);
 		b.m_colour = colours[i%5];
 		cout << b.m_colour << endl;
@@ -48,7 +47,7 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	}
 
 	for(int i = 0; i < numPredators; i++){
-		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
+		vec3 position = vec3(math::random(bounding_box.min.x,bounding_box.max.x),math::random(bounding_box.min.y,bounding_box.max.y),math::random(bounding_box.min.z,bounding_box.max.z));
 		Predator  b = Predator(position);
 		b.m_geometry = &m_sharkGeometry;
 		b.m_colour = colours[0];
@@ -60,6 +59,7 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 }
 
 void School::renderSchool() {
+	drawBounds();
 	float zRad = 50;
 	applyForce(zRad*zRad, 0.4, 0.65);
 	update(); //update all
@@ -142,9 +142,9 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 				p1->mFear = max(p1->mFear-0.001,0);
 			}
 		}
+		//if near the bounding edge, point back in
 		if(!(bounding_box*0.9).inside(p1->mPosition)){
-			cout << "outside" << endl;
-			p1->mAccel -= (p1->mPosition - origin);
+			p1->mAccel -= normalize(p1->mPosition - origin)*jFactor;
 		}
 	}
 }
@@ -157,7 +157,7 @@ void School::update(){
 			prey.erase(pr++);
 			cout << "eaten!" << endl;
 		} else {
-			pr->pullToCentre(vec3(0,0,0));
+			pr->pullToCentre(origin);
 			pr->update();
 			++pr;
 		}
@@ -165,7 +165,7 @@ void School::update(){
 
 	for(vector<Predator>::iterator pred = predators.begin(); pred != predators.end(); ++pred) {
 
-		pred->pullToCentre(vec3(0,0,0));
+		pred->pullToCentre(origin);
 		pred->update();
 	}
 	//cout << "checking" << endl;
@@ -176,13 +176,35 @@ void School::update(){
 void School::buildTree(){
 	for(int i = 0; i < prey.size(); i++){
 		Prey * p = &(*(prey.begin()+i));
-		m_octree->insert(p);
+		//m_octree->insert(p);
 	}
 }
 
 void School::drawBounds(){
 	glPushMatrix();
-
+	bounding_box.draw();
+	(bounding_box*0.9).draw();
+	glTranslatef(origin.x,origin.y,origin.z);
+	//x
+	glColor3f(1,0,0);
+	glPushMatrix();{
+		glRotatef(90,0,1,0);
+		glTranslatef(0,0,50);
+		cgraLine(100);
+	}glPopMatrix();
+	//y
+	glColor3f(0,1,0);
+	glPushMatrix();{
+		glRotatef(90,1,0,0);
+		glTranslatef(0,0,50);
+		cgraLine(100);
+	}glPopMatrix();
+	//z
+	glColor3f(0,0,1);
+	glPushMatrix();{
+		glTranslatef(0,0,50);
+		cgraLine(100);
+	}glPopMatrix();
 	glPopMatrix();
 }
 
