@@ -84,7 +84,7 @@ float amplitudeR = 1;
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 45; // difference in angle from windDir
 float medianS = 0.2;
-float speedFactor = 1; // scales the speed
+float speedFactor = 0.5; // scales the speed
 
 vec2 shipPos = vec2(0.0, -0.5);
 
@@ -238,8 +238,7 @@ void renderGUI() {
 	SimpleGUI::newFrame();
 
 	if (ImGui::IsMouseClicked(1))
-		//ImGui::OpenPopup("Controls");
-
+		ImGui::OpenPopup("Controls");
 	if (ImGui::BeginPopup("Controls")) {
 		if (ImGui::Selectable("Stormy")) {
  		medianWavelength = 100;
@@ -247,18 +246,40 @@ void renderGUI() {
  		windDir = 0; // wind direction from (x = 1, z = 0)
  		dAngle = 60; // difference in angle from windDir
  		medianS = 0.2;
- 		speedFactor = 1; // scales the speed
+ 		speedFactor = 0.5; // scales the speed
  		initWaves();
 
-		} if (ImGui::Selectable("calm")) {
+		} 
+		
+		if (ImGui::Selectable("long wavelength- Stormy")) {
+			medianWavelength = 100;
+			amplitudeR = 2;
+			windDir = 0; // wind direction from (x = 1, z = 0)
+			dAngle = 60; // difference in angle from windDir
+			medianS = 0.3;
+			speedFactor = 0.5; // scales the speed
+			initWaves();
+
+		}
+		if (ImGui::Selectable("calm")) {
  		medianWavelength = 80;
  		amplitudeR = 1;
  		windDir = 0; // wind direction from (x = 1, z = 0)
  		dAngle = 20; // difference in angle from windDir
  		medianS = 0.1;
- 		speedFactor = 1; // scales the speed
+ 		speedFactor = 0.5; // scales the speed
 		initWaves();
 		}
+		if (ImGui::Selectable("long Wavelength- calm")) {
+			medianWavelength = 100;
+			amplitudeR = 1;
+			windDir = 0; // wind direction from (x = 1, z = 0)
+			dAngle = 20; // difference in angle from windDir
+			medianS = 0.1;
+			speedFactor = 0.2; // scales the speed
+			initWaves();
+		}
+
 
 		ImGui::EndPopup();
 	}
@@ -295,7 +316,7 @@ float randF() {
 void fillProps(GLfloat properties[], int waveIndex) {
 
 	float wavelength = medianWavelength - medianWavelength*0.4 + 2* randF() *0.8 * medianWavelength;
-	float speed = sqrt((9.81*wavelength) / (2 * 3.14));//speedFactor * (frequency*wavelength);
+	float speed = sqrt((9.81*wavelength) / (2 * 3.14)) * speedFactor;
 	float frequency = speed / wavelength;// sqrt((9.81 * 2 * 3.145) / wavelength);
 	float amplitude = amplitudeR - amplitudeR*0.2 + randF() * 0.4 * amplitudeR;
 
