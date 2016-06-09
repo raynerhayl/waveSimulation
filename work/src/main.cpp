@@ -58,7 +58,7 @@ vec2 g_mousePosition;
 float g_pitch = 0;
 float g_yaw = 0;
 float g_zoom = 1.0;
-vec3 g_camPos = vec3(0,0,0);
+vec3 g_camPos = vec3(0,100.0,0);
 
 BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
 bool drawOriginAxis = false;
@@ -78,7 +78,7 @@ GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
 
 float medianWavelength = 80;
-float amplitudeR = 2;
+float amplitudeR = 1;
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 45; // difference in angle from windDir
 float medianS = 0.2;
@@ -94,7 +94,7 @@ int fps = 0;
 // Values and fields to showcase the use of shaders
 // Remove when modifying main.cpp for Assignment 3
 //
-bool g_useShader = false;
+bool g_useShader = true;
 GLuint g_texture = 0;
 GLuint g_plainShader = 0;
 GLuint g_sobelShader = 0;
@@ -133,11 +133,11 @@ void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
 	}
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 		if (g_useShader) {
-			g_useShader = false;
+			//g_useShader = false;
 			cout << "Using the default OpenGL pipeline" << endl;
 		}
 		else {
-			g_useShader = true;
+			//g_useShader = true;
 			cout << "Using a shader" << endl;
 		}
 	}
@@ -215,20 +215,33 @@ void charCallback(GLFWwindow *win, unsigned int c) {
 	// Not needed for this assignment, but useful to have later on
 }
 
+void initWaves();
+
 void renderGUI() {
 	// Start registering GUI components
 	SimpleGUI::newFrame();
 
 	if (ImGui::IsMouseClicked(1))
-		//ImGui::OpenPopup("Controls");
+		ImGui::OpenPopup("Controls");
 
 	if (ImGui::BeginPopup("Controls")) {
-		if (ImGui::Selectable("Play")) {
+		if (ImGui::Selectable("Stormy")) {
+ 		medianWavelength = 100;
+ 		amplitudeR = 3;
+ 		windDir = 0; // wind direction from (x = 1, z = 0)
+ 		dAngle = 60; // difference in angle from windDir
+ 		medianS = 0.2;
+ 		speedFactor = 1; // scales the speed
+ 		initWaves();
 
-		}
-
-		if (ImGui::Selectable("Pause")) {
-
+		} if (ImGui::Selectable("calm")) {
+ 		medianWavelength = 80;
+ 		amplitudeR = 1;
+ 		windDir = 0; // wind direction from (x = 1, z = 0)
+ 		dAngle = 20; // difference in angle from windDir
+ 		medianS = 0.1;
+ 		speedFactor = 1; // scales the speed
+		initWaves();
 		}
 
 		ImGui::EndPopup();
@@ -628,7 +641,7 @@ void render(int width, int height) {
 
 
 	glPushMatrix();{
-		glTranslatef(shipPos.x,0.0,shipPos.y);
+		glTranslatef(shipPos.x,-10.0,shipPos.y);
 
 		glScalef(10,10,10);
 		ship->renderGeometry();
@@ -637,10 +650,8 @@ void render(int width, int height) {
 
 
 
-		if(draw_school == false){
 		glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
 		renderWave();
-		}
 
 	//renderWave();
 	glEnable(GL_LIGHTING);
