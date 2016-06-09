@@ -65,6 +65,7 @@ bool drawOriginAxis = false;
 //school related
 School * g_school;
 bool draw_school = true;
+bool draw_caustics = true;
 
 //wave related
 Wave * wave;
@@ -202,6 +203,15 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 			vec3 camDir = getCamDir();
 			vec3 right = cross(camDir,vec3(0,1,0));
 			g_camPos += normalize(right);
+		}
+		break;
+		case 'E':
+		{
+			if(draw_caustics){
+				draw_caustics = false;
+			} else {
+				draw_caustics = true;
+			}
 		}
 		break;
 	}
@@ -613,7 +623,7 @@ void render(int width, int height) {
 	if(draw_school) g_school->renderSchool();
 
 
-
+	if(draw_caustics){
 		glUseProgram(g_causticShader);
 
 
@@ -631,6 +641,8 @@ void render(int width, int height) {
 		// Specify the number of waves to use from the buffer
 		
 		glUniform1i(glGetUniformLocation(g_causticShader, "numWaves"), numWaves);
+
+	}
 
 	glPushMatrix();
 	glTranslatef(0, -500, 0);
