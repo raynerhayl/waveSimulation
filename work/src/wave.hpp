@@ -34,8 +34,8 @@ private:
 	std::vector<triangle> m_triangles;	// Triangle/Face list
 
 	double squareDensity = 150;
-	double width = 1000;
-	double height = 1000;
+	double width = 100;
+	double height = 100;
 
 	bool m_wireFrameOn = false;
 

@@ -152,8 +152,8 @@ void Wave::render() {
 	//m_normals.clear();
 	//createNormals();
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	float ambient[]= { 0.0,0.0,0.1, 1.0 };
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);

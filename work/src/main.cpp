@@ -3,7 +3,7 @@
 // Copyright (c) 2016 Taehyun Rhee, Joshua Scott, Ben Allen
 //
 // This software is provided 'as-is' for assignment of COMP308 in ECS,
-// Victoria University of Wellington, without any express or implied warranty.
+// Victoria University of Wellington, without any express or implied warranty. 
 // In no event will the authors be held liable for any damages arising from
 // the use of this software.
 //
@@ -22,14 +22,17 @@
 #include "cgra_math.hpp"
 #include "simple_image.hpp"
 #include "simple_shader.hpp"
-
-#include "wave.hpp"
 #include "simple_gui.hpp"
 
 #include "shady_geometry.hpp"
 #include "opengl.hpp"
 #include "school.hpp"
 #include "helpers.hpp"
+#include "boid.hpp"
+#include "octree.hpp"
+#include "wave.hpp"
+
+#include "perlin_noise.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -40,7 +43,7 @@ GLFWwindow* g_window;
 
 
 // Projection values
-//
+// 
 float g_fovy = 20.0;
 float g_znear = 0.1;
 float g_zfar = 10000.0;
@@ -51,10 +54,10 @@ float g_zfar = 10000.0;
 bool g_leftMouseDown = false;
 vec2 g_mousePosition;
 float g_pitch = 0;
-float g_yaw = 90;
+float g_yaw = 0;
 float g_zoom = 1.0;
 
-BoundingBox scene_bounds = BoundingBox(vec3(-100, -100, -100), vec3(100, 100, 100));
+BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
 
 //school related
 School * g_school;
@@ -86,10 +89,13 @@ int fps = 0;
 // Values and fields to showcase the use of shaders
 // Remove when modifying main.cpp for Assignment 3
 //
-bool g_useShader = true;
+bool g_useShader = false;
 GLuint g_texture = 0;
+GLuint g_plainShader = 0;
+GLuint g_sobelShader = 0;
+GLuint g_toonShader = 0;
 GLuint g_shaderGerstner = 0;
-GLuint g_shaderPhong = 1;
+GLuint g_shaderPhong = 0;
 GLuint bumpTex = 0;
 
 // Mouse Button callback
@@ -133,7 +139,10 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	g_zoom -= yoffset * g_zoom * 0.2;
 }
 
-
+OctreeNode * m_octree;
+Octree * m_newtree;
+std::vector<Boid*> temp_boids;
+int boid = 0;
 // Keyboard callback
 // Called for every key event on since the last glfwPollEvents
 //
@@ -142,9 +151,46 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 	// 	<< "action=" << action << "mods=" << mods << endl;
 	// YOUR CODE GOES HERE
 	// ...
-	switch (key) {
-	case 'F':
-		if (action == 1)draw_school = !draw_school;
+	switch(key){
+		case 'F':
+			if(action == 1)draw_school = !draw_school;
+		break;
+		case 'O':
+			if(action == 1){
+				for(int i = 0; i != 2000; i++){
+					vec3 position = vec3(math::random(scene_bounds.min.x,scene_bounds.max.x),math::random(scene_bounds.min.y,scene_bounds.max.y),math::random(scene_bounds.min.z,scene_bounds.max.z));
+					Prey* b = new Prey(position);
+					temp_boids.push_back(b);
+					cout << b << endl;
+					m_newtree->insert(b);
+				}
+				//cout << temp_boids.size() << endl;
+			}
+		break;
+		case 'P':
+		{
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0.4,0);
+		}
+		break;
+		case 'L':
+		{
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0.4,0,0);
+		}
+		break;
+		case 'M':
+		{
+			temp_boids[boid%temp_boids.size()]->mPosition += vec3(0,0,0.4);
+		}
+		break;
+		case 'I':
+		{
+			if(action ==1)boid++;
+		}
+		break;
+		case 'D':
+		{
+			m_newtree->clear();
+		}
 		break;
 	}
 }
@@ -177,12 +223,12 @@ void renderGUI() {
 		ImGui::EndPopup();
 	}
 
+	
 
-
-	ImGui::SetNextWindowPos(ImVec2(10, 10));
-	ImGui::Begin("Fixed Overlay", nullptr, ImVec2(0, 0), 0.3f,
-		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+	ImGui::SetNextWindowPos(ImVec2(10,10));
+	ImGui::Begin("Fixed Overlay", nullptr, ImVec2(0,0), 0.3f,
+	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_AlwaysAutoResize|
+	ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings);
 	ostringstream ss;
 	// Replace this with your code
 	ss << frameSpeed << " ms/frame  " << fps << " fps";
@@ -193,8 +239,8 @@ void renderGUI() {
 	SimpleGUI::render();
 }
 
-void initSchool() {
-	g_school = new School(200, scene_bounds);
+void initSchool(){
+	g_school = new School(1000,3,scene_bounds);
 }
 
 float randF() {
@@ -291,23 +337,23 @@ void initTexture() {
 }
 
 
-
 // An example of how to load a shader from a hardcoded location
 //
 void initShader() {
 	// To create a shader program we use a helper function
 	// We pass it an array of the types of shaders we want to compile
 	// and the corrosponding locations for the files of each stage
-
-	// shader for gerstner vertex modifications as well as phong shading
+	g_sobelShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/sobel.vert", "./work/res/shaders/sobel.frag" });
+	g_toonShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/toon.vert", "./work/res/shaders/toon.frag" });
+	g_plainShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/plain.vert", "./work/res/shaders/plain.frag" });
 	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/shaderPhong.frag" });
-
 	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
+
 }
 
 
 // Sets up where the camera is in the scene
-//
+// 
 void setupCamera(int width, int height) {
 	// Set up the projection matrix
 	glMatrixMode(GL_PROJECTION);
@@ -325,31 +371,32 @@ void setupCamera(int width, int height) {
 
 
 
-void drawOrigin() {
+void drawOrigin(){
 	//x
-	glColor3f(1, 0, 0);
-	glPushMatrix(); {
-		glRotatef(90, 0, 1, 0);
-		glTranslatef(0, 0, 50);
+	glColor3f(1,0,0);
+	glPushMatrix();{
+		glRotatef(90,0,1,0);
+		glTranslatef(0,0,50);
 		cgraLine(100);
 	}glPopMatrix();
 	//y
-	glColor3f(0, 1, 0);
-	glPushMatrix(); {
-		glRotatef(90, 1, 0, 0);
-		glTranslatef(0, 0, 50);
+	glColor3f(0,1,0);
+	glPushMatrix();{
+		glRotatef(90,1,0,0);
+		glTranslatef(0,0,50);
 		cgraLine(100);
 	}glPopMatrix();
 	//z
-	glColor3f(0, 0, 1);
-	glPushMatrix(); {
-		glTranslatef(0, 0, 50);
+	glColor3f(0,0,1);
+	glPushMatrix();{
+		glTranslatef(0,0,50);
 		cgraLine(100);
 	}glPopMatrix();
 }
 
+
 void renderWave() {
-	glUseProgram(g_shaderPhong);
+	glUseProgram(0);
 
 	// render stuff on top
 	glPushMatrix(); {
@@ -441,14 +488,78 @@ void renderWave() {
 		// Unbind our shader
 		glUseProgram(0);
 		glUseProgramObjectARB(0);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_2D);
 
 }
+
 
 // Draw function
 //
 void render(int width, int height) {
-	glViewport(0, 0, width, height);
+	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+	GLuint FramebufferName = 0;
+
+
+	glGenFramebuffersEXT(1, &FramebufferName);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferName);
+	GLuint renderedTexture;
+	glGenTextures(1, &renderedTexture);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+	// Give an empty image to OpenGL ( the last "0" )
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+
+	// Poor filtering. Needed !
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	GLuint normalTexture;
+	glGenTextures(1, &normalTexture);
+	glBindTexture(GL_TEXTURE_2D, normalTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	GLuint depth_tex;
+	glGenTextures(1, &depth_tex);
+	glBindTexture(GL_TEXTURE_2D, depth_tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	//-------------------------
+	//Attach depth buffer to FBO
+
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_tex, 0);
+
+	// Set "renderedTexture" as our colour attachement #0
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
+
+
+	// Set the list of draw buffers.
+	GLenum DrawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, DrawBuffers); // "1" is the size of DrawBuffers
+
+								   //glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+
+								   // Always check that our framebuffer is ok
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+	}
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		return;
+	}
+
+	glViewport(0,0,width,height);
 	// Grey/Blueish background
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -458,39 +569,108 @@ void render(int width, int height) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_NORMALIZE);
-	glEnable(GL_TEXTURE_2D);
-
 
 	setupCamera(width, height);
 
-	if (draw_school == false) {
-		renderWave();
+
+		// Use the shader we made
+		if (g_useShader){
+			glUseProgram(g_toonShader);
+		} else {
+			glUseProgram(0);
+		}
+		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
+		glLightfv(GL_LIGHT0, GL_POSITION, direction);
+
+	glDisable(GL_LIGHTING);
+	//draw unlit stuff here
+	drawOrigin();
+	glColor3f(1,1,1);
+	cgraCube(
+		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
+		(scene_bounds.max.y+scene_bounds.min.y)/2,
+		(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
+		abs(scene_bounds.max.x-scene_bounds.min.x),
+		abs(scene_bounds.max.y-scene_bounds.min.y),
+		abs(scene_bounds.max.z-scene_bounds.min.z)
+	));
+
+	if(draw_school) g_school->renderSchool();
+	renderWave();
+	glEnable(GL_LIGHTING);
+
+
+		// Unbind our shader
+		glUseProgram(0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glViewport(0, 0, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+		if (g_useShader){
+		glUseProgram(g_sobelShader);
+	} else {
+		glUseProgram(g_plainShader);
 	}
-	else {
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		glDisable(GL_LIGHTING);
-		//draw unlit stuff here
-		drawOrigin();
-		glColor3f(1, 1, 1);
-		cgraCube(
-			vec3((scene_bounds.max.x + scene_bounds.min.x) / 2,
-				(scene_bounds.max.y + scene_bounds.min.y) / 2,
-				(scene_bounds.max.z + scene_bounds.min.z) / 2), vec3(
-					abs(scene_bounds.max.x - scene_bounds.min.x),
-					abs(scene_bounds.max.y - scene_bounds.min.y),
-					abs(scene_bounds.max.z - scene_bounds.min.z)
-					));
-		if (draw_school) {
-			g_school->renderSchool();
-		}
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Enable Drawing texures
+		glEnable(GL_TEXTURE_2D);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		// Set the location for binding the texture
+		glActiveTexture(GL_TEXTURE0);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, normalTexture);
+		glActiveTexture(GL_TEXTURE1);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+		glActiveTexture(GL_TEXTURE2);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, depth_tex);
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+			if (g_useShader){
+		glUniform1i(glGetUniformLocation(g_sobelShader, "edge"), 0);
+		glUniform1i(glGetUniformLocation(g_sobelShader, "colorMap"), 1);
+		glUniform1i(glGetUniformLocation(g_sobelShader, "depthMap"), 2);
+		glUniform1f(glGetUniformLocation(g_sobelShader, "width"), width);
+	} else {
+		glUniform1f(glGetUniformLocation(g_plainShader, "rendered"), 1);
 	}
 
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glBegin(GL_QUADS);
+		glTexCoord2f(0, 0);
+		glVertex3f(-1, -1,-1);
+		glTexCoord2f(1, 0);
+		glVertex3f(1, -1,-1);
+		glTexCoord2f(1, 1);
+		glVertex3f(1, 1,-1);
+		glTexCoord2f(0, 1);
+		glVertex3f(-1, 1,-1);
+		glEnd();
+
+
+		glEnable(GL_TEXTURE_GEN_S);
+		glEnable(GL_TEXTURE_GEN_T);
+
+
 	// Disable flags for cleanup (optional)
+	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
-	glDisable(GL_TEXTURE_2D);
 
+
+		glUseProgram(0);
+	glDeleteTextures(1, &depth_tex);
+	glDeleteTextures(1, &renderedTexture);
+	glDeleteTextures(1, &normalTexture);
+	glDeleteFramebuffers(1, &FramebufferName);
 }
 
 
@@ -499,8 +679,27 @@ void APIENTRY debugCallbackARB(GLenum, GLenum, GLuint, GLenum, GLsizei, const GL
 
 
 //Main program
-//
+// 
 int main(int argc, char **argv) {
+
+
+	PerlinNoise p_noise;
+
+	cout << "Perlinine" <<  endl;
+
+	for (int x = 0; x < 10; x++) {
+		for (int y = 0; y < 10; y++) {
+			double dx = x/double(9);
+			double dy = y/double(9);
+
+			cout << p_noise.noise(dx, dy, 0);
+		
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+
 
 	// Initialize the GLFW library
 	if (!glfwInit()) {
@@ -584,11 +783,11 @@ int main(int argc, char **argv) {
 	initSchool();
 	initWaves();
 
-
 	//for fps calculation
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
 
+	
 	float r = 1.0; // mix ratio, for fading waves
 	float dr = 0.01;
 
@@ -596,17 +795,6 @@ int main(int argc, char **argv) {
 	int wave = 0;
 
 	bool fade = true; // fade out
-
-					  // Enable Drawing texures
-	glEnable(GL_TEXTURE_2D);
-	// Use Texture as the color
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	// Set the location for binding the texture
-	glActiveTexture(GL_TEXTURE0);
-	// Bind the texture
-	glBindTexture(GL_TEXTURE_2D, g_texture);
-
-
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
@@ -620,7 +808,6 @@ int main(int argc, char **argv) {
 			nbFrames = 0;
 			lastTime += 1.0;
 		}
-		if (draw_school == false) {
 
 			waveTime = waveTime + 0.1;
 
@@ -647,7 +834,6 @@ int main(int argc, char **argv) {
 			}
 
 
-		}
 
 
 
@@ -669,13 +855,9 @@ int main(int argc, char **argv) {
 		glfwPollEvents();
 	}
 
-	glDisable(GL_TEXTURE_2D);
-
 
 	glfwTerminate();
 }
-
-
 
 
 

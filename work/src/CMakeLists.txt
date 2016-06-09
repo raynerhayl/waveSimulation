@@ -13,17 +13,20 @@ SET(headers
 	"shady_geometry.hpp"
 	"school.hpp"
 	"boid.hpp"
-	"wave.hpp"
 	"simple_gui.hpp"
+	"perlin_noise.hpp"
+	"wave.hpp"
 )
+
 
 # TODO list your source files (.cpp) here
 SET(sources
 	"main.cpp"
 	"school.cpp"
 	"boid.cpp"
-	"wave.cpp"
 	"simple_gui.cpp"
+	"perlin_noise.cpp"
+	"wave.cpp"
 )
 
 # Add executable target and link libraries
