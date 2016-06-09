@@ -560,7 +560,8 @@ void render(int width, int height) {
 
 	glViewport(0, 0, width, height);
 	// Grey/Blueish background
-	glClearColor(52/255.0,104/255.0,125/255.0,1.0f);          // We'll Clear To The Color Of The Fog ( Modified )
+
+	glClearColor(135/255.0,206/255.0,250/255.0,1.0f);          // We'll Clear To The Color Of The Fog ( Modified )
 	GLfloat fogColor[4] = { 52 / 255.0,104 / 255.0,125 / 255.0,1.0f };
 	glFogi(GL_FOG_MODE, GL_LINEAR);        // Fog Mode
 	glFogfv(GL_FOG_COLOR, fogColor);            // Set Fog Color

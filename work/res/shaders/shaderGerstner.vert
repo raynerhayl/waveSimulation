@@ -114,7 +114,11 @@ void main() {
 
 	vTextureCoord0 = vPosition.xz/50.0;
 
-		 gl_FrontColor = gl_Color;
+	vec4 color = gl_Color;
+	
+	color = color + max( 0.4 * (vPosition.y - 2.0), 0.0);
+
+	gl_FrontColor = color;
 
 	
 	// IMPORTANT tell OpenGL where the vertex is
