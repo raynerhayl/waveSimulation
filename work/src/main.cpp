@@ -599,7 +599,11 @@ void render(int width, int height) {
 			glUseProgram(0);
 		}
 	if(draw_school) g_school->renderSchool();
-	//ship->renderGeometry();
+	
+	if(!draw_school){
+		renderWave();
+		ship->renderGeometry();
+	}
 	glPushMatrix();
 	glTranslatef(0, -1000, 0);
 	glColor3f(0.4, 0.4, 0.4);

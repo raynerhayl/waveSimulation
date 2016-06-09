@@ -1,3 +1,4 @@
+ 
 //---------------------------------------------------------------------------
 //
 // Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
@@ -77,27 +78,15 @@ void main() {
 	for(int i = 0; i < numWaves; i ++){
 		vec4 gerstner = gerstnerFun(waves[i]);
 
-		worldPos.x = worldPos.x + gerstner.x;
+		//worldPos.x = worldPos.x + gerstner.x;
 		worldPos.y = worldPos.y + gerstner.y;
-		worldPos.z = worldPos.z + gerstner.z;
+		//worldPos.z = worldPos.z + gerstner.z;
 
 	}
 
 	worldPos.y = worldPos.y +  rand(vec2(0.0,1.0));
 
-	// calculate normal 
-	for(int i = 0; i < numWaves; i ++){
-		vec3 gerstnerNorm = (gerstnerNorm(waves[i], vec2(worldPos.x,worldPos.z)));
-
-		vNormal.x = gerstnerNorm.x + vNormal.x;
-		vNormal.y = gerstnerNorm.y + vNormal.y;
-		vNormal.z = gerstnerNorm.z + vNormal.z;
-
-	}
-
-
-	vNormal.y = 1 - vNormal.y;
-	vNormal = normalize(vNormal * gl_NormalMatrix);
+	vNormal = gl_NormalMatrix * gl_Normal;
 
 
 	vPosition = worldPos.xyz;
@@ -140,6 +129,7 @@ vec4 gerstnerFun(sWave wave){
 	vec4 result = vec4(0,0,0,0);
 
 	float term = wave.frequency * dot(wave.d, vec2(worldPos.x, worldPos.z)) + time * wave.phase;
+
 
 	float steepF = wave.steepness * 1/(wave.frequency * wave.amplitude);
 
