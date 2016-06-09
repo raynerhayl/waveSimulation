@@ -393,12 +393,6 @@ void render(int width, int height) {
 	setupCamera(width, height);
 
 
-		// Use the shader we made
-		if (g_useShader){
-			glUseProgram(g_toonShader);
-		} else {
-			glUseProgram(0);
-		}
 		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
 		glLightfv(GL_LIGHT0, GL_POSITION, direction);
 
@@ -415,6 +409,12 @@ void render(int width, int height) {
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
 
+		// Use the shader we made
+		if (g_useShader){
+			glUseProgram(g_toonShader);
+		} else {
+			glUseProgram(0);
+		}
 	if(draw_school) g_school->renderSchool();
 	glEnable(GL_LIGHTING);
 
