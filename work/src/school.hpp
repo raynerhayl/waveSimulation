@@ -28,6 +28,7 @@ public:
 private:
 	//fields
 	BoundingBox bounding_box;
+	vec3 origin;
 	bool draw_bounds = true;
 	Geometry m_fishGeometry = Geometry("./work/res/assets/fish1.obj");
 	Geometry m_sharkGeometry = Geometry("./work/res/assets/shark.obj");
@@ -43,6 +44,5 @@ private:
 	void update();
 	void applyForce(float,float,float);
 
-	void testSchool(BoundingBox);
 	void buildTree();
 };

@@ -25,9 +25,8 @@ using namespace std;
 using namespace cgra;
 
 School::School(int numPrey, int numPredators, BoundingBox bounds) {
-	testSchool(bounds);
+	bounding_box = bounds;
 	BoundingBox scaledBounds = bounds*2;
-	vec3 origin;
 	origin = (scaledBounds.max + scaledBounds.min)/2;
 	vec3 halfSize = abs(scaledBounds.max - scaledBounds.min)/2;
 	
@@ -58,10 +57,6 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	}
 
 	cout << "created "<< numPrey <<" prey " << endl;
-}
-
-void School::testSchool(BoundingBox bounds){
-	
 }
 
 void School::renderSchool() {
@@ -146,6 +141,10 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 			if(p1->mFear != 0){ //TODO play with this, make more intuitive
 				p1->mFear = max(p1->mFear-0.001,0);
 			}
+		}
+		if(!(bounding_box*0.9).inside(p1->mPosition)){
+			cout << "outside" << endl;
+			p1->mAccel -= (p1->mPosition - origin);
 		}
 	}
 }
