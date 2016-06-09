@@ -70,7 +70,7 @@ float waveTime = 0.0;
 int numWaves = 10;
 
 Geometry * ship = nullptr;
-
+Geometry * ground = nullptr;
 GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
@@ -581,7 +581,7 @@ void render(int width, int height) {
 
 	glDisable(GL_LIGHTING);
 	//draw unlit stuff here
-	drawOrigin();
+	/*drawOrigin();
 	glColor3f(1,1,1);
 	cgraCube(
 		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
@@ -590,7 +590,7 @@ void render(int width, int height) {
 		abs(scene_bounds.max.x-scene_bounds.min.x),
 		abs(scene_bounds.max.y-scene_bounds.min.y),
 		abs(scene_bounds.max.z-scene_bounds.min.z)
-	));
+	));*/
 
 		// Use the shader we made
 		if (g_useShader){
@@ -599,8 +599,14 @@ void render(int width, int height) {
 			glUseProgram(0);
 		}
 	if(draw_school) g_school->renderSchool();
-	ship->renderGeometry();
-	renderWave();
+	//ship->renderGeometry();
+	glPushMatrix();
+	glTranslatef(0, -1000, 0);
+	glColor3f(0.4, 0.4, 0.4);
+	glScalef(10, 10, 10);
+	ground->renderGeometry();
+	glPopMatrix();
+	//renderWave();
 	glEnable(GL_LIGHTING);
 
 
@@ -786,7 +792,6 @@ int main(int argc, char **argv) {
 	initShader();
 	initSchool();
 	initWaves();
-	ship = new Geometry("./work/res/assets/ship.obj");
 	//for fps calculation
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
@@ -801,6 +806,8 @@ int main(int argc, char **argv) {
 	bool fade = true; // fade out
 
 	ship = new Geometry("./work/res/assets/ship.obj");
+	ground = new Geometry("./work/res/assets/ground.obj");
+
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
