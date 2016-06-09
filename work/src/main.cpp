@@ -69,7 +69,7 @@ Wave * wave;
 float waveTime = 0.0;
 int numWaves = 10;
 
-Geometry * ship = new Geometry("./work/res/assets/ship.obj");
+Geometry * ship = nullptr;
 
 GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
@@ -576,12 +576,6 @@ void render(int width, int height) {
 	setupCamera(width, height);
 
 
-		// Use the shader we made
-		if (g_useShader){
-			glUseProgram(g_toonShader);
-		} else {
-			glUseProgram(0);
-		}
 		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
 		glLightfv(GL_LIGHT0, GL_POSITION, direction);
 
@@ -598,6 +592,12 @@ void render(int width, int height) {
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));
 
+		// Use the shader we made
+		if (g_useShader){
+			glUseProgram(g_toonShader);
+		} else {
+			glUseProgram(0);
+		}
 	if(draw_school) g_school->renderSchool();
 	ship->renderGeometry();
 	renderWave();
@@ -799,6 +799,8 @@ int main(int argc, char **argv) {
 	int wave = 0;
 
 	bool fade = true; // fade out
+
+	ship = new Geometry("./work/res/assets/ship.obj");
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
