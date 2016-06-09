@@ -104,7 +104,8 @@ GLuint g_shaderPhong = 0;
 GLuint bumpTex = 0;
 GLuint g_shipShader = 0;
 GLuint g_gerstNormShader = 0;
-	GLuint gerstNormalTex;
+GLuint gerstNormalTex;
+GLuint g_causticShader = 0;
 
 
 // Mouse Button callback
@@ -374,6 +375,7 @@ void initShader() {
 	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_shipShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/ship.vert", "./work/res/shaders/toon.frag" });
 	g_gerstNormShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/norm.frag" });
+	g_causticShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/caustic.vert", "./work/res/shaders/toon.frag" });
 
 }
 
@@ -610,7 +612,25 @@ void render(int width, int height) {
 	}
 	if(draw_school) g_school->renderSchool();
 
-	
+
+
+		glUseProgram(g_causticShader);
+
+
+		glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
+		// Use the shader we made
+
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+		glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
+		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+
+		// Set the current time for the shader 
+		glUniform1f(glGetUniformLocation(g_causticShader, "time"), waveTime);
+		// Send the shader the current main buffer of wave properties
+		glUniform1fv(glGetUniformLocation(g_causticShader, "waveProperties"), 100, activeBuf);
+		// Specify the number of waves to use from the buffer
+		
+		glUniform1i(glGetUniformLocation(g_causticShader, "numWaves"), numWaves);
 
 	glPushMatrix();
 	glTranslatef(0, -500, 0);
