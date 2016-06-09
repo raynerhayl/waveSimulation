@@ -1,3 +1,4 @@
+ 
 //---------------------------------------------------------------------------
 //
 // Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
@@ -68,8 +69,7 @@ float rand(vec2 co){
 void main() {
 
 // wave properties
-
-
+vertex_normal = normalize(gl_NormalMatrix * gl_Normal);
     // Calculate the light position for this vertex
     vertex_light_position = normalize(gl_LightSource[0].position.xyz);
     // Calculate the light’s half vector
@@ -86,37 +86,23 @@ void main() {
 	for(int i = 0; i < numWaves; i ++){
 		vec4 gerstner = gerstnerFun(waves[i]);
 
-		worldPos.x = worldPos.x + gerstner.x;
+		//worldPos.x = worldPos.x + gerstner.x;
 		worldPos.y = worldPos.y + gerstner.y;
-		worldPos.z = worldPos.z + gerstner.z;
+		//worldPos.z = worldPos.z + gerstner.z;
 
 	}
 
 	worldPos.y = worldPos.y +  rand(vec2(0.0,1.0));
 
-	// calculate normal 
-	for(int i = 0; i < numWaves; i ++){
-		vec3 gerstnerNorm = (gerstnerNorm(waves[i], vec2(worldPos.x,worldPos.z)));
+	vNormal = gl_NormalMatrix * gl_Normal;
 
-		vNormal.x = gerstnerNorm.x + vNormal.x;
-		vNormal.y = gerstnerNorm.y + vNormal.y;
-		vNormal.z = gerstnerNorm.z + vNormal.z;
-
-	}
-
-
-	vNormal.y = 1 - vNormal.y;
-	vNormal = vNormal;
-
-	vertex_normal = normalize(gl_NormalMatrix * vNormal);
 
 	vPosition = worldPos.xyz;
 
 	vTextureCoord0 = vPosition.xz/50.0;
 
-		 gl_FrontColor = gl_Color;
+	 gl_FrontColor = gl_Color;
 
-	
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
 	
