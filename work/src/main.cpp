@@ -85,6 +85,7 @@ float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 45; // difference in angle from windDir
 float medianS = 0.2;
 float speedFactor = 0.5; // scales the speed
+float dr = 0.01; // rate waves fade out and in
 
 vec2 shipPos = vec2(0.0, -0.5);
 
@@ -240,8 +241,12 @@ void renderGUI() {
 	if (ImGui::IsMouseClicked(1))
 		ImGui::OpenPopup("Controls");
 	if (ImGui::BeginPopup("Controls")) {
+		
 		if (ImGui::Selectable("Stormy")) {
- 		medianWavelength = 100;
+			 dr = 0.01;
+
+			numWaves = 14;
+			medianWavelength = 100;
  		amplitudeR = 3;
  		windDir = 0; // wind direction from (x = 1, z = 0)
  		dAngle = 60; // difference in angle from windDir
@@ -252,27 +257,39 @@ void renderGUI() {
 		} 
 		
 		if (ImGui::Selectable("long wavelength- Stormy")) {
+			dr = 0.01;
+
+			numWaves = 14;
+
 			medianWavelength = 100;
 			amplitudeR = 2;
 			windDir = 0; // wind direction from (x = 1, z = 0)
 			dAngle = 60; // difference in angle from windDir
-			medianS = 0.3;
+			medianS = 0.5;
 			speedFactor = 0.5; // scales the speed
 			initWaves();
 
 		}
 		if (ImGui::Selectable("calm")) {
+			dr = 0.01;
+
+			numWaves = 14;
+
  		medianWavelength = 80;
  		amplitudeR = 1;
  		windDir = 0; // wind direction from (x = 1, z = 0)
  		dAngle = 20; // difference in angle from windDir
- 		medianS = 0.1;
+ 		medianS = 0.3;
  		speedFactor = 0.5; // scales the speed
 		initWaves();
 		}
 		if (ImGui::Selectable("long Wavelength- calm")) {
+			dr = 0.01;
+
+			numWaves = 10;
+
 			medianWavelength = 100;
-			amplitudeR = 1;
+			amplitudeR = 0.5;
 			windDir = 0; // wind direction from (x = 1, z = 0)
 			dAngle = 20; // difference in angle from windDir
 			medianS = 0.1;
@@ -280,6 +297,43 @@ void renderGUI() {
 			initWaves();
 		}
 
+		if (ImGui::Selectable("Choppy")) {
+			dr = 0.03;
+
+			numWaves = 14;
+
+			medianWavelength = 20;
+			amplitudeR = 0.5;
+			windDir = 0; // wind direction from (x = 1, z = 0)
+			dAngle = 180; // difference in angle from windDir
+			medianS = 0.1;
+			speedFactor = 0.2; // scales the speed
+			initWaves();
+		}
+		if (ImGui::Selectable("Single wave")) {
+			dr = 0.00;
+
+			numWaves = 1;
+			medianWavelength = 100;
+			amplitudeR = 2;
+			windDir = 0; // wind direction from (x = 1, z = 0)
+			dAngle = 0; // difference in angle from windDir
+			medianS = 0.1;
+			speedFactor = 0.2; // scales the speed
+			initWaves();
+		}
+		if (ImGui::Selectable("Single wave - steep")) {
+			dr = 0.00;
+
+			numWaves = 1;
+			medianWavelength = 100;
+			amplitudeR = 2;
+			windDir = 0; // wind direction from (x = 1, z = 0)
+			dAngle = 0; // difference in angle from windDir
+			medianS = 0.5;
+			speedFactor = 0.2; // scales the speed
+			initWaves();
+		}
 
 		ImGui::EndPopup();
 	}
@@ -903,7 +957,6 @@ int main(int argc, char **argv) {
 
 	
 	float r = 1.0; // mix ratio, for fading waves
-	float dr = 0.01;
 
 
 	int wave = 0;
