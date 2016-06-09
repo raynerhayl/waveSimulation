@@ -55,12 +55,12 @@ float g_zfar = 10000.0;
 bool dragging = false;
 bool g_leftMouseDown = false;
 vec2 g_mousePosition;
-float g_pitch = 0;
-float g_yaw = 0;
-float g_zoom = 1.0;
-vec3 g_camPos = vec3(0,0,0);
+float g_pitch = 25;
+float g_yaw = -180;
+float g_zoom = 1.5;
+vec3 g_camPos = vec3(-19.8882, -718.89, 2385.37);
 
-BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
+BoundingBox scene_bounds = BoundingBox(vec3(-400,-400,-800),vec3(600,00,100));
 bool drawOriginAxis = false;
 //school related
 School * g_school;
@@ -157,8 +157,8 @@ cgra::vec3 getCamDir(){
 void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	// cout << "Scroll Callback :: xoffset=" << xoffset << "yoffset=" << yoffset << endl;
 	g_zoom -= yoffset * g_zoom * 0.2;
-	if(yoffset < 0) g_camPos -= getCamDir()*8;
-	else  g_camPos += getCamDir()*8;
+	if(yoffset < 0) g_camPos -= getCamDir()*20;
+	else  g_camPos += getCamDir()*20;
 }
 
 // Keyboard callback
@@ -200,6 +200,11 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 			vec3 camDir = getCamDir();
 			vec3 right = cross(camDir,vec3(0,1,0));
 			g_camPos += normalize(right);
+		}
+		break;
+		case 'P':
+		{
+			cout << g_camPos << " pitch " << g_pitch << " yaw " << g_yaw << endl;
 		}
 		break;
 	}
@@ -250,7 +255,7 @@ void renderGUI() {
 }
 
 void initSchool(){
-	g_school = new School(500,3,scene_bounds);
+	g_school = new School(800,3,scene_bounds);
 }
 
 float randF() {
@@ -552,7 +557,7 @@ void render(int width, int height) {
 	glFogfv(GL_FOG_COLOR, fogColor);            // Set Fog Color
 	glFogf(GL_FOG_DENSITY, 0.35f);              // How Dense Will The Fog Be
 	glHint(GL_FOG_HINT, GL_DONT_CARE);          // Fog Hint Value
-	glFogf(GL_FOG_START, 1200.0f);             // Fog Start Depth
+	glFogf(GL_FOG_START, 1800.0f);             // Fog Start Depth
 	glFogf(GL_FOG_END, 4000.0f);               // Fog End Depth
 	glEnable(GL_FOG);                   // Enables GL_FOG
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -573,6 +578,12 @@ void render(int width, int height) {
 
 	glDisable(GL_LIGHTING);
 
+	//draw unlit stuff here
+	if(drawOriginAxis){
+		drawOrigin();
+		glColor3f(1,0,0);
+		scene_bounds.draw();
+	}
 	// Use the shader we made
 	if (g_useShader) {
 		glUseProgram(g_toonShader);
@@ -614,19 +625,20 @@ void render(int width, int height) {
 
 
 	glPushMatrix();{
-		glTranslatef(shipPos.x,0.0,shipPos.y);
+		glTranslatef(shipPos.x,1000,shipPos.y);
 
 		glScalef(10,10,10);
-		//ship->renderGeometry();
+		ship->renderGeometry();
 
 	} glPopMatrix();
 
 
-
+	glPushMatrix();
+	glTranslatef(0, 1000, 0);
 		glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
-		//renderWave();
+		renderWave();
 	glEnable(GL_LIGHTING);
-
+	glPopMatrix();
 
 		// Unbind our shader
 		glUseProgram(0);

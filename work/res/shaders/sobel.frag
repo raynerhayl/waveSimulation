@@ -57,7 +57,7 @@ vec3 sobel(float step, vec2 center)
 {
     vec2 oldCenter = center;
     float pNoiseVal =  pNoise(gl_TexCoord[0].st * 7000.0, 3);
-    vec2 perlinNoise = vec2(pNoiseVal * 0.01, pNoiseVal * 0.01);
+    vec2 perlinNoise = vec2(pNoiseVal * 0.02, pNoiseVal * 0.02);
     center += perlinNoise;
     center *= 0.95;
 	float norm = 0.0;
@@ -99,8 +99,8 @@ vec3 sobel(float step, vec2 center)
 	//return texture2D(colorMap, center).rgb;
 	//return vec3(1.0,1.0,1.0);
     pNoiseVal = pNoise(gl_TexCoord[0].st * 6000.0, 3);
-    perlinNoise = vec2(pNoiseVal * 0.02, pNoiseVal * 0.02);
-   // center += perlinNoise;
+    perlinNoise = vec2(pNoiseVal * 0.01, pNoiseVal * 0.01);
+    center += perlinNoise;
     center *= 0.95;
 
     vec3 mixed=  mix(texture2D(colorMap, center).rgb,vec3(0,0,0), maxCol );
