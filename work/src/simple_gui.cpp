@@ -278,6 +278,12 @@ namespace cgra {
 			io.RenderDrawListsFn = renderDrawLists;
 			io.SetClipboardTextFn = setClipboardText;
 			io.GetClipboardTextFn = getClipboardText;
+
+			// Have to comment this out for it to run on my machine (Haylem)
+
+		//#ifdef _WIN32
+		//	io.ImeWindowHandle = glfwGetWin32Window(g_window);
+		//#endif
 			if (install_callbacks) {
 				glfwSetMouseButtonCallback(window, mouseButtonCallback);
 				glfwSetScrollCallback(window, scrollCallback);
