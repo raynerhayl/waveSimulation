@@ -112,8 +112,9 @@ float Prey::getMaxSpeedSqrd(){
 void Prey::drawSelf() {
 	//cout << mFear << endl;
 	glPushMatrix();{
-		glColor3f(1,1-mFear,1-mFear);
-		float len = 2;
+		//glColor3f(1,1-mFear,1-mFear);
+		glColor3f(m_colour.x,m_colour.y,m_colour.z);
+		//float len = 2;
 		//cgraCone(len/4, len, 4, 4, false);
 		// glTranslatef(0,0,4);
 		// glColor3f(1,0,0);

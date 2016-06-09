@@ -39,6 +39,8 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	for(int i = 0; i < numPrey; i++){
 		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
 		Prey b = Prey(position);
+		b.m_colour = colours[i%5];
+		cout << b.m_colour << endl;
 		b.m_geometry = &m_fishGeometry;
 		prey.push_back(b);
 		Prey * p = &(*(prey.begin()+i));
@@ -50,6 +52,7 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
 		Predator  b = Predator(position);
 		b.m_geometry = &m_sharkGeometry;
+		b.m_colour = colours[0];
 		predators.push_back(b);
 		//m_octree->insert(&b);
 	}
