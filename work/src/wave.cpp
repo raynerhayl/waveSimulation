@@ -162,7 +162,7 @@ void Wave::render() {
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
 	float diffuse[] = { 0.25,0.54,1.0, 0.4 };
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-	float specular[] = { 0.0,0.0,0.1, 0.4 };
+	float specular[] = { 0.50,0.50,0.5, 0.4 };
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
 	float shininess[] = { 0.1*128.0 };
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);

@@ -38,6 +38,10 @@ varying vec3 vPosition;
 varying vec2 vTextureCoord0;
 varying float caustic;
 
+varying vec3 vertex_light_position;
+varying vec3 vertex_light_half_vector;
+varying vec3 vertex_normal;
+
 
 struct sWave
 {
@@ -65,7 +69,11 @@ float rand(vec2 co){
 void main() {
 
 // wave properties
-
+vertex_normal = normalize(gl_NormalMatrix * gl_Normal);
+    // Calculate the light position for this vertex
+    vertex_light_position = normalize(gl_LightSource[0].position.xyz);
+    // Calculate the light’s half vector
+    vertex_light_half_vector = normalize(gl_LightSource[0].halfVector.xyz);
 
 	// Transform and pass on the normal/position/texture to fragment shader
 	worldPos = vec4(gl_Vertex.xyzw);
@@ -92,6 +100,8 @@ void main() {
 	vPosition = worldPos.xyz;
 
 	vTextureCoord0 = vPosition.xz/50.0;
+
+	 gl_FrontColor = gl_Color;
 
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
