@@ -34,23 +34,30 @@ varying float caustic;
 
 void main() {
 
+	/*
 	//vNormal = normalize(vNormal);
 
-	vec4 color = vec4(0.0);
-	
-	vec3 L = normalize(gl_LightSource[0].position.xyz);
-	vec3 norm = normalize(texture2D(texture0,vTextureCoord0.st).rgb*2.0-1.0);
-	norm = normalize(norm + vNormal);
-	//normalize(vNormal);
-	vec4 diff = gl_FrontLightProduct[0].diffuse * max(dot(norm,L),0.0);
+	vec4 color = vec4(1.0);
+	vec4 texColor = vec4(texture2D(texture0, vTextureCoord0).rgb,1.0);
+	vec3 bNorm = texture2D(texture0, vTextureCoord0).rgb * 2.0 - 1.0;
 
-	vec4 amb = gl_FrontLightProduct[0].ambient;
-	color = diff + amb;
+	vec3 L = normalize(gl_LightSource[0].position.xyz);
+	vec3 norm = normalize(vNormal);
+	norm =  bNorm;
+
+	vec4 diff = gl_FrontLightProduct[0].diffuse * max(dot(norm,L),0.0);// * vec4(texColor.rgb,1.0);
+	diff.xyz = diff.xyz + 0.4  * max(vPosition.y/3.0,0.0);
+	
+	//vec4 amb = gl_FrontLightProduct[0].ambient;
+	color = diff;
+	color.w=1.0;
+
+
 
 	gl_FragColor = color;
 
 
-/*	// Can do all sorts of cool stuff here
+	// Can do all sorts of cool stuff here
 	vec3 color = texture2D(texture1, vTextureCoord0).rgb;
 
 	//color = colorFromLight(0, vPosition, vNormal);
@@ -80,21 +87,26 @@ void main() {
    }
    
    // write Total Color: 
-   gl_FragColor = gl_FrontLightModelProduct.sceneColor + finalColor; 			
+   gl_FragColor = gl_FrontLightModelProduct.sceneColor + finalColor; 				*/
+
 	
 
 	vec3 CAMERA_POSITION = gl_ModelViewMatrixInverse[3].xyz;
 
-	vec4 specular = vec4(0.0);
+	vec4 specular;
 	vec4 diffuse;
 	vec3 norm = normalize(vNormal); //Important: after interpolation normal modulus != 1.
+	vec3 bnorm = texture2D(texture0, vTextureCoord0).rgb * 2.0 - 1.0;
+
 	vec3 lightVector = gl_LightSource[0].position.xyz;
 	float dist = length(lightVector);
 	float attenuation = 1.0 / (gl_LightSource[0].constantAttenuation + gl_LightSource[0].linearAttenuation * dist + gl_LightSource[0].quadraticAttenuation * dist * dist);
-	attenuation = 1.0;
+	//attenuation = 1.0;
 	lightVector = normalize(lightVector);
 	float nxDir = max(0.0, dot(lightVector, norm));
-	diffuse =  gl_LightSource[0].diffuse * nxDir ;
+	float bnxDir = max(0.0, dot(lightVector, bnorm));
+
+	diffuse =  gl_LightSource[0].diffuse *( nxDir + bnxDir) ;
 
 	if(nxDir != 0.0)
 	{
@@ -109,6 +121,7 @@ void main() {
 	//vec4 texColor = vec4(texture2D(texture0, screenspace).rgb,1.0);
 	vec4 texColor = vec4(1.0);
 
-	gl_FragColor = gl_FrontMaterial.ambient *gl_LightSource[0].ambient + (gl_FrontMaterial.diffuse *diffuse * vec4(texColor.rgb,1.0)) + (gl_FrontMaterial.specular *specular * texColor.a);	*/
+	//diffuse.xyz = diffuse.xyz + 0.2  * max(vPosition.y/3.0,0.0);
 
+	gl_FragColor = gl_FrontMaterial.ambient *gl_LightSource[0].ambient + (gl_FrontMaterial.diffuse *diffuse * vec4(texColor.rgb,1.0)) + (gl_FrontMaterial.specular *specular * texColor.a);
 	}

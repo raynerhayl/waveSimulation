@@ -116,7 +116,7 @@ void Wave::createDisplayListPoly() {
 		for (int vtri = 0; vtri < 3; vtri++) {
 			glNormal3f(m_normals[m_triangles[tri].v[vtri].n].x, m_normals[m_triangles[tri].v[vtri].n].y, m_normals[m_triangles[tri].v[vtri].n].z);
 			glVertex3f(m_points[m_triangles[tri].v[vtri].p].x, m_points[m_triangles[tri].v[vtri].p].y, m_points[m_triangles[tri].v[vtri].p].z);
-			glTexCoord2f(((m_points[m_triangles[tri].v[vtri].p].x + width / 2) / width)*4, ((m_points[m_triangles[tri].v[vtri].p].z + height / 2) / height)*4);
+			//glTexCoord2f(((m_points[m_triangles[tri].v[vtri].p].x + width / 2) / width)*4, ((m_points[m_triangles[tri].v[vtri].p].z + height / 2) / height)*4);
 		}
 	}
 
@@ -157,7 +157,7 @@ void Wave::render() {
 
 	float ambient[]= { 0.0,0.0,0.1, 1.0 };
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-	float diffuse[] = { 0.25,0.64,0.9, 1.0 };
+	float diffuse[] = { 0.25,0.54,1.0, 1.0 };
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
 	float specular[] = { 0.0,0.0,0.1, 1.0 };
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);

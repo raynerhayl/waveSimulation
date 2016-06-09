@@ -69,11 +69,11 @@ GLfloat propsBuf[200]; // seto of properties to fade in
 GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
 
-float medianWavelength = 20;
-float amplitudeR = 0.5;
+float medianWavelength = 40;
+float amplitudeR = 1;
 float windDir = 0; // wind direction from (x = 1, z = 0)
-float dAngle = 45; // difference in angle from windDir
-float medianS = 0.1;
+float dAngle = 20; // difference in angle from windDir
+float medianS = 0.0;
 float speedFactor = 1; // scales the speed
 
 
@@ -254,7 +254,7 @@ void fillAllProps(GLfloat properties[]) {
 // Called once on start up
 //
 void initLight() {
-	float direction[] = { 1.0, 1.0, 0.0, 0.0 };
+	float direction[] = { 0.0, 1.0, 1.0, 0.0 };
 	float diffintensity[] = { 0.8, 0.8, 0.8, 1.0 };
 	float ambient[] = { 0.7, 0.7, 0.7, 1.0 };
 	//float specular[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -272,7 +272,7 @@ void initLight() {
 // An example of how to load a texure from a hardcoded location
 //
 void initTexture() {
-	Image tex("./work/res/textures/normalMap.jpg");
+	Image tex("./work/res/textures/normalMap2.jpg");
 	glGenTextures(1, &bumpTex); // Generate texture ID
 
 	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
@@ -351,8 +351,6 @@ void drawOrigin() {
 void renderWave() {
 	glUseProgram(g_shaderPhong);
 
-
-
 	// render stuff on top
 	glPushMatrix(); {
 		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
@@ -398,23 +396,7 @@ void renderWave() {
 	} glPopMatrix();
 
 	glUseProgram(0);
-
-	//// Enable Drawing texures
-	//glEnable(GL_TEXTURE_2D);
-	//// Use Texture as the color
-	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	//// Set the location for binding the texture
-	//glActiveTexture(GL_TEXTURE0);
-	//// Bind the texture
-	//glBindTexture(GL_TEXTURE_2D, brickTex);
-
-	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
-
-	// Unbind our shader
-	glUseProgram(0);
 	glUseProgramObjectARB(0);
-
-	
 
 		// Texture setup
 		//
@@ -433,7 +415,7 @@ void renderWave() {
 
 		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
 		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture0"), 0);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
 
 		// Set the current time for the shader 
 		glUniform1f(glGetUniformLocation(g_shaderGerstner, "time"), waveTime);
