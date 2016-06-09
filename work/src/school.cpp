@@ -86,7 +86,7 @@ void School::renderSchool() {
 		}
 		glRotatef(45,1,1,1);
 		glColor3f(1,1,0);
-		cgraLine(zRad);
+		//cgraLine(zRad);
 	// Clean up
 	}glPopMatrix();
 	// m_octree->draw();

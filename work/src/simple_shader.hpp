@@ -78,7 +78,7 @@ namespace cgra {
 			throw shader_compile_error();
 		}
 		// always print, so we can see warnings
-		printShaderInfoLog(shader);
+		//printShaderInfoLog(shader);
 		return shader;
 	}
 

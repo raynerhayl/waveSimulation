@@ -562,9 +562,17 @@ void render(int width, int height) {
 		return;
 	}
 
-	glViewport(0,0,width,height);
+	glViewport(0, 0, width, height);
 	// Grey/Blueish background
-	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
+	glClearColor(52/255.0,104/255.0,125/255.0,1.0f);          // We'll Clear To The Color Of The Fog ( Modified )
+	GLfloat fogColor[4] = { 52 / 255.0,104 / 255.0,125 / 255.0,1.0f };
+	glFogi(GL_FOG_MODE, GL_LINEAR);        // Fog Mode
+	glFogfv(GL_FOG_COLOR, fogColor);            // Set Fog Color
+	glFogf(GL_FOG_DENSITY, 0.35f);              // How Dense Will The Fog Be
+	glHint(GL_FOG_HINT, GL_DONT_CARE);          // Fog Hint Value
+	glFogf(GL_FOG_START, 4000.0f);             // Fog Start Depth
+	glFogf(GL_FOG_END, 8000.0f);               // Fog End Depth
+	glEnable(GL_FOG);                   // Enables GL_FOG
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
@@ -576,8 +584,8 @@ void render(int width, int height) {
 	setupCamera(width, height);
 
 
-		float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
-		glLightfv(GL_LIGHT0, GL_POSITION, direction);
+	float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 
 	glDisable(GL_LIGHTING);
 	//draw unlit stuff here
@@ -592,17 +600,18 @@ void render(int width, int height) {
 		abs(scene_bounds.max.z-scene_bounds.min.z)
 	));*/
 
-		// Use the shader we made
-		if (g_useShader){
-			glUseProgram(g_toonShader);
-		} else {
-			glUseProgram(0);
-		}
+	// Use the shader we made
+	if (g_useShader) {
+		glUseProgram(g_toonShader);
+	}
+	else {
+		glUseProgram(0);
+	}
 	if(draw_school) g_school->renderSchool();
 	//ship->renderGeometry();
 	glPushMatrix();
 	glTranslatef(0, -1000, 0);
-	glColor3f(0.4, 0.4, 0.4);
+	glColor3f(0.3f,0.3f,0.3f);
 	glScalef(10, 10, 10);
 	ground->renderGeometry();
 	glPopMatrix();

@@ -32,5 +32,8 @@ void main() {
     gl_FrontColor = gl_Color;
     // Set the position of the current vertex 
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    vec3 vVertex = vec3(gl_ModelViewMatrix * gl_Vertex);
+    const float LOG2 = 1.442695;
+    gl_FogFragCoord = abs(vertexWorld.z/vertexWorld.w);
     depth = gl_Position.z;
 }

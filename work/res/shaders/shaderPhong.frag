@@ -65,5 +65,7 @@ void main() {
 
 	//diffuse.xyz = diffuse.xyz + 0.2  * max(vPosition.y/3.0,0.0);
 
-	gl_FragColor = gl_FrontMaterial.ambient *gl_LightSource[0].ambient + (gl_FrontMaterial.diffuse *diffuse * vec4(texColor.rgb,1.0)) + (gl_FrontMaterial.specular *specular * texColor.a);
+	gl_FragData[0] = gl_FrontMaterial.ambient *gl_LightSource[0].ambient + (gl_FrontMaterial.diffuse *diffuse * vec4(texColor.rgb,1.0)) + (gl_FrontMaterial.specular *specular * texColor.a);
+
+
 	}
