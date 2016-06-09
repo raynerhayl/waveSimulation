@@ -574,19 +574,6 @@ void render(int width, int height) {
 
 	glDisable(GL_LIGHTING);
 
-	//draw unlit stuff here
-	if(drawOriginAxis){
-		drawOrigin();
-		glColor3f(1,1,1);
-		cgraCube(
-			vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
-			(scene_bounds.max.y+scene_bounds.min.y)/2,
-			(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
-			abs(scene_bounds.max.x-scene_bounds.min.x),
-			abs(scene_bounds.max.y-scene_bounds.min.y),
-			abs(scene_bounds.max.z-scene_bounds.min.z)
-		));
-	}
 	// Use the shader we made
 	if (g_useShader) {
 		glUseProgram(g_toonShader);
@@ -637,10 +624,8 @@ void render(int width, int height) {
 
 
 
-		if(draw_school == false){
 		glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
 		renderWave();
-		}
 
 	//renderWave();
 	glEnable(GL_LIGHTING);
