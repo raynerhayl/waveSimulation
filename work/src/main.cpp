@@ -101,6 +101,9 @@ GLuint g_shaderGerstner = 0;
 GLuint g_shaderPhong = 0;
 GLuint bumpTex = 0;
 GLuint g_shipShader = 0;
+GLuint g_gerstNormShader = 0;
+	GLuint gerstNormalTex;
+
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -353,6 +356,7 @@ void initShader() {
 	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_shipShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/ship.vert", "./work/res/shaders/shaderPhong.frag" });
+	g_gerstNormShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/norm.frag" });
 
 }
 
@@ -451,14 +455,16 @@ void renderWave() {
 	glUseProgram(0);
 	glUseProgramObjectARB(0);
 
-		// Texture setup
+
+				// Texture setup
 		//
 		// Enable Drawing texures
 		glEnable(GL_TEXTURE_2D);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		// Set the location for binding the texture
 		glActiveTexture(GL_TEXTURE0);
 		// Bind the texture
-		glBindTexture(GL_TEXTURE_2D, bumpTex);
+		glBindTexture(GL_TEXTURE_2D, gerstNormalTex);
 
 		glUseProgram(g_shaderGerstner);
 
@@ -476,21 +482,33 @@ void renderWave() {
 		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
 		// Specify the number of waves to use from the buffer
 		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
-		GLint m_viewport[4];
-		glGetIntegerv(GL_VIEWPORT, m_viewport);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportWidth"), m_viewport[2]);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportHeight"), m_viewport[3]);
 
-
-
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		wave->render();
 
+
+
+
+		/*
+		glUseProgram(g_gerstNormShader);
+
+
+		glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
+		// Use the shader we made
+
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture0"), 0);
+		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+
+		// Set the current time for the shader 
+		glUniform1f(glGetUniformLocation(g_shaderGerstner, "time"), waveTime);
+		// Send the shader the current main buffer of wave properties
+		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
+		// Specify the number of waves to use from the buffer
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
+
+		wave->render();
+*/
 		// Unbind our shader
 		glUseProgram(0);
 		glUseProgramObjectARB(0);
@@ -546,6 +564,16 @@ void render(int width, int height) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+
+	glGenTextures(1, &gerstNormalTex);
+	glBindTexture(GL_TEXTURE_2D, gerstNormalTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
 	//-------------------------
 	//Attach depth buffer to FBO
 
@@ -554,11 +582,13 @@ void render(int width, int height) {
 	// Set "renderedTexture" as our colour attachement #0
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gerstNormalTex, 0);
+
 
 
 	// Set the list of draw buffers.
-	GLenum DrawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, DrawBuffers); // "1" is the size of DrawBuffers
+	GLenum DrawBuffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, DrawBuffers); // "1" is the size of DrawBuffers
 
 								   //glDrawBuffer(GL_NONE); // No color buffer is drawn to.
 
@@ -591,17 +621,6 @@ void render(int width, int height) {
 		glLightfv(GL_LIGHT0, GL_POSITION, direction);
 
 	glDisable(GL_LIGHTING);
-	//draw unlit stuff here
-	/*drawOrigin();
-	glColor3f(1,1,1);
-	cgraCube(
-		vec3((scene_bounds.max.x+scene_bounds.min.x)/2,
-		(scene_bounds.max.y+scene_bounds.min.y)/2,
-		(scene_bounds.max.z+scene_bounds.min.z)/2),vec3(
-		abs(scene_bounds.max.x-scene_bounds.min.x),
-		abs(scene_bounds.max.y-scene_bounds.min.y),
-		abs(scene_bounds.max.z-scene_bounds.min.z)
-	));*/
 
 		// Use the shader we made
 		if (g_useShader){
@@ -612,6 +631,8 @@ void render(int width, int height) {
 
 	
 	if(draw_school) g_school->renderSchool();
+
+	
 
 	glPushMatrix();
 	glTranslatef(0, -1000, 0);
@@ -637,10 +658,6 @@ void render(int width, int height) {
 		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
 		// Specify the number of waves to use from the buffer
 		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
-		GLint m_viewport[4];
-		glGetIntegerv(GL_VIEWPORT, m_viewport);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportWidth"), m_viewport[2]);
-		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportHeight"), m_viewport[3]);
 
 
 
@@ -666,7 +683,7 @@ void render(int width, int height) {
 
 		if(draw_school == false){
 		renderWave();
-	}
+		}
 
 	//renderWave();
 	glEnable(GL_LIGHTING);

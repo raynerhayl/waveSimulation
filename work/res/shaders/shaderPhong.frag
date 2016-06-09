@@ -18,9 +18,6 @@
 uniform sampler2D texture0;
 uniform sampler2D texture1;
 
-uniform float viewportWidth;
-uniform float viewportHeight;
-
 uniform float time;
 
 
@@ -28,17 +25,21 @@ uniform float time;
 varying vec3 vNormal;
 varying vec3 vPosition;
 varying vec2 vTextureCoord0;
-varying float caustic;
 
 
 
 void main() {
 
-	
+
 	vec4 color = vec4(0.0);
 	vec4 diffuse = gl_LightSource[0].diffuse * max(dot(normalize(gl_NormalMatrix * vNormal),normalize(gl_LightSource[0].position.xyz)),0.0);
 
 	color = diffuse * gl_FrontMaterial.diffuse;
+
+	vec4 texColor = vec4(texture2D(texture0, vec2(vPosition.x/500.0,vPosition.y/500.0)).rgb,1.0);
+
+	//color = vec4(0.0);
+	//color.x = texColor.y;
 
 	gl_FragColor = (color);
 
