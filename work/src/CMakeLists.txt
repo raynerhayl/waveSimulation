@@ -16,6 +16,7 @@ SET(headers
 	"simple_gui.hpp"
 	"perlin_noise.hpp"
 	"wave.hpp"
+	"geometry.hpp"
 )
 
 
@@ -27,6 +28,7 @@ SET(sources
 	"simple_gui.cpp"
 	"perlin_noise.cpp"
 	"wave.cpp"
+	"geometry.cpp"
 )
 
 # Add executable target and link libraries
