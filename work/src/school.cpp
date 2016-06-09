@@ -20,6 +20,7 @@
 #include "shady_geometry.hpp"
 
 
+
 using namespace std;
 using namespace cgra;
 
@@ -32,15 +33,17 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	
 	m_octree = new Octree(origin,halfSize);
 
+	//m_fishGeometry = Geometry("abc");
 	cout << "adding boids" << endl;
 
 	for(int i = 0; i < numPrey; i++){
 		vec3 position = vec3(math::random(bounds.min.x,bounds.max.x),math::random(bounds.min.y,bounds.max.y),math::random(bounds.min.z,bounds.max.z));
 		Prey b = Prey(position);
+		b.m_geometry = &m_fishGeometry;
 		prey.push_back(b);
 		Prey * p = &(*(prey.begin()+i));
 		cout << p->mPosition << endl;
-		m_octree->insert(p);
+		//m_octree->insert(p);
 	}
 
 	for(int i = 0; i < numPredators; i++){

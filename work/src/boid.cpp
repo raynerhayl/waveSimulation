@@ -100,7 +100,6 @@ float Predator::getMaxSpeedSqrd(){
 }
 
 Prey::Prey(vec3 loc) : Boid(loc){
-
 }
 
 float Prey::getMaxSpeedSqrd(){
@@ -114,10 +113,11 @@ void Prey::drawSelf() {
 	glPushMatrix();{
 		glColor3f(1,1-mFear,1-mFear);
 		float len = 2;
-		cgraCone(len/4, len, 4, 4, false);
+		//cgraCone(len/4, len, 4, 4, false);
 		// glTranslatef(0,0,4);
 		// glColor3f(1,0,0);
 		// cgraLine(3);
+		m_geometry->renderGeometry();
 	// Clean up
 	}glPopMatrix();
 }

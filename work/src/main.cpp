@@ -30,6 +30,8 @@
 #include "helpers.hpp"
 #include "boid.hpp"
 #include "octree.hpp"
+#include "wave.hpp"
+#include "geometry.hpp"
 
 #include "perlin_noise.hpp"
 
@@ -62,6 +64,27 @@ BoundingBox scene_bounds = BoundingBox(vec3(-500,-500,-500),vec3(500,500,500));
 School * g_school;
 bool draw_school = true;
 
+//wave related
+Wave * wave;
+float waveTime = 0.0;
+int numWaves = 10;
+
+Geometry * ship = new Geometry("./work/res/assets/ship.obj");
+
+GLfloat propsBuf[200]; // seto of properties to fade in
+GLfloat props[200]; // main set of properties
+GLfloat activeBuf[200]; // properties which actually get sent to shader
+
+float medianWavelength = 40;
+float amplitudeR = 1;
+float windDir = 0; // wind direction from (x = 1, z = 0)
+float dAngle = 20; // difference in angle from windDir
+float medianS = 0.0;
+float speedFactor = 1; // scales the speed
+
+
+
+
 //performance
 float frameSpeed = 0;
 int fps = 0;
@@ -74,6 +97,9 @@ GLuint g_texture = 0;
 GLuint g_plainShader = 0;
 GLuint g_sobelShader = 0;
 GLuint g_toonShader = 0;
+GLuint g_shaderGerstner = 0;
+GLuint g_shaderPhong = 0;
+GLuint bumpTex = 0;
 
 // Mouse Button callback
 // Called for mouse movement event on since the last glfwPollEvents
@@ -115,6 +141,7 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
 	// cout << "Scroll Callback :: xoffset=" << xoffset << "yoffset=" << yoffset << endl;
 	g_zoom -= yoffset * g_zoom * 0.2;
 }
+
 OctreeNode * m_octree;
 Octree * m_newtree;
 std::vector<Boid*> temp_boids;
@@ -219,15 +246,71 @@ void initSchool(){
 	g_school = new School(1000,3,scene_bounds);
 }
 
+float randF() {
+	float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	return r;
+}
+
+
+/*
+	Populates an array of properties at the given wave index
+*/
+void fillProps(GLfloat properties[], int waveIndex) {
+
+	float wavelength = medianWavelength - medianWavelength*0.4 + 2* randF() *0.8 * medianWavelength;
+	float speed = sqrt((9.81*wavelength) / (2 * 3.14));//speedFactor * (frequency*wavelength);
+	float frequency = speed / wavelength;// sqrt((9.81 * 2 * 3.145) / wavelength);
+	float amplitude = amplitudeR - amplitudeR*0.2 + randF() * 0.4 * amplitudeR;
+
+	float angle = windDir - dAngle + randF() * 2 * dAngle;
+
+	vec2 dir = vec2(std::sin((3.145 * angle) / 180), std::cos((3.145 * angle) / 180));
+
+	float steepness =randF()*(medianS * 0.2) + medianS *0.7;
+
+	properties[waveIndex * 6] = wavelength;	     // wavelength
+	properties[waveIndex * 6 + 1] = amplitude;  // amplitude
+	properties[waveIndex * 6 + 2] = speed;  // velocity
+	properties[waveIndex * 6 + 3] = dir.x; // direction x
+	properties[waveIndex * 6 + 4] = dir.y;  // direction y
+	properties[waveIndex * 6 + 5] = steepness;  // steepness
+
+}
+
+/*
+	Initiate the wave class and populate property arrays
+*/
+void initWaves() {
+	wave = new Wave();
+
+	for (int i = 0; i < numWaves; i++) {
+
+		fillProps(props, i);
+		fillProps(propsBuf, i);
+		fillProps(activeBuf, i);
+
+	}
+
+}
+
+void fillAllProps(GLfloat properties[]) {
+	for (int i = 0; i < numWaves; i++) {
+		fillProps(properties, i);
+	}
+}
+
 // Sets up where and what the light is
 // Called once on start up
-// 
+//
 void initLight() {
-	float direction[] = { 0.7f, 0.7f, 1.0f, 0.0f };
-	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	float direction[] = { 0.0, 1.0, 1.0, 0.0 };
+	float diffintensity[] = { 0.8, 0.8, 0.8, 1.0 };
+	float ambient[] = { 0.7, 0.7, 0.7, 1.0 };
+	//float specular[] = { 0.0, 0.0, 0.0, 1.0 };
+
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
+	//glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
 
@@ -238,11 +321,11 @@ void initLight() {
 // An example of how to load a texure from a hardcoded location
 //
 void initTexture() {
-	Image tex("./work/res/textures/brick.jpg");
+	Image tex("./work/res/textures/normalMap2.jpg");
+	glGenTextures(1, &bumpTex); // Generate texture ID
 
 	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
-	glGenTextures(1, &g_texture); // Generate texture ID
-	glBindTexture(GL_TEXTURE_2D, g_texture); // Bind it as a 2D texture
+	glBindTexture(GL_TEXTURE_2D, bumpTex); // Bind it as a 2D texture
 
 	// Setup sampling strategies
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -253,8 +336,8 @@ void initTexture() {
 
 	// Finnaly, actually fill the data into our texture
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
-}
 
+}
 
 
 // An example of how to load a shader from a hardcoded location
@@ -266,6 +349,8 @@ void initShader() {
 	g_sobelShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/sobel.vert", "./work/res/shaders/sobel.frag" });
 	g_toonShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/toon.vert", "./work/res/shaders/toon.frag" });
 	g_plainShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/plain.vert", "./work/res/shaders/plain.frag" });
+	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/shaderPhong.frag" });
+	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
 
 }
 
@@ -310,6 +395,104 @@ void drawOrigin(){
 		glTranslatef(0,0,50);
 		cgraLine(100);
 	}glPopMatrix();
+}
+
+
+void renderWave() {
+	glUseProgram(0);
+
+	// render stuff on top
+	glPushMatrix(); {
+		float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		float specular[] = { 0.0,0.0 / 256.0,150.0 / 256.0, 1.0 };
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		float shininess[] = { 0.1*128.0 };
+		glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+		glTranslatef(0, 30, 0);
+		cgraSphere(10.0);
+
+	} glPopMatrix();
+
+	// render stuff on bottom
+	glPushMatrix(); {
+
+		glRotatef(180, 0.0, 0.0, 1.0);
+
+		glPushMatrix(); {
+			float ambient[] = { 0.0 / 256.0,100.0 / 256.0,50 / 256.0, 1.0 };
+			glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+			float diffuse[] = { 200.0 / 256,200.0 / 256.0,0.0, 1.0 };
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+			float specular[] = { 0.0,0.0 / 256.0,150.0 / 256.0, 1.0 };
+			glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+			float shininess[] = { 0.1*128.0 };
+			glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+			glTranslatef(0, 30, 0);
+			cgraSphere(10.0);
+
+		} glPopMatrix();
+
+		GLint m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+		//glBindTexture(GL_TEXTURE_2D, causTex);
+		//glCopyTexSubImage2D(GL_TEXTURE_2D, 1, 0, 0, m_viewport[0], m_viewport[1], 200, 200);
+
+	} glPopMatrix();
+
+	glUseProgram(0);
+	glUseProgramObjectARB(0);
+
+		// Texture setup
+		//
+		// Enable Drawing texures
+		glEnable(GL_TEXTURE_2D);
+		// Set the location for binding the texture
+		glActiveTexture(GL_TEXTURE0);
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, bumpTex);
+
+		glUseProgram(g_shaderGerstner);
+
+
+		glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
+		// Use the shader we made
+
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture0"), 0);
+		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+
+		// Set the current time for the shader 
+		glUniform1f(glGetUniformLocation(g_shaderGerstner, "time"), waveTime);
+		// Send the shader the current main buffer of wave properties
+		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
+		// Specify the number of waves to use from the buffer
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
+		GLint m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportWidth"), m_viewport[2]);
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "viewportHeight"), m_viewport[3]);
+
+
+
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		wave->render();
+
+		// Unbind our shader
+		glUseProgram(0);
+		glUseProgramObjectARB(0);
+		//glDisable(GL_TEXTURE_2D);
+
 }
 
 
@@ -416,6 +599,8 @@ void render(int width, int height) {
 			glUseProgram(0);
 		}
 	if(draw_school) g_school->renderSchool();
+	ship->renderGeometry();
+	renderWave();
 	glEnable(GL_LIGHTING);
 
 
@@ -600,22 +785,62 @@ int main(int argc, char **argv) {
 	initTexture();
 	initShader();
 	initSchool();
+	initWaves();
 
 	//for fps calculation
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
+
+	
+	float r = 1.0; // mix ratio, for fading waves
+	float dr = 0.01;
+
+
+	int wave = 0;
+
+	bool fade = true; // fade out
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(g_window)) {
 
 		double currentTime = glfwGetTime();
 		nbFrames++;
-		if ( currentTime - lastTime >= 1.0 ) {
-		    frameSpeed = 1000.0/double(nbFrames);
-		    fps = nbFrames;
-		    nbFrames = 0;
-		    lastTime += 1.0;
+		if (currentTime - lastTime >= 1.0) {
+
+			frameSpeed = 1000.0 / double(nbFrames);
+			fps = nbFrames;
+			nbFrames = 0;
+			lastTime += 1.0;
 		}
+
+			waveTime = waveTime + 0.1;
+
+			activeBuf[wave * 6 + 1] = propsBuf[wave * 6 + 1] * r;
+
+			if (fade) {
+				r = r - dr;
+				if (r <= 0) {
+					r = 0 + dr;
+					fade = false;
+					fillProps(propsBuf, wave); // add new wave
+				}
+			}
+			else { // fade in new wave
+				r = r + dr;
+				if (r > 1) {
+					r = 1;
+					fade = true;
+					wave = wave + 1;
+					if (wave > numWaves) {
+						wave = 0;
+					}
+				}
+			}
+
+
+
+
+
 
 		// Make sure we draw to the WHOLE window
 		int width, height;
@@ -634,10 +859,9 @@ int main(int argc, char **argv) {
 		glfwPollEvents();
 	}
 
+
 	glfwTerminate();
 }
-
-
 
 
 

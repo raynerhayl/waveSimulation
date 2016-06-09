@@ -16,6 +16,8 @@
 #include "opengl.hpp"
 #include "helpers.hpp"
 
+#include "geometry.hpp"
+
 
 class Boid {
 public:
@@ -53,6 +55,7 @@ private:
 };
 
 class Prey : public Boid {
+	
 public:
 	//methods
 	Prey(vec3 pos);
@@ -60,6 +63,7 @@ public:
 	bool mIsDead = false;
 	float mFear = 0.0f;
 	float mMass = 1;
+	Geometry * m_geometry;
 private:
 	void drawSelf();
 	float getMaxSpeedSqrd();

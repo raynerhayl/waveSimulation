@@ -14,9 +14,9 @@ SET(headers
 	"school.hpp"
 	"boid.hpp"
 	"simple_gui.hpp"
-	"octree_node.hpp"
-	"octree.hpp"
 	"perlin_noise.hpp"
+	"wave.hpp"
+	"geometry.hpp"
 )
 
 
@@ -27,6 +27,8 @@ SET(sources
 	"boid.cpp"
 	"simple_gui.cpp"
 	"perlin_noise.cpp"
+	"wave.cpp"
+	"geometry.cpp"
 )
 
 # Add executable target and link libraries
