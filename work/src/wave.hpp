@@ -13,13 +13,13 @@
 #include "boid.hpp"
 
 
-struct vertex {
-	int p = 0; // index for point in m_points
-	int t = 0; // index for uv in m_uvs
-	int n = 0; // index for normal in m_normals
-};
+// struct vertex {
+// 	int p = 0; // index for point in m_points
+// 	int t = 0; // index for uv in m_uvs
+// 	int n = 0; // index for normal in m_normals
+// };
 
-struct triangle {
+struct m_triangle {
 	vertex v[3]; //requires 3 verticies
 };
 
@@ -31,11 +31,11 @@ private:
 	std::vector<cgra::vec3> m_points;	// Point list
 	std::vector<cgra::vec2> m_uvs;		// Texture Coordinate list
 	std::vector<cgra::vec3> m_normals;	// Normal list
-	std::vector<triangle> m_triangles;	// Triangle/Face list
+	std::vector<m_triangle> m_triangles;	// Triangle/Face list
 
-	double squareDensity = 150;
-	double width = 100;
-	double height = 100;
+	double squareDensity = 15;
+	double width = 1000;
+	double height = 1000;
 
 	bool m_wireFrameOn = false;
 

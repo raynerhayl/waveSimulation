@@ -74,7 +74,7 @@ void Wave::createTriangles() {
 			off = off + 1;
 		}
 
-		triangle triOdd = triangle();
+		m_triangle triOdd = m_triangle();
 
 		triOdd.v[0].p = off + square;
 		triOdd.v[0].n = 0;
@@ -84,7 +84,7 @@ void Wave::createTriangles() {
 		triOdd.v[2].n = 0;
 
 		m_triangles.push_back(triOdd);
-		triangle triEven = triangle();
+		m_triangle triEven = m_triangle();
 
 		triEven.v[0].p = off + square + 1;
 		triEven.v[0].n = 0;

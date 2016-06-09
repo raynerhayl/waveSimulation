@@ -16,6 +16,8 @@
 #include "opengl.hpp"
 #include "helpers.hpp"
 
+#include "geometry.hpp"
+
 
 class Boid {
 public:
@@ -53,6 +55,7 @@ private:
 };
 
 class Prey : public Boid {
+	//static Geometry g;
 public:
 	//methods
 	Prey(vec3 pos);
