@@ -35,8 +35,8 @@ private:
 
 	double squareDensity = 50;
 
-	double width = 500;
-	double height = 500;
+	double width = 1000;
+	double height = 1000;
 
 	bool m_wireFrameOn = false;
 

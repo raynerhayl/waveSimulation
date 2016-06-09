@@ -36,54 +36,14 @@ void main() {
 
 	color = diffuse * gl_FrontMaterial.diffuse;
 
-	vec4 texColor = vec4(texture2D(texture0, vec2(vPosition.x/500.0,vPosition.y/500.0)).rgb,1.0);
+	//color = color * 0.3 * abs(1.0-vPosition.y);
+	//vec4 texColor = vec4(texture2D(texture0, vec2(vPosition.x/500.0,vPosition.y/500.0)).rgb,1.0);
 
 	//color = vec4(0.0);
 	//color.x = texColor.y;
 
 	gl_FragColor = (color);
 
-	
-	/*
 
-	vec3 CAMERA_POSITION = gl_ModelViewMatrixInverse[3].xyz;
-
-	vec4 specular;
-	vec4 diffuse;
-	vec3 norm = normalize(vNormal); //Important: after interpolation normal modulus != 1.
-	//vec3 bnorm = texture2D(texture0, vTextureCoord0).rgb * 2.0 - 1.0;
-
-	vec3 lightVector = gl_LightSource[0].position.xyz;
-	float dist = length(lightVector);
-	float attenuation = 1.0 / (gl_LightSource[0].constantAttenuation + gl_LightSource[0].linearAttenuation * dist + gl_LightSource[0].quadraticAttenuation * dist * dist);
-	attenuation = 1.0;
-	lightVector = normalize(lightVector);
-	float nxDir = max(0.0, dot(lightVector, norm));
-	//float bnxDir = max(0.0, dot(lightVector, bnorm));
-
-	diffuse =  gl_LightSource[0].diffuse *( nxDir );//+ bnxDir) ;
-
-	if(nxDir != 0.0)
-	{
-			vec3 cameraVector = normalize(CAMERA_POSITION - vPosition.xyz);
-			vec3 halfVector = normalize(lightVector + cameraVector);
-			float nxHalf = max(0.0,dot(norm, halfVector));
-			float specularPower = pow(nxHalf, gl_FrontMaterial.shininess);
-			specular =  gl_LightSource[0].specular * specularPower ;
-	}
-
-	//vec2 screenspace = vec2(gl_FragCoord.x/viewportWidth + 1,gl_FragCoord.y/viewportHeight + 1);
-	//vec4 texColor = vec4(texture2D(texture0, screenspace).rgb,1.0);
-	vec4 texColor = vec4(1.0);
-
-	//diffuse.xyz = diffuse.xyz + 0.2  * max(vPosition.y/3.0,0.0);
-	
-	vec4 color = vec4(0.0);
-	//color.x = vNormal.y;
-	color = gl_FrontMaterial.ambient *gl_LightSource[0].ambient + (gl_FrontMaterial.diffuse *diffuse * vec4(texColor.rgb,1.0)) ;//+ (gl_FrontMaterial.specular *specular * texColor.a);
-
-	gl_FragColor = color;
-	
-	*/
 
 	}

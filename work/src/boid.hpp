@@ -29,6 +29,7 @@ public:
 	vec3 mVelocity;
 	vec3 mAccel;
 	vec3 getPosition();
+	vec3 m_colour;
 
 	void pullToCentre(const vec3 &);
 	Geometry * m_geometry;

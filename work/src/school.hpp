@@ -36,6 +36,8 @@ private:
 	std::vector<Prey> prey;
 	std::vector<Predator> predators;
 
+	vec3 colours [5] = {vec3(52/255.0,86/255.0,156/255.0),vec3(250/255.0,129/255.0,19/255.0),vec3(27/255.0,143/255.0,89/255.0),vec3(115/255.0,4/255.0,166/255.0),vec3(250/255.0,155/255.0,25/255.0)};
+
 	// Methods
 	void drawBounds();
 	void update();
