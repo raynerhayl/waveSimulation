@@ -80,9 +80,9 @@ GLfloat activeBuf[200]; // properties which actually get sent to shader
 float medianWavelength = 40;
 float amplitudeR = 1;
 float windDir = 0; // wind direction from (x = 1, z = 0)
-float dAngle = 20; // difference in angle from windDir
-float medianS = 0.0;
-float speedFactor = 1; // scales the speed
+float dAngle = 45; // difference in angle from windDir
+float medianS = 0.2;
+float speedFactor = 0.2; // scales the speed
 
 
 
@@ -614,12 +614,50 @@ void render(int width, int height) {
 	if(draw_school) g_school->renderSchool();
 	//ship->renderGeometry();
 	glPushMatrix();
-	glTranslatef(0, -500, 0);
+	glTranslatef(0, -1000, 0);
 	glColor3f(0.3f,0.3f,0.3f);
-	glScalef(5, 5, 5);
+	glScalef(15,15,15);
 	ground->renderGeometry();
 	glPopMatrix();
-	//renderWave();
+
+
+		glUseProgram(g_shipShader);
+
+
+		glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
+		// Use the shader we made
+
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture0"), 0);
+		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+
+		// Set the current time for the shader 
+		glUniform1f(glGetUniformLocation(g_shaderGerstner, "time"), waveTime);
+		// Send the shader the current main buffer of wave properties
+		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
+		// Specify the number of waves to use from the buffer
+		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
+
+
+
+
+
+	glPushMatrix();{
+		glTranslatef(shipPos.x,0.0,shipPos.y);
+
+		glScalef(10,10,10);
+		//ship->renderGeometry();
+
+	} glPopMatrix();
+
+
+
+
+		glPushMatrix();
+		glTranslatef(0, 500, 0);
+		glColor3f(52 / 255.0, 104 / 255.0, 125 / 255.0);
+	renderWave();
+		glPopMatrix();
 	glEnable(GL_LIGHTING);
 
 
