@@ -305,6 +305,19 @@ void renderGUI() {
 			speedFactor = 0.2; // scales the speed
 			initWaves();
 		}
+				if (ImGui::Selectable("Choppy- directional")) {
+			dr = 0.03;
+
+			numWaves = 14;
+
+			medianWavelength = 20;
+			amplitudeR = 0.5;
+			windDir = 0; // wind direction from (x = 1, z = 0)
+			dAngle = 40; // difference in angle from windDir
+			medianS = 0.1;
+			speedFactor = 0.2; // scales the speed
+			initWaves();
+		}
 		if (ImGui::Selectable("Single wave")) {
 			dr = 0.00;
 
@@ -542,6 +555,8 @@ void renderWave() {
 		glUniform1fv(glGetUniformLocation(g_shaderGerstner, "waveProperties"), 100, activeBuf);
 		// Specify the number of waves to use from the buffer
 		glUniform1i(glGetUniformLocation(g_shaderGerstner, "numWaves"), numWaves);
+				glUniform1i(glGetUniformLocation(g_shaderGerstner, "waveHeight"), amplitudeR);
+
 
 
 		glPushMatrix;{
@@ -958,7 +973,7 @@ int main(int argc, char **argv) {
 	bool fade = true; // fade out
 
 	ship = new Geometry("./work/res/assets/ship.obj");
-	ground = new Geometry("./work/res/assets/ground4.obj");
+	ground = new Geometry("./work/res/assets/ground2.obj");
 
 
 	// Loop until the user closes the window

@@ -28,6 +28,8 @@ uniform float frameWidth = 200;
 uniform float viewportWidth;
 uniform float viewportHeight;
 
+uniform float waveHeight;
+
 
 vec4 worldPos;
 
@@ -116,15 +118,12 @@ void main() {
 
 	vec4 color = gl_Color;
 
-	caustic = max( 0.4 * (vPosition.y - 2.0), 0.0);
+	caustic = max( 0.4 * (vPosition.y - waveHeight), 0.0);
 	
 	color = color;
 
 	gl_FrontColor = color;
 
-	caustic = 0;
-
-	
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
 	
