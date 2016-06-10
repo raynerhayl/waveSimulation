@@ -105,7 +105,7 @@ Prey::Prey(vec3 loc) : Boid(loc){
 }
 
 float Prey::getMaxSpeedSqrd(){
-	float speed = min(mMaxSpeed + (((int)(mFear*100) % 10000)*.001), 5.0f);
+	float speed = min(mMaxSpeed + (((int)(mFear*100) % 10000)*.001), 1.2f);
 	return speed * speed;
 }
 
