@@ -55,17 +55,17 @@ float g_zfar = 10000.0;
 bool dragging = false;
 bool g_leftMouseDown = false;
 vec2 g_mousePosition;
-float g_pitch = 25;
-float g_yaw = -180;
+float g_pitch = 9.199;
+float g_yaw = -166.6;
 float g_zoom = 1.5;
-vec3 g_camPos = vec3(-19.8882, -718.89, 2385.37);
+vec3 g_camPos = vec3 (- 251.134, -728.151, 1059.1);
 
 BoundingBox scene_bounds = BoundingBox(vec3(-400,-400,-800),vec3(600,00,100));
 bool drawOriginAxis = false;
 //school related
 School * g_school;
-bool draw_school = true;
-bool draw_caustics = true;
+bool draw_school = false;
+bool draw_caustics = false;
 
 bool g_drawLand = true;
 //wave related
@@ -715,13 +715,14 @@ void render(int width, int height) {
 		scene_bounds.draw();
 	}
 	// Use the shader we made
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
 	if (g_useShader) {
 		glUseProgram(g_toonShader);
 	}
 	else {
 		glUseProgram(0);
-		glEnable(GL_LIGHTING);
-		glEnable(GL_COLOR_MATERIAL);
 	}
 	if(draw_school) g_school->renderSchool();
 
@@ -790,7 +791,7 @@ void render(int width, int height) {
 
 
 	glPushMatrix();{
-		glTranslatef(shipPos.x,1000,shipPos.y);
+		glTranslatef(shipPos.x,500,shipPos.y);
 
 		glScalef(10,10,10);
 		ship->renderGeometry();
@@ -799,7 +800,7 @@ void render(int width, int height) {
 
 
 	glPushMatrix();
-	glTranslatef(0, 1000, 0);
+	glTranslatef(0, 500, 0);
 		glColor3f(52 / 255.0,104 / 255.0,125 / 255.0);
 		renderWave();
 	glEnable(GL_LIGHTING);
@@ -1006,7 +1007,7 @@ int main(int argc, char **argv) {
 	bool fade = true; // fade out
 
 	ship = new Geometry("./work/res/assets/ship.obj");
-	ground = new Geometry("./work/res/assets/ground4.obj");
+	ground = new Geometry("./work/res/assets/ground3.obj");
 
 
 	// Loop until the user closes the window
