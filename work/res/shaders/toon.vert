@@ -19,6 +19,8 @@ varying vec3 vertex_light_half_vector;
 varying vec3 vertex_normal;
 varying vec4 direction;
 varying float depth;
+varying float caustic;
+
 void main() {            
 	vec4 vertexWorld = gl_ModelViewMatrix * gl_Vertex;
 	vec4 cameraWorld = gl_ModelViewMatrix * cameraPos;
@@ -35,5 +37,6 @@ void main() {
     vec3 vVertex = vec3(gl_ModelViewMatrix * gl_Vertex);
     const float LOG2 = 1.442695;
     gl_FogFragCoord = abs(vertexWorld.z/vertexWorld.w);
+    caustic = 0.0;
     depth = gl_Position.z;
 }

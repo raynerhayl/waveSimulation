@@ -30,6 +30,7 @@ uniform float viewportWidth;
 uniform float viewportHeight;
 
 
+
 vec4 worldPos;
 
 // Values to pass to the fragment shader
@@ -96,7 +97,7 @@ vertex_normal = normalize(gl_NormalMatrix * gl_Normal);
 
 	vNormal = gl_NormalMatrix * gl_Normal;
 
-
+	caustic = 0.0;
 	vPosition = worldPos.xyz;
 
 	vTextureCoord0 = vPosition.xz/50.0;
