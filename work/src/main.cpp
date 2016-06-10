@@ -67,6 +67,7 @@ School * g_school;
 bool draw_school = true;
 bool draw_caustics = true;
 
+bool g_drawLand = true;
 //wave related
 Wave * wave;
 float waveTime = 0.0;
@@ -208,11 +209,18 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 		case 'C':
 		{
 			if (action == 1)
-			draw_caustics = !draw_caustics;
+				draw_caustics = !draw_caustics;
 		}break;
 		case 'P':
 		{
-			cout << g_camPos << " pitch " << g_pitch << " yaw " << g_yaw << endl;
+			if(action == 1)
+				cout << g_camPos << " pitch " << g_pitch << " yaw " << g_yaw << endl;
+		}
+		break;
+		case 'L':
+		{
+			if(action == 1)
+				g_drawLand = !g_drawLand;
 		}
 		break;
 	}
@@ -718,7 +726,7 @@ void render(int width, int height) {
 	glTranslatef(0, -1000, 0);
 	glColor3f(0.3f,0.3f,0.3f);
 	glScalef(5,10,5);
-	ground->renderGeometry();
+	if(g_drawLand)ground->renderGeometry();
 	glPopMatrix();
 
 

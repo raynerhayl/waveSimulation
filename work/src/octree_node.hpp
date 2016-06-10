@@ -79,40 +79,6 @@ public:
 		return !(p.x > max.x || p.x < min.x || p.y > max.y || p.y < min.y || p.z > max.z || p.z < min.z);
 	}
 
-	// int clean(vector<Boid*>& toShuffle){
-	// 	int childDataCount = 0;
-	// 	if(isLeafNode()){
-	// 		if(m_dataSize != 0){
-	// 			if(dataInBounds()) return 1;
-	// 			else {
-	// 				toShuffle.push_back(data);
-	// 				data = NULL;
-	// 			}
-	// 		}
-	// 	} else {
-	// 		for (int i = 0; i != 8; ++i){
-	// 			int dataCount = children[i]->clean(toShuffle);
-	// 			if(dataCount == 0){
-	// 				children[i] -> deleteChildren();
-	// 			}
-	// 			childDataCount+= dataCount;
-	// 		}
-	// 		for(int i = toShuffle.size()-1; i != -1; i--){
-	// 			if(inBounds(toShuffle[i]->mPosition)){
-	// 				if(insert(toShuffle[i])){
-	// 					toShuffle.erase(toShuffle.begin()+i); //remove from list
-	// 					cout << "shsize: " << toShuffle.size() << endl;
-	// 					childDataCount++;
-	// 				} else {
-	// 					//cout << "didnt fit, continued up" << endl;
-	// 				}//add to this
-	// 			}
-	// 		}
-	// 	}
-	// 	//cout << "#ch: " << childDataCount << " #orph: "<< toShuffle.size() << endl;
-	// 	return childDataCount;
-	// }
-
 	bool insert(Boid* boid){
 		//cout << "inserting" << endl;
 		if(inBounds(boid->getPosition())){
