@@ -4,6 +4,9 @@ uniform sampler2D colorMap;
 uniform float width;
 varying float limit;
 uniform float time;
+
+uniform bool warp;
+uniform bool outline;
 #define PI 3.14159265358979323846
 
 float intensity(in vec4 color, int i)
@@ -58,8 +61,10 @@ vec3 sobel(float step, vec2 center)
     vec2 oldCenter = center;
     float pNoiseVal =  pNoise(gl_TexCoord[0].st * 7000.0, 3);
     vec2 perlinNoise = vec2(pNoiseVal * 0.02, pNoiseVal * 0.02);
-    center += perlinNoise;
-    center *= 0.95;
+    if (warp){
+     center += perlinNoise;
+    }
+    center *= 0.98;
 	float norm = 0.0;
 	for (int i =0; i < 3; i++){
     float tleft = intensity(texture2D(edge,center + vec2(-step,step)), i);
@@ -100,10 +105,16 @@ vec3 sobel(float step, vec2 center)
 	//return vec3(1.0,1.0,1.0);
     pNoiseVal = pNoise(gl_TexCoord[0].st * 6000.0, 3);
     perlinNoise = vec2(pNoiseVal * 0.01, pNoiseVal * 0.01);
-    center += perlinNoise;
-    center *= 0.95;
-
-    vec3 mixed=  mix(texture2D(colorMap, center).rgb,vec3(0,0,0), maxCol );
+    if (warp){
+        center += perlinNoise;
+    }
+    center *= 0.98;
+    vec3 mixed = vec3(0,0,0);
+    if (outline){
+     mixed=  mix(texture2D(colorMap, center).rgb,vec3(0,0,0), maxCol );
+    } else {
+     mixed=  texture2D(colorMap, center).rgb;
+    }
    return mixed;
  }
 

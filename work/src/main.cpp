@@ -96,14 +96,21 @@ int fps = 0;
 // Remove when modifying main.cpp for Assignment 3
 //
 bool g_useShader = true;
+bool g_useSketchy = true;
+bool g_useOutline = true;
+
+
+
 GLuint g_texture = 0;
 GLuint g_plainShader = 0;
 GLuint g_sobelShader = 0;
 GLuint g_toonShader = 0;
 GLuint g_shaderGerstner = 0;
+GLuint g_shaderGerstnerPhong = 0;
 GLuint g_shaderPhong = 0;
 GLuint bumpTex = 0;
 GLuint g_shipShader = 0;
+GLuint g_shipShaderPhong = 0;
 GLuint g_gerstNormShader = 0;
 GLuint gerstNormalTex;
 GLuint g_causticShader = 0;
@@ -134,14 +141,7 @@ void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
 		if(action ==1)dragging = ! dragging;
 	}
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-		if (g_useShader) {
-			//g_useShader = false;
-			cout << "Using the default OpenGL pipeline" << endl;
-		}
-		else {
-			//g_useShader = true;
-			cout << "Using a shader" << endl;
-		}
+		//g_useShader = !g_useShader;
 	}
 }
 cgra::vec3 getCamDir(){
@@ -210,6 +210,24 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 			if (action == 1)
 			draw_caustics = !draw_caustics;
 		}break;
+
+		case 'E':
+		{
+			if (action == 1)
+				g_useOutline = !g_useOutline;
+		}break;
+
+		case 'R':
+		{
+			if (action == 1)
+				g_useSketchy = !g_useSketchy;
+		}break;
+		case 'T':
+		{
+			if (action == 1)
+				g_useShader = !g_useShader;
+		}break;
+
 		case 'P':
 		{
 			cout << g_camPos << " pitch " << g_pitch << " yaw " << g_yaw << endl;
@@ -457,8 +475,10 @@ void initShader() {
 	g_toonShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/toon.vert", "./work/res/shaders/toon.frag" });
 	g_plainShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/plain.vert", "./work/res/shaders/plain.frag" });
 	g_shaderGerstner = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/toon.frag" });
+	g_shaderGerstnerPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_shipShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/ship.vert", "./work/res/shaders/toon.frag" });
+	g_shipShaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/ship.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_gerstNormShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/norm.frag" });
 	g_causticShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/caustic.vert", "./work/res/shaders/toon.frag" });
 
@@ -526,7 +546,12 @@ void renderWave() {
 		// Bind the texture
 		glBindTexture(GL_TEXTURE_2D, gerstNormalTex);
 
-		glUseProgram(g_shaderGerstner);
+		if (g_useShader) {
+			glUseProgram(g_shaderGerstner);
+		}
+		else {
+			glUseProgram(g_shaderGerstnerPhong);
+		}
 
 
 		glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
@@ -687,32 +712,41 @@ void render(int width, int height) {
 	}
 	else {
 		glUseProgram(0);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_COLOR_MATERIAL);
 	}
 	if(draw_school) g_school->renderSchool();
 
 
-	if(draw_caustics){
-		glUseProgram(g_causticShader);
+
+		if (g_useShader) {
+			if (draw_caustics) {
+				glUseProgram(g_causticShader);
 
 
-		glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
-		// Use the shader we made
+				glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
+				// Use the shader we made
 
-		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
-		glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
-		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+				// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+				glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
+				//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
 
-		// Set the current time for the shader 
-		glUniform1f(glGetUniformLocation(g_causticShader, "time"), waveTime);
-		// Send the shader the current main buffer of wave properties
-		glUniform1fv(glGetUniformLocation(g_causticShader, "waveProperties"), 100, activeBuf);
-		// Specify the number of waves to use from the buffer
-		
-		glUniform1i(glGetUniformLocation(g_causticShader, "numWaves"), numWaves);
+				// Set the current time for the shader 
+				glUniform1f(glGetUniformLocation(g_causticShader, "time"), waveTime);
+				// Send the shader the current main buffer of wave properties
+				glUniform1fv(glGetUniformLocation(g_causticShader, "waveProperties"), 100, activeBuf);
+				// Specify the number of waves to use from the buffer
 
-	} else {
-		glUseProgram(g_toonShader);
-	}
+				glUniform1i(glGetUniformLocation(g_causticShader, "numWaves"), numWaves);
+
+			}
+			else {
+				glUseProgram(g_toonShader);
+			}
+		} else {
+			glUseProgram(0);
+		}
+	
 
 	glPushMatrix();
 	glTranslatef(0, -1000, 0);
@@ -721,8 +755,12 @@ void render(int width, int height) {
 	ground->renderGeometry();
 	glPopMatrix();
 
-
+	if (g_useShader) {
 		glUseProgram(g_shipShader);
+	}
+	else {
+		glUseProgram(g_shipShaderPhong);
+	}
 
 
 		glUniform1i(glGetUniformLocation(g_shaderPhong, "texture0"), 0);
@@ -765,11 +803,7 @@ void render(int width, int height) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glViewport(0, 0, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-		if (g_useShader){
-		glUseProgram(g_sobelShader);
-	} else {
-		glUseProgram(g_plainShader);
-	}
+	
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		glDisable(GL_LIGHTING);
@@ -788,14 +822,20 @@ void render(int width, int height) {
 		glActiveTexture(GL_TEXTURE2);
 		// Bind the texture
 		glBindTexture(GL_TEXTURE_2D, depth_tex);
+		
 		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
-			if (g_useShader){
+
+		if (g_useShader){
+			glUseProgram(g_sobelShader);
 		glUniform1i(glGetUniformLocation(g_sobelShader, "edge"), 0);
 		glUniform1i(glGetUniformLocation(g_sobelShader, "colorMap"), 1);
 		glUniform1i(glGetUniformLocation(g_sobelShader, "depthMap"), 2);
 		glUniform1f(glGetUniformLocation(g_sobelShader, "width"), width);
+		glUniform1f(glGetUniformLocation(g_sobelShader, "warp"), g_useSketchy);
+		glUniform1f(glGetUniformLocation(g_sobelShader, "outline"), g_useOutline);
 	} else {
-		glUniform1f(glGetUniformLocation(g_plainShader, "rendered"), 1);
+			glUseProgram(g_plainShader);
+		glUniform1f(glGetUniformLocation(g_plainShader, "colorMap"), 1);
 	}
 
 		glMatrixMode(GL_PROJECTION);

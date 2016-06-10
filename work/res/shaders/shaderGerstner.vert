@@ -121,9 +121,6 @@ void main() {
 	color = color;
 
 	gl_FrontColor = color;
-
-	caustic = 0;
-
 	
 	// IMPORTANT tell OpenGL where the vertex is
 	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
