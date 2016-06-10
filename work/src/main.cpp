@@ -64,7 +64,7 @@ BoundingBox scene_bounds = BoundingBox(vec3(-400,-400,-800),vec3(600,00,100));
 bool drawOriginAxis = false;
 //school related
 School * g_school;
-bool draw_school = false;
+bool draw_school = true;
 bool draw_caustics = false;
 
 bool g_drawLand = true;
@@ -794,6 +794,7 @@ void render(int width, int height) {
 		glTranslatef(shipPos.x,500,shipPos.y);
 
 		glScalef(10,10,10);
+		glColor3f(115 / 255.0, 48 / 255.0, 20 / 255.0);
 		ship->renderGeometry();
 
 	} glPopMatrix();
