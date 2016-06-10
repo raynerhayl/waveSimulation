@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ //---------------------------------------------------------------------------
 //
 // Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
 //
@@ -106,23 +106,31 @@ void main() {
 
 
 	vNormal.y = 1 - vNormal.y;
-	vNormal = vNormal;
 
-	vertex_normal = normalize(gl_NormalMatrix * vNormal);
+	vNormal = normalize(vNormal);
+
+	vec4 color = gl_Color;
+	caustic = dot(vNormal, normalize(gl_LightSource[0].position.xyz));
+	color =   0.5* caustic + 0.5*color;
+	
+	vNormal = gl_NormalMatrix * gl_Normal;
+
+
+	vec4 vertexWorld = gl_ModelViewMatrix * gl_Vertex;
+
+	vertex_normal = normalize( vNormal);
 
 	vPosition = worldPos.xyz;
 
 	vTextureCoord0 = vPosition.xz/50.0;
 
-	vec4 color = gl_Color;
-	
-	color = color + max( 0.4 * (vPosition.y - 2.0), 0.0);
 
-	gl_FrontColor = color;
 
-	
+	gl_FrontColor = gl_Color;
+	gl_FogFragCoord = abs(vertexWorld.z/vertexWorld.w);
+
 	// IMPORTANT tell OpenGL where the vertex is
-	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 	
 }
 
@@ -183,3 +191,4 @@ vec3 gerstnerNorm(sWave wave, vec2 worldPlane){
 
 	return result;
 }
+

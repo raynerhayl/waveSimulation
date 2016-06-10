@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ //---------------------------------------------------------------------------
 //
 // Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
 //
@@ -69,60 +69,6 @@ void main() {
 
 // wave properties
 
-
-    // Calculate the light position for this vertex
-    vertex_light_position = normalize(gl_LightSource[0].position.xyz);
-    // Calculate the light’s half vector
-    vertex_light_half_vector = normalize(gl_LightSource[0].halfVector.xyz);
-
-	// Transform and pass on the normal/position/texture to fragment shader
-	worldPos = vec4(gl_Vertex.xyzw);
-
-	createWaves();
-	vNormal = vec3(0.0);
-
-
-	// calculate vertex position
-	for(int i = 0; i < numWaves; i ++){
-		vec4 gerstner = gerstnerFun(waves[i]);
-
-		worldPos.x = worldPos.x + gerstner.x;
-		worldPos.y = worldPos.y + gerstner.y;
-		worldPos.z = worldPos.z + gerstner.z;
-
-	}
-
-	worldPos.y = worldPos.y +  rand(vec2(0.0,1.0));
-
-	// calculate normal 
-	for(int i = 0; i < numWaves; i ++){
-		vec3 gerstnerNorm = (gerstnerNorm(waves[i], vec2(worldPos.x,worldPos.z)));
-
-		vNormal.x = gerstnerNorm.x + vNormal.x;
-		vNormal.y = gerstnerNorm.y + vNormal.y;
-		vNormal.z = gerstnerNorm.z + vNormal.z;
-
-	}
-
-
-	vNormal.y = 1 - vNormal.y;
-	vNormal = vNormal;
-
-	vertex_normal = normalize(gl_NormalMatrix * vNormal);
-
-	vPosition = worldPos.xyz;
-
-	vTextureCoord0 = vPosition.xz/50.0;
-
-	vec4 color = gl_Color;
-	
-	color = color + max( 0.4 * (vPosition.y - 2.0), 0.0);
-
-	gl_FrontColor = color;
-
-	
-	// IMPORTANT tell OpenGL where the vertex is
-	gl_Position = gl_ModelViewProjectionMatrix * worldPos;
 	
 }
 
@@ -183,3 +129,4 @@ vec3 gerstnerNorm(sWave wave, vec2 worldPlane){
 
 	return result;
 }
+

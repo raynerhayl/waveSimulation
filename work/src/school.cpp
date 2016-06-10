@@ -59,7 +59,7 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 }
 
 void School::renderSchool() {
-	drawBounds();
+	//drawBounds();
 	float zRad = 50;
 	applyForce(zRad*zRad, 0.4, 0.65);
 	update(); //update all
@@ -71,7 +71,7 @@ void School::renderSchool() {
 	// 	t[i]->draw();
 	// }
 	glPushMatrix();{
-		if(draw_bounds)drawBounds();
+		//if(draw_bounds)drawBounds();
 		//Actually draw the School
 		for(int i = 0; i < prey.size(); i++){
 			prey[i].draw();

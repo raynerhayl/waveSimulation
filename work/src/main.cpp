@@ -65,6 +65,7 @@ bool drawOriginAxis = false;
 //school related
 School * g_school;
 bool draw_school = true;
+bool draw_caustics = true;
 
 //wave related
 Wave * wave;
@@ -78,7 +79,7 @@ GLfloat props[200]; // main set of properties
 GLfloat activeBuf[200]; // properties which actually get sent to shader
 
 float medianWavelength = 80;
-float amplitudeR = 2;
+float amplitudeR = 1;
 float windDir = 0; // wind direction from (x = 1, z = 0)
 float dAngle = 45; // difference in angle from windDir
 float medianS = 0.2;
@@ -93,7 +94,7 @@ int fps = 0;
 // Values and fields to showcase the use of shaders
 // Remove when modifying main.cpp for Assignment 3
 //
-bool g_useShader = false;
+bool g_useShader = true;
 GLuint g_texture = 0;
 GLuint g_plainShader = 0;
 GLuint g_sobelShader = 0;
@@ -103,7 +104,8 @@ GLuint g_shaderPhong = 0;
 GLuint bumpTex = 0;
 GLuint g_shipShader = 0;
 GLuint g_gerstNormShader = 0;
-	GLuint gerstNormalTex;
+GLuint gerstNormalTex;
+GLuint g_causticShader = 0;
 
 
 // Mouse Button callback
@@ -132,11 +134,11 @@ void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
 	}
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 		if (g_useShader) {
-			g_useShader = false;
+			//g_useShader = false;
 			cout << "Using the default OpenGL pipeline" << endl;
 		}
 		else {
-			g_useShader = true;
+			//g_useShader = true;
 			cout << "Using a shader" << endl;
 		}
 	}
@@ -202,6 +204,11 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
 			g_camPos += normalize(right);
 		}
 		break;
+		case 'C':
+		{
+			if (action == 1)
+			draw_caustics = !draw_caustics;
+		}break;
 		case 'P':
 		{
 			cout << g_camPos << " pitch " << g_pitch << " yaw " << g_yaw << endl;
@@ -219,6 +226,8 @@ void charCallback(GLFWwindow *win, unsigned int c) {
 	// Not needed for this assignment, but useful to have later on
 }
 
+void initWaves();
+
 void renderGUI() {
 	// Start registering GUI components
 	SimpleGUI::newFrame();
@@ -227,12 +236,23 @@ void renderGUI() {
 		//ImGui::OpenPopup("Controls");
 
 	if (ImGui::BeginPopup("Controls")) {
-		if (ImGui::Selectable("Play")) {
+		if (ImGui::Selectable("Stormy")) {
+ 		medianWavelength = 100;
+ 		amplitudeR = 3;
+ 		windDir = 0; // wind direction from (x = 1, z = 0)
+ 		dAngle = 60; // difference in angle from windDir
+ 		medianS = 0.2;
+ 		speedFactor = 1; // scales the speed
+ 		initWaves();
 
-		}
-
-		if (ImGui::Selectable("Pause")) {
-
+		} if (ImGui::Selectable("calm")) {
+ 		medianWavelength = 80;
+ 		amplitudeR = 1;
+ 		windDir = 0; // wind direction from (x = 1, z = 0)
+ 		dAngle = 20; // difference in angle from windDir
+ 		medianS = 0.1;
+ 		speedFactor = 1; // scales the speed
+		initWaves();
 		}
 
 		ImGui::EndPopup();
@@ -365,6 +385,7 @@ void initShader() {
 	g_shaderPhong = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderSimple.vert", "./work/res/shaders/shaderPhong.frag" });
 	g_shipShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/ship.vert", "./work/res/shaders/toon.frag" });
 	g_gerstNormShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/shaderGerstner.vert", "./work/res/shaders/norm.frag" });
+	g_causticShader = makeShaderProgramFromFile({ GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, { "./work/res/shaders/caustic.vert", "./work/res/shaders/toon.frag" });
 
 }
 
@@ -551,7 +572,8 @@ void render(int width, int height) {
 
 	glViewport(0, 0, width, height);
 	// Grey/Blueish background
-	glClearColor(52/255.0,104/255.0,125/255.0,1.0f);          // We'll Clear To The Color Of The Fog ( Modified )
+	glClearColor(52 / 255.0, 104 / 255.0, 125 / 255.0, 1.0f);
+	//glClearColor(135/255.0,206/255.0,250/255.0,1.0f);          // We'll Clear To The Color Of The Fog ( Modified )
 	GLfloat fogColor[4] = { 52 / 255.0,104 / 255.0,125 / 255.0,1.0f };
 	glFogi(GL_FOG_MODE, GL_LINEAR);        // Fog Mode
 	glFogfv(GL_FOG_COLOR, fogColor);            // Set Fog Color
@@ -593,7 +615,29 @@ void render(int width, int height) {
 	}
 	if(draw_school) g_school->renderSchool();
 
-	
+
+	if(draw_caustics){
+		glUseProgram(g_causticShader);
+
+
+		glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
+		// Use the shader we made
+
+		// Set our sampler (texture0) to use GL_TEXTURE0 as the source
+		glUniform1i(glGetUniformLocation(g_causticShader, "texture0"), 0);
+		//glUniform1i(glGetUniformLocation(g_shaderGerstner, "texture1"), 0);
+
+		// Set the current time for the shader 
+		glUniform1f(glGetUniformLocation(g_causticShader, "time"), waveTime);
+		// Send the shader the current main buffer of wave properties
+		glUniform1fv(glGetUniformLocation(g_causticShader, "waveProperties"), 100, activeBuf);
+		// Specify the number of waves to use from the buffer
+		
+		glUniform1i(glGetUniformLocation(g_causticShader, "numWaves"), numWaves);
+
+	} else {
+		glUseProgram(g_toonShader);
+	}
 
 	glPushMatrix();
 	glTranslatef(0, -1000, 0);
