@@ -115,8 +115,10 @@ void main() {
 	vTextureCoord0 = vPosition.xz/50.0;
 
 	vec4 color = gl_Color;
+
+	caustic = max( 0.4 * (vPosition.y - 2.0), 0.0);
 	
-	color = color + max( 0.4 * (vPosition.y - 2.0), 0.0);
+	color = color;
 
 	gl_FrontColor = color;
 

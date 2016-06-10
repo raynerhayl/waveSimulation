@@ -884,7 +884,7 @@ int main(int argc, char **argv) {
 	bool fade = true; // fade out
 
 	ship = new Geometry("./work/res/assets/ship.obj");
-	ground = new Geometry("./work/res/assets/ground3.obj");
+	ground = new Geometry("./work/res/assets/ground4.obj");
 
 
 	// Loop until the user closes the window
