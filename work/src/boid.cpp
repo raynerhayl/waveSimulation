@@ -37,19 +37,16 @@ void Boid::pullToCentre(const vec3 &centre){
 		float pullStrength = 0.0001f;
 		//float pullStrength = 0.01f;
 		mVelocity -= normalize(dirToCenter) * ( ( distToCenter - maxDistance ) * pullStrength );
-		//mAccel -= normalize(dirToCenter) * ( ( distToCenter - maxDistance ) * pullStrength );
 	}
 }
 
 void Boid::update(){
-	//cout << "accel: " << mAccel << " vel: " << mVelocity << " pos: " << mPosition << endl;
-	//limit velocity
-
 	mVelocity += mAccel;
 
 	float velLengthSqrd = lengthSquared(mVelocity);
 	float maxSpeedSqrd = getMaxSpeedSqrd();
 
+	//limit velocity
 	if( velLengthSqrd > maxSpeedSqrd ) {
 		mVelocity = normalize(mVelocity);
 		mVelocity *= mMaxSpeed;
@@ -58,8 +55,6 @@ void Boid::update(){
 		mVelocity *= mMinSpeed;
 	}
 
-
-	
 	mPosition += mVelocity;
 	mAccel = vec3(0,0,0);
 }
@@ -89,10 +84,6 @@ void Predator::drawSelf() {
 		float len = 8;
 		glScalef(2,2,2);
 		m_geometry->renderGeometry();
-		//cgraCone(len/4, len, 4, 4, false);
-		//glTranslatef(0,0,4);
-		//glColor3f(1,0,0);
-		//cgraLine(3);
 	// Clean up
 	}glPopMatrix();
 }
@@ -102,6 +93,7 @@ float Predator::getMaxSpeedSqrd(){
 }
 
 Prey::Prey(vec3 loc) : Boid(loc){
+
 }
 
 float Prey::getMaxSpeedSqrd(){
@@ -111,15 +103,8 @@ float Prey::getMaxSpeedSqrd(){
 
 /**/
 void Prey::drawSelf() {
-	//cout << mFear << endl;
 	glPushMatrix();{
-		//glColor3f(1,1-mFear,1-mFear);
 		glColor3f(m_colour.x,m_colour.y,m_colour.z);
-		//float len = 2;
-		//cgraCone(len/4, len, 4, 4, false);
-		// glTranslatef(0,0,4);
-		// glColor3f(1,0,0);
-		// cgraLine(3);
 		m_geometry->renderGeometry();
 	// Clean up
 	}glPopMatrix();

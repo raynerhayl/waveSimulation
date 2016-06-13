@@ -27,11 +27,7 @@ using namespace cgra;
 School::School(int numPrey, int numPredators, BoundingBox bounds) {
 	bounding_box = bounds;
 	origin = (bounding_box.max + bounding_box.min)/2;
-	//vec3 halfSize = abs(bounding_box.max - bounding_box.min)/2;
-	
-	// m_octree = new Octree(origin,halfSize);
 
-	//m_fishGeometry = Geometry("abc");
 	cout << "adding boids" << endl;
 
 	for(int i = 0; i < numPrey; i++){
@@ -42,7 +38,7 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 		b.m_geometry = &m_fishGeometry;
 		prey.push_back(b);
 		Prey * p = &(*(prey.begin()+i));
-		cout << p->mPosition << endl;
+		cout << "new Prey" << p->mPosition << endl;
 		//m_octree->insert(p);
 	}
 
@@ -59,7 +55,6 @@ School::School(int numPrey, int numPredators, BoundingBox bounds) {
 }
 
 void School::renderSchool() {
-	//drawBounds();
 	float zRad = 50;
 	applyForce(zRad*zRad, 0.4, 0.65);
 	update(); //update all
@@ -71,7 +66,6 @@ void School::renderSchool() {
 	// 	t[i]->draw();
 	// }
 	glPushMatrix();{
-		//if(draw_bounds)drawBounds();
 		//Actually draw the School
 		for(int i = 0; i < prey.size(); i++){
 			prey[i].draw();
@@ -81,16 +75,13 @@ void School::renderSchool() {
 		}
 		glRotatef(45,1,1,1);
 		glColor3f(1,1,0);
-		//cgraLine(zRad);
 	// Clean up
 	}glPopMatrix();
-	// m_octree->draw();
 }
 
 void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh){
-	float jFactor = 0.1;
+	float jFactor = 0.1; //a number used for tweaking the speed of the boids
 	for( vector<Prey>::iterator p1 = prey.begin(); p1 != prey.end(); ++p1 ) {
-
 	    vector<Prey>::iterator p2 = p1;
 	    for( ++p2; p2 != prey.end(); ++p2 ) {
 			vec3 dir = p1->mPosition - p2->mPosition;
@@ -128,7 +119,6 @@ void School::applyForce(float zoneRadiusSqrd, float lowThresh, float highThresh)
 				if( distSqrd > eatDistSqrd ){
 					float F = ( predatorZoneRadiusSqrd/distSqrd - 1.0f ) * 0.1f;
 					p1->mFear += F * 0.1f;
-					//cout << "fear add" <<F * 0.1f << endl;
 					dir = normalize(dir) * F;
 					p1->mAccel+= dir;
 					predator->mAccel += dir;
@@ -164,19 +154,15 @@ void School::update(){
 	}
 
 	for(vector<Predator>::iterator pred = predators.begin(); pred != predators.end(); ++pred) {
-
 		pred->pullToCentre(origin);
 		pred->update();
 	}
-	//cout << "checking" << endl;
-	//m_octree->clear();
-	//buildTree();
 }
 
 void School::buildTree(){
 	for(int i = 0; i < prey.size(); i++){
 		Prey * p = &(*(prey.begin()+i));
-		//m_octree->insert(p);
+		m_octree->insert(p);
 	}
 }
 
@@ -208,9 +194,3 @@ void School::drawBounds(){
 	glPopMatrix();
 }
 
-// void School::addCollider(primitives){
-
-// }
-
-// YOUR CODE GOES HERE
-// ...

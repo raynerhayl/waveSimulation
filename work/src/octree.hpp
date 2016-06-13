@@ -38,19 +38,6 @@ public:
 		root = new OctreeNode(m_origin,m_halfDimension);
 	}
 
-	/*Check and reshuffle all nodes*/
-	void check(){
-		vector<Boid *> shuffleList;
-		//root->clean(shuffleList);
-		for(int i = 0; i < shuffleList.size(); i++){
-			if(root->inBounds(shuffleList[i]->mPosition)){
-				root->insert(shuffleList[i]);
-			}
-		}
-		//TODO make root down a size
-		if(shuffleList.size() > 0) cout << "shuffleList.size = " << shuffleList.size() << endl;
-	}
-
 	void draw(){
 		glColor3f(1,1,1);
 		root->draw();

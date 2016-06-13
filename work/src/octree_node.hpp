@@ -24,7 +24,7 @@ class OctreeNode {
 private:
 	Boid * data[MAX_SIZE];
 	int m_dataSize = 0;
-		//fields
+	//fields
 	vec3 m_origin;
 	vec3 m_halfDimension;
 	OctreeNode *children[8];
